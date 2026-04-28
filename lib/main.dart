@@ -19,12 +19,12 @@ class SubTrackerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SubTracker Pro',
+      title: 'SubTracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B0F19), 
-        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme), 
+        scaffoldBackgroundColor: const Color(0xFF09090B), // Hitam pekat modern
+        textTheme: GoogleFonts.spaceGroteskTextTheme(ThemeData.dark().textTheme), // Font yang lebih unik/techy
         useMaterial3: true,
       ),
       home: const DashboardScreen(),
