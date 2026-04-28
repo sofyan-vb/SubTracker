@@ -1,12 +1,12 @@
-// lib/providers/subscription_provider.dart
 import 'package:flutter/material.dart';
 import '../models/subscription.dart';
 
 class SubProvider extends ChangeNotifier {
-  // Data dummy awal
   final List<Subscription> _subs = [
-    Subscription(id: '1', name: 'Netflix', price: 186000, dueDate: DateTime.now().add(const Duration(days: 3)), category: 'Entertainment'),
-    Subscription(id: '2', name: 'Spotify', price: 54900, dueDate: DateTime.now().add(const Duration(days: 12)), category: 'Music'),
+    Subscription(id: '1', name: 'Netflix Premium', price: 186000, dueDate: DateTime.now().add(const Duration(days: 2)), category: 'Entertainment'),
+    Subscription(id: '2', name: 'Spotify Duo', price: 64900, dueDate: DateTime.now().add(const Duration(days: 10)), category: 'Music'),
+    Subscription(id: '3', name: 'Adobe Creative Cloud', price: 450000, dueDate: DateTime.now().add(const Duration(days: 15)), category: 'Software'),
+    Subscription(id: '4', name: 'YouTube Premium', price: 59000, dueDate: DateTime.now().add(const Duration(days: 22)), category: 'Entertainment'),
   ];
 
   List<Subscription> get subs => _subs;

@@ -1,4 +1,3 @@
-// lib/widgets/add_bottom_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/subscription.dart';
@@ -20,37 +19,60 @@ class _AddSubBottomSheetState extends State<AddSubBottomSheet> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Container(
-      padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: bottomInset + 24),
+      padding: EdgeInsets.fromLTRB(28, 28, 28, bottomInset + 28),
       decoration: const BoxDecoration(
-        color: Color(0xFF1E293B),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: Color(0xFF151A26),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Tambah Langganan Baru', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          TextField(
-            controller: _nameCtrl,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(labelText: 'Nama Layanan', labelStyle: TextStyle(color: Colors.grey)),
+          Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10)))),
+          const SizedBox(height: 24),
+          const Text('Langganan Baru', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 24),
+          
+          Container(
+            decoration: BoxDecoration(color: const Color(0xFF0B0F19), borderRadius: BorderRadius.circular(16)),
+            child: TextField(
+              controller: _nameCtrl,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Nama Layanan (Msl: Netflix)',
+                hintStyle: TextStyle(color: Colors.white30),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.all(20),
+              ),
+            ),
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _priceCtrl,
-            keyboardType: TextInputType.number,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(labelText: 'Harga (Rp)', labelStyle: TextStyle(color: Colors.grey)),
+          
+          Container(
+            decoration: BoxDecoration(color: const Color(0xFF0B0F19), borderRadius: BorderRadius.circular(16)),
+            child: TextField(
+              controller: _priceCtrl,
+              keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                hintText: 'Harga per Bulan (Rp)',
+                hintStyle: TextStyle(color: Colors.white30),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.all(20),
+              ),
+            ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
+          
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: 60,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF3B82F6),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: const Color(0xFF8B5CF6),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                elevation: 10,
+                shadowColor: const Color(0xFF8B5CF6).withOpacity(0.5),
               ),
               onPressed: () {
                 if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
@@ -65,7 +87,7 @@ class _AddSubBottomSheetState extends State<AddSubBottomSheet> {
                   Navigator.pop(context);
                 }
               },
-              child: const Text('Simpan', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: const Text('Tambahkan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           )
         ],

@@ -1,5 +1,3 @@
-// lib/models/subscription.dart
-
 class Subscription {
   final String id;
   final String name;

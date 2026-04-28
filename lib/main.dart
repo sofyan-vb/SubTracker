@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,16 +19,13 @@ class SubTrackerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SubTracker',
+      title: 'SubTracker Pro',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0F172A),
-          elevation: 0,
-        ),
+        scaffoldBackgroundColor: const Color(0xFF0B0F19), 
+        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme), 
+        useMaterial3: true,
       ),
       home: const DashboardScreen(),
     );
