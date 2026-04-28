@@ -1,9 +1,13 @@
+// lib/screens/dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/subscription_tile.dart';
-import '../widgets/add_bottom_sheet.dart';
+
+// PERBAIKAN IMPORT: 
+// Karena sekarang add_screen.dart ada di folder yang sama (screens), kita panggil seperti ini:
+import 'add_screen.dart'; 
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,7 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: const Color(0xFF09090B),
         elevation: 0,
         title: const Text(
-          'SubTracker', // Judul diubah sesuai permintaan
+          'SubTracker',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5)
         ),
         actions: [
@@ -49,31 +53,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       
-      // Tombol Tambah di tengah (Tanpa bayangan)
+      // Tombol Tambah ke Halaman Full Screen
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
         margin: const EdgeInsets.only(top: 30),
         child: FloatingActionButton(
-          elevation: 0, // 100% Hilangkan bayangan
+          elevation: 0, 
           hoverElevation: 0,
           highlightElevation: 0,
-          backgroundColor: const Color(0xFFD4FF00), // Warna Neon Lime yang berani
+          backgroundColor: const Color(0xFFD4FF00), 
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: const Icon(Icons.add, size: 32, color: Colors.black), // Ikon hitam agar kontras
+          child: const Icon(Icons.add, size: 32, color: Colors.black), 
           onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (context) => const AddSubBottomSheet(),
+            // PERBAIKAN NAVIGASI: Pindah ke layar baru
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddScreen()),
             );
           },
         ),
       ),
 
-      // Bottom Navigation yang elegan
       bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFF121214), // Sedikit lebih terang dari background
+        color: const Color(0xFF121214), 
         elevation: 0,
         shape: const CircularNotchedRectangle(),
         notchMargin: 12,
@@ -85,7 +87,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onPressed: () => setState(() => _currentIndex = 0),
               child: Icon(Icons.dashboard_rounded, color: _currentIndex == 0 ? const Color(0xFFD4FF00) : Colors.grey[700], size: 28),
             ),
-            const SizedBox(width: 50), // Ruang untuk FAB
+            const SizedBox(width: 50), 
             MaterialButton(
               minWidth: 50,
               onPressed: () => setState(() => _currentIndex = 1),
@@ -111,15 +113,13 @@ class _HomeView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // HERO CARD (High Contrast - Flat Design Tanpa Bayangan)
           Container(
             width: double.infinity,
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: const Color(0xFFD4FF00), // Solid Neon Lime (Sangat kontras dan modern)
+              color: const Color(0xFFD4FF00), 
               borderRadius: BorderRadius.circular(24),
-              // BOX SHADOW DIHAPUS TOTAL
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
