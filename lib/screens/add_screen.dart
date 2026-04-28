@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 import '../models/subscription.dart';
 import '../providers/subscription_provider.dart';
 
+// PASTIKAN ANDA SUDAH MEMBUAT FILE INI SEPERTI INSTRUKSI SEBELUMNYA
+import '../services/notification_service.dart';
+
 class AddScreen extends StatefulWidget {
   const AddScreen({super.key});
 
@@ -18,6 +21,8 @@ class _AddScreenState extends State<AddScreen> {
   
   String _selectedCategory = 'Hiburan';
   DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now(); // State baru untuk Jam
+  
   bool _isAutoRenew = true;
   String _selectedStatus = 'Aktif';
   int _reminderDays = 1;
@@ -32,6 +37,7 @@ class _AddScreenState extends State<AddScreen> {
     super.dispose();
   }
 
+  // Fungsi untuk memunculkan Kalender (Tanggal)
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -55,6 +61,28 @@ class _AddScreenState extends State<AddScreen> {
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
+  // Fungsi untuk memunculkan Jam (Waktu)
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFFD4FF00),
+              onPrimary: Colors.black,
+              surface: Color(0xFF121214),
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) setState(() => _selectedTime = picked);
+  }
+
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 4, top: 16),
@@ -64,9 +92,8 @@ class _AddScreenState extends State<AddScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // MENGGUNAKAN SCAFFOLD AGAR MENJADI HALAMAN FULL SCREEN
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B), // Latar belakang hitam pekat
+      backgroundColor: const Color(0xFF09090B), 
       appBar: AppBar(
         backgroundColor: const Color(0xFF09090B),
         elevation: 0,
@@ -116,10 +143,26 @@ class _AddScreenState extends State<AddScreen> {
                       ],
                     ),
 
-                    _buildLabel('Tanggal Jatuh Tempo'),
-                    GestureDetector(
-                      onTap: () => _selectDate(context),
-                      child: _buildFakeInput(DateFormat('dd MMMM yyyy').format(_selectedDate), Icons.calendar_month),
+                    // TANGGAL DAN JAM DIBUAT BERSEBELAHAN
+                    _buildLabel('Waktu Pengingat (Tanggal & Jam)'),
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: GestureDetector(
+                            onTap: () => _selectDate(context),
+                            child: _buildFakeInput(DateFormat('dd MMM yyyy').format(_selectedDate), Icons.calendar_month),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: GestureDetector(
+                            onTap: () => _selectTime(context),
+                            child: _buildFakeInput(_selectedTime.format(context), Icons.access_time_filled),
+                          ),
+                        ),
+                      ],
                     ),
 
                     _buildLabel('H- Berapa Hari Pengingat'),
@@ -136,7 +179,7 @@ class _AddScreenState extends State<AddScreen> {
               ),
             ),
             
-            // TOMBOL SIMPAN DI BAGIAN PALING BAWAH LAYAR
+            // TOMBOL SIMPAN
             Container(
               padding: const EdgeInsets.all(24),
               width: double.infinity,
@@ -149,15 +192,40 @@ class _AddScreenState extends State<AddScreen> {
                 ),
                 onPressed: () {
                   if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
+                    
+                    // 1. Gabungkan Tanggal dan Jam yang dipilih menjadi satu DateTime
+                    DateTime scheduledDateTime = DateTime(
+                      _selectedDate.year, 
+                      _selectedDate.month, 
+                      _selectedDate.day,
+                      _selectedTime.hour, 
+                      _selectedTime.minute,
+                    );
+
+                    // 2. Simpan ke Provider
                     final newSub = Subscription(
-                      id: DateTime.now().toString(),
+                      id: DateTime.now().millisecondsSinceEpoch.toString(), // ID Unik
                       name: _nameCtrl.text,
                       price: double.parse(_priceCtrl.text),
-                      dueDate: _selectedDate,
+                      dueDate: scheduledDateTime, // Masukkan waktu presisi
                       category: _selectedCategory,
                     );
                     context.read<SubProvider>().addSub(newSub);
-                    Navigator.pop(context); // Kembali ke dashboard setelah simpan
+
+                    // 3. Daftarkan ke Alarm/Notifikasi HP (Menggunakan ID unik dari hash)
+                    try {
+                      NotificationService.scheduleNotification(
+                        newSub.id.hashCode, // ID notifikasi harus integer
+                        'Tagihan ${newSub.name} 💸',
+                        'Waktunya membayar langganan sebesar Rp ${_priceCtrl.text}',
+                        scheduledDateTime,
+                      );
+                    } catch (e) {
+                      debugPrint('Notifikasi belum di-setup: $e');
+                    }
+
+                    // 4. Kembali ke Dashboard
+                    Navigator.pop(context); 
                   }
                 },
                 child: const Text('TAMBAHKAN', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black)),
@@ -169,10 +237,9 @@ class _AddScreenState extends State<AddScreen> {
     );
   }
 
-  // Helper Widgets (Sama seperti sebelumnya)
   Widget _buildTextField(TextEditingController ctrl, String hint, {bool isNumber = false}) {
     return Container(
-      decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(16)), // Warna form sedikit lebih terang dari background
+      decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(16)), 
       child: TextField(
         controller: ctrl,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
@@ -205,7 +272,10 @@ class _AddScreenState extends State<AddScreen> {
       decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(16)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), Icon(icon, color: Colors.white30)],
+        children: [
+          Expanded(child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), 
+          Icon(icon, color: Colors.white30, size: 20)
+        ],
       ),
     );
   }
