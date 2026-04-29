@@ -38,12 +38,14 @@ dependencies:
   flutter_slidable: ^3.0.1
   google_fonts: ^6.2.1
   intl: ^0.19.0
-  flutter_local_notifications: ^21.0.0
-  timezone: ^0.11.0
+  flutter_local_notifications: ^17.0.0
+  timezone: ^0.9.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1  
+  flutter_native_splash: ^2.4.0  
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -93,3 +95,20 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Pengaturan Icon Aplikasi
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+
+# Pengaturan Splash Screen (Layar Loading)
+flutter_native_splash:
+  color: "#09090B" # Warna latar belakang disamakan dengan tema hitam pekat aplikasimu
+  image: "assets/logo.png"
+  android: true
+  ios: true
+  android_12:
+    image: "assets/logo.png"
+    color: "#09090B"
