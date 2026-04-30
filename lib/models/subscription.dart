@@ -1,5 +1,3 @@
-// lib/models/subscription.dart
-
 class Subscription {
   final String id;
   final String name;
@@ -15,7 +13,7 @@ class Subscription {
     required this.category,
   });
 
-  // FUNGSI BARU: Mengubah data menjadi format teks untuk disimpan di memori HP
+  
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
@@ -24,7 +22,7 @@ class Subscription {
     'category': category,
   };
 
-  // FUNGSI BARU: Mengubah format teks dari HP kembali menjadi data aplikasi
+
   factory Subscription.fromJson(Map<String, dynamic> json) => Subscription(
     id: json['id'],
     name: json['name'],

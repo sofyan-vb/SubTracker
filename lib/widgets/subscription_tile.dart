@@ -1,4 +1,3 @@
-// lib/widgets/subscription_tile.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +18,7 @@ class _SubTileState extends State<SubTile> {
   @override
   void initState() {
     super.initState();
-    // PERBAIKAN: Disamakan dengan DetailScreen, me-refresh setiap 1 DETIK!
+    
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) setState(() {}); 
     });
@@ -31,7 +30,7 @@ class _SubTileState extends State<SubTile> {
     super.dispose();
   }
 
-  // PERBAIKAN: Menggunakan format teks detik yang SAMA PERSIS dengan DetailScreen
+  
   String _getCountdownText(DateTime dueDate) {
     final diff = dueDate.difference(DateTime.now());
     if (diff.isNegative) return 'Waktunya Pembayaran!';
