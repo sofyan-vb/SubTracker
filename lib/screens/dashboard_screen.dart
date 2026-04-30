@@ -1,4 +1,3 @@
-// lib/screens/dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -114,12 +113,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
 
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          _HomeView(),
-          _StatsView(), 
-        ],
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _currentIndex == 0 
+            ? const _HomeView(key: ValueKey('home')) 
+            : const _StatsView(key: ValueKey('stats')),
       ),
       
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -165,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class _HomeView extends StatelessWidget {
-  const _HomeView();
+  const _HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -176,55 +174,61 @@ class _HomeView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(color: const Color(0xFFD4FF00), borderRadius: BorderRadius.circular(24)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                      child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text('Total Tagihan Bulanan', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  currencyFormat.format(provider.totalMonthly),
-                  style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
-                ),
-              ],
+          // Animasi Kartu Total Bulanan
+          FadeInSlide(
+            delay: const Duration(milliseconds: 100),
+            child: Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.all(28),
+              decoration: BoxDecoration(color: const Color(0xFFD4FF00), borderRadius: BorderRadius.circular(24)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                        child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text('Total Tagihan Bulanan', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    currencyFormat.format(provider.totalMonthly),
+                    style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                  ),
+                ],
+              ),
             ),
           ),
 
           const SizedBox(height: 20),
           
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Layanan Aktif', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(20)),
-                  child: Text('${provider.subs.length} Total', style: const TextStyle(color: Color(0xFFD4FF00), fontSize: 12, fontWeight: FontWeight.bold)),
-                ),
-              ],
+          FadeInSlide(
+            delay: const Duration(milliseconds: 200),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Layanan Aktif', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(20)),
+                    child: Text('${provider.subs.length} Total', style: const TextStyle(color: Color(0xFFD4FF00), fontSize: 12, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
 
           Expanded(
             child: provider.subs.isEmpty
-                // EMOJI SUDAH DIHAPUS DI SINI
                 ? const Center(
                     child: Text(
                       'Tidak ada catatan', 
@@ -236,7 +240,12 @@ class _HomeView extends StatelessWidget {
                     physics: const BouncingScrollPhysics(),
                     itemCount: provider.subs.length,
                     itemBuilder: (context, index) {
-                      return SubTile(sub: provider.subs[index]);
+                      // Animasi beruntun untuk setiap catatan langganan!
+                      return FadeInSlide(
+                        // Memberikan jeda yang berbeda untuk setiap baris agar munculnya berurutan
+                        delay: Duration(milliseconds: 300 + (index * 100)), 
+                        child: SubTile(sub: provider.subs[index]),
+                      );
                     },
                   ),
           ),
@@ -247,7 +256,7 @@ class _HomeView extends StatelessWidget {
 }
 
 class _StatsView extends StatelessWidget {
-  const _StatsView();
+  const _StatsView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -273,77 +282,98 @@ class _StatsView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Ringkasan', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            FadeInSlide(
+              delay: const Duration(milliseconds: 100),
+              child: const Text('Ringkasan', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            ),
             const SizedBox(height: 16),
             
-            Row(
-              children: [
-                Expanded(child: _buildSummaryCard('Tahunan', currencyFormat.format(provider.totalYearly), Icons.all_inclusive, Colors.purpleAccent)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildSummaryCard('Layanan', '${activeSubs.length} Aktif', Icons.subscriptions_rounded, Colors.cyanAccent)),
-              ],
+            FadeInSlide(
+              delay: const Duration(milliseconds: 200),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSummaryCard('Tahunan', currencyFormat.format(provider.totalYearly), Icons.all_inclusive, Colors.purpleAccent)),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildSummaryCard('Layanan', '${activeSubs.length} Aktif', Icons.subscriptions_rounded, Colors.cyanAccent)),
+                ],
+              ),
             ),
             const SizedBox(height: 16), 
 
-            Row(
-              children: [
-                Expanded(child: _buildSummaryCard('Rata-rata /Bulan', currencyFormat.format(averagePrice), Icons.analytics_outlined, Colors.orangeAccent)),
-                const SizedBox(width: 16),
-                Expanded(child: _buildSummaryCard('Termahal', mostExpensiveText, Icons.diamond_outlined, Colors.pinkAccent)),
-              ],
+            FadeInSlide(
+              delay: const Duration(milliseconds: 300),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSummaryCard('Rata-rata /Bulan', currencyFormat.format(averagePrice), Icons.analytics_outlined, Colors.orangeAccent)),
+                  const SizedBox(width: 16),
+                  Expanded(child: _buildSummaryCard('Termahal', mostExpensiveText, Icons.diamond_outlined, Colors.pinkAccent)),
+                ],
+              ),
             ),
             
             const SizedBox(height: 40),
-            const Text('Analisis Kategori', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            
+            FadeInSlide(
+              delay: const Duration(milliseconds: 400),
+              child: const Text('Analisis Kategori', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+            ),
             const SizedBox(height: 16),
 
             if (breakdown.isEmpty)
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(16)),
-                child: const Center(child: Text('Belum ada data pengeluaran.', style: TextStyle(color: Colors.white54))),
+              FadeInSlide(
+                delay: const Duration(milliseconds: 500),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(16)),
+                  child: const Center(child: Text('Belum ada data pengeluaran.', style: TextStyle(color: Colors.white54))),
+                ),
               ),
 
-            ...breakdown.entries.map((entry) {
-              final category = entry.key;
-              final amount = entry.value;
+            ...breakdown.entries.toList().asMap().entries.map((entry) {
+              final index = entry.key;
+              final category = entry.value.key;
+              final amount = entry.value.value;
               final percentage = totalMonthly > 0 ? (amount / totalMonthly) : 0.0;
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(category, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text(currencyFormat.format(amount), style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.w900, fontSize: 16)),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: percentage,
-                        backgroundColor: Colors.white.withOpacity(0.05),
-                        color: const Color(0xFFD4FF00),
-                        minHeight: 12, 
+              return FadeInSlide(
+                // Menambahkan delay dinamis agar chart kategori muncul satu per satu ke bawah
+                delay: Duration(milliseconds: 500 + (index * 150)),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(20)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(category, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(currencyFormat.format(amount), style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.w900, fontSize: 16)),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text('${(percentage * 100).toStringAsFixed(1)}% dari total', style: const TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold)),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: LinearProgressIndicator(
+                          value: percentage,
+                          backgroundColor: Colors.white.withOpacity(0.05),
+                          color: const Color(0xFFD4FF00),
+                          minHeight: 12, 
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Text('${(percentage * 100).toStringAsFixed(1)}% dari total', style: const TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
                 ),
               );
-            }).toList(),
+            }),
             
             const SizedBox(height: 80), 
           ],
@@ -372,6 +402,63 @@ class _StatsView extends StatelessWidget {
             child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// WIDGET RAHASIA: MESIN ANIMASI MUNCUL (FADE & SLIDE)
+// ============================================================================
+class FadeInSlide extends StatefulWidget {
+  final Widget child;
+  final Duration delay;
+
+  const FadeInSlide({super.key, required this.child, required this.delay});
+
+  @override
+  State<FadeInSlide> createState() => _FadeInSlideState();
+}
+
+class _FadeInSlideState extends State<FadeInSlide> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnim;
+  late Animation<Offset> _slideAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+
+    _opacityAnim = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+
+    // Menjalankan animasi setelah jeda waktu yang ditentukan
+    Future.delayed(widget.delay, () {
+      if (mounted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacityAnim,
+      child: SlideTransition(
+        position: _slideAnim,
+        child: widget.child,
       ),
     );
   }
