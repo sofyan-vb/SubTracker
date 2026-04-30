@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/subscription.dart';
 import '../providers/subscription_provider.dart';
-
-// PASTIKAN ANDA SUDAH MEMBUAT FILE INI SEPERTI INSTRUKSI SEBELUMNYA
 import '../services/notification_service.dart';
 
 class AddScreen extends StatefulWidget {
@@ -21,7 +19,7 @@ class _AddScreenState extends State<AddScreen> {
   
   String _selectedCategory = 'Hiburan';
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now(); // State baru untuk Jam
+  TimeOfDay _selectedTime = TimeOfDay.now(); 
   
   bool _isAutoRenew = true;
   String _selectedStatus = 'Aktif';
@@ -37,7 +35,6 @@ class _AddScreenState extends State<AddScreen> {
     super.dispose();
   }
 
-  // Fungsi untuk memunculkan Kalender (Tanggal)
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -61,7 +58,6 @@ class _AddScreenState extends State<AddScreen> {
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
-  // Fungsi untuk memunculkan Jam (Waktu)
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -143,7 +139,6 @@ class _AddScreenState extends State<AddScreen> {
                       ],
                     ),
 
-                    // TANGGAL DAN JAM DIBUAT BERSEBELAHAN
                     _buildLabel('Waktu Pengingat (Tanggal & Jam)'),
                     Row(
                       children: [
@@ -166,7 +161,7 @@ class _AddScreenState extends State<AddScreen> {
                     ),
 
                     _buildLabel('H- Berapa Hari Pengingat'),
-                    _buildDropdown('H-$_reminderDays', ['H-1', 'H-3', 'H-7'], (val) {
+                    _buildDropdown('H-$_reminderDays', ['H-0', 'H-1', 'H-3', 'H-7'], (val) {
                       setState(() => _reminderDays = int.parse(val!.replaceAll('H-', '')));
                     }),
 
@@ -179,7 +174,6 @@ class _AddScreenState extends State<AddScreen> {
               ),
             ),
             
-            // TOMBOL SIMPAN
             Container(
               padding: const EdgeInsets.all(24),
               width: double.infinity,
@@ -193,8 +187,8 @@ class _AddScreenState extends State<AddScreen> {
                 onPressed: () {
                   if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
                     
-                    // 1. Gabungkan Tanggal dan Jam yang dipilih menjadi satu DateTime
-                    DateTime scheduledDateTime = DateTime(
+                    // 1. Gabungkan Tanggal dan Jam menjadi waktu aslinya
+                    DateTime exactDateTime = DateTime(
                       _selectedDate.year, 
                       _selectedDate.month, 
                       _selectedDate.day,
@@ -202,29 +196,31 @@ class _AddScreenState extends State<AddScreen> {
                       _selectedTime.minute,
                     );
 
-                    // 2. Simpan ke Provider
+                    // 2. Kurangi waktu tersebut dengan pilihan H- Berapa Hari
+                    DateTime scheduledDateTime = exactDateTime.subtract(Duration(days: _reminderDays));
+
+                    // 3. Simpan data ke Provider (Catatan tetap menggunakan waktu asli)
                     final newSub = Subscription(
-                      id: DateTime.now().millisecondsSinceEpoch.toString(), // ID Unik
+                      id: DateTime.now().millisecondsSinceEpoch.toString(), 
                       name: _nameCtrl.text,
                       price: double.parse(_priceCtrl.text),
-                      dueDate: scheduledDateTime, // Masukkan waktu presisi
+                      dueDate: exactDateTime, 
                       category: _selectedCategory,
                     );
                     context.read<SubProvider>().addSub(newSub);
 
-                    // 3. Daftarkan ke Alarm/Notifikasi HP (Menggunakan ID unik dari hash)
+                    // 4. Daftarkan jadwal alarm dengan waktu yang sudah dikurangi
                     try {
                       NotificationService.scheduleNotification(
-                        newSub.id.hashCode, // ID notifikasi harus integer
+                        newSub.id.hashCode, 
                         'Tagihan ${newSub.name} 💸',
                         'Waktunya membayar langganan sebesar Rp ${_priceCtrl.text}',
                         scheduledDateTime,
                       );
                     } catch (e) {
-                      debugPrint('Notifikasi belum di-setup: $e');
+                      debugPrint('Gagal set notif: $e');
                     }
 
-                    // 4. Kembali ke Dashboard
                     Navigator.pop(context); 
                   }
                 },
