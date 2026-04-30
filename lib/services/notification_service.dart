@@ -1,4 +1,3 @@
-// lib/services/notification_service.dart
 import 'package:flutter/foundation.dart'; 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -13,7 +12,6 @@ class NotificationService {
 
     tz.initializeTimeZones();
     
-    // DETEKSI WAKTU GADGET 
     final dynamic info = await FlutterTimezone.getLocalTimezone();
     String timeZoneName;
     try { 
@@ -21,10 +19,9 @@ class NotificationService {
     } catch(e) { 
       timeZoneName = 'Asia/Jakarta'; 
     }
-    
     tz.setLocalLocation(tz.getLocation(timeZoneName));
     
-    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/launcher_icon');
     const InitializationSettings settings = InitializationSettings(android: androidSettings);
     
     await _notificationsPlugin.initialize(settings);
@@ -42,26 +39,35 @@ class NotificationService {
     final tz.TZDateTime scheduledTzTime = tz.TZDateTime.from(scheduledTime, tz.local);
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
 
-    if (scheduledTzTime.isBefore(now)) return; 
+   
+    const NotificationDetails notifDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'sub_tracker_pasti_muncul_v7', 
+        'Pengingat Mendesak',
+        channelDescription: 'Tagihan yang tidak boleh dilewatkan',
+        importance: Importance.max, 
+        priority: Priority.high,    
+        playSound: true,            
+        enableVibration: true,      
+        visibility: NotificationVisibility.public, 
+        category: AndroidNotificationCategory.alarm, 
+      ),
+    );
 
+    
+    if (scheduledTzTime.isBefore(now) || scheduledTzTime.isAtSameMomentAs(now)) {
+      await _notificationsPlugin.show(id, title, body, notifDetails);
+      return; 
+    }
+
+  
     await _notificationsPlugin.zonedSchedule(
       id,
       title, 
       body,  
       scheduledTzTime, 
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'sub_tracker_spanduk_v3', // ID Baru lagi agar Android mereset ulang izin
-          'Pesan Tagihan',
-          importance: Importance.max, // Wajib Maksimal
-          priority: Priority.high,    // Wajib Tinggi
-          playSound: true,            // Wajib ada agar Android mau menurunkan Banner
-          enableVibration: true,      // Wajib ada agar Android mau menurunkan Banner
-          ticker: 'Pengingat baru',
-          // fullScreenIntent dan showWhen SUDAH DIHAPUS agar tidak dianggap alarm
-        ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      notifDetails,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle, 
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }

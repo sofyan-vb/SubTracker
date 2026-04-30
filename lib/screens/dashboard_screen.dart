@@ -170,13 +170,49 @@ class _HomeView extends StatelessWidget {
     final provider = context.watch<SubProvider>();
     final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
+   
+    final hour = DateTime.now().hour;
+    String greeting = 'Selamat Pagi';
+    if (hour >= 12 && hour < 15) {
+      greeting = 'Selamat Siang';
+    } else if (hour >= 15 && hour < 18) {
+      greeting = 'Selamat Sore';
+    } else if (hour >= 18 || hour < 4) {
+      greeting = 'Selamat Malam';
+    }
+
+    String topCategoryText = 'Belum ada data pengeluaran.';
+    if (provider.categoryBreakdown.isNotEmpty) {
+      final top = provider.categoryBreakdown.entries.reduce((a, b) => a.value > b.value ? a : b);
+      topCategoryText = 'Pengeluaran terbesarmu bulan ini tersedot untuk layanan ${top.key}!';
+    }
+
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Animasi Kartu Total Bulanan
+          
+          // SAPAAN HILANG-MUNCUL, KECIL, MERAH
           FadeInSlide(
-            delay: const Duration(milliseconds: 100),
+            delay: const Duration(milliseconds: 50),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 20, bottom: 10),
+              child: BlinkingWidget(
+                child: Text(
+                  greeting, 
+                  style: const TextStyle(
+                    color: Colors.redAccent, 
+                    fontSize: 16, 
+                    fontWeight: FontWeight.bold, 
+                    letterSpacing: 1.0 
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          FadeInSlide(
+            delay: const Duration(milliseconds: 150),
             child: Container(
               width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -197,19 +233,49 @@ class _HomeView extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  Text(
-                    currencyFormat.format(provider.totalMonthly),
-                    style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      currencyFormat.format(provider.totalMonthly),
+                      style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-          const SizedBox(height: 20),
+          if (provider.subs.isNotEmpty)
+            FadeInSlide(
+              delay: const Duration(milliseconds: 250),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1A1A1C), 
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.white10),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.tips_and_updates_rounded, color: Colors.amberAccent, size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        topCategoryText,
+                        style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+          const SizedBox(height: 10),
           
           FadeInSlide(
-            delay: const Duration(milliseconds: 200),
+            delay: const Duration(milliseconds: 350),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
@@ -240,10 +306,8 @@ class _HomeView extends StatelessWidget {
                     physics: const BouncingScrollPhysics(),
                     itemCount: provider.subs.length,
                     itemBuilder: (context, index) {
-                      // Animasi beruntun untuk setiap catatan langganan!
                       return FadeInSlide(
-                        // Memberikan jeda yang berbeda untuk setiap baris agar munculnya berurutan
-                        delay: Duration(milliseconds: 300 + (index * 100)), 
+                        delay: Duration(milliseconds: 450 + (index * 100)), 
                         child: SubTile(sub: provider.subs[index]),
                       );
                     },
@@ -336,7 +400,6 @@ class _StatsView extends StatelessWidget {
               final percentage = totalMonthly > 0 ? (amount / totalMonthly) : 0.0;
 
               return FadeInSlide(
-                // Menambahkan delay dinamis agar chart kategori muncul satu per satu ke bawah
                 delay: Duration(milliseconds: 500 + (index * 150)),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
@@ -407,9 +470,7 @@ class _StatsView extends StatelessWidget {
   }
 }
 
-// ============================================================================
-// WIDGET RAHASIA: MESIN ANIMASI MUNCUL (FADE & SLIDE)
-// ============================================================================
+
 class FadeInSlide extends StatefulWidget {
   final Widget child;
   final Duration delay;
@@ -438,7 +499,6 @@ class _FadeInSlideState extends State<FadeInSlide> with SingleTickerProviderStat
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
 
-    // Menjalankan animasi setelah jeda waktu yang ditentukan
     Future.delayed(widget.delay, () {
       if (mounted) {
         _controller.forward();
@@ -460,6 +520,46 @@ class _FadeInSlideState extends State<FadeInSlide> with SingleTickerProviderStat
         position: _slideAnim,
         child: widget.child,
       ),
+    );
+  }
+}
+
+
+class BlinkingWidget extends StatefulWidget {
+  final Widget child;
+
+  const BlinkingWidget({super.key, required this.child});
+
+  @override
+  State<BlinkingWidget> createState() => _BlinkingWidgetState();
+}
+
+class _BlinkingWidgetState extends State<BlinkingWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _opacityAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))
+      ..repeat(reverse: true); 
+
+    _opacityAnim = Tween<double>(begin: 0.1, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacityAnim,
+      child: widget.child,
     );
   }
 }

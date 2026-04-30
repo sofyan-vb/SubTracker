@@ -17,7 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     // Mengatur berapa lama loading berputar sebelum pindah ke Dashboard (3000 ms = 3 detik)
-    Timer(const Duration(milliseconds: 3000), () {
+    Timer(const Duration(milliseconds: 5000), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,

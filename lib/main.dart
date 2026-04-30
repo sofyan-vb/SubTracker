@@ -1,36 +1,54 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'providers/subscription_provider.dart';
-import 'screens/dashboard_screen.dart';
-import 'services/notification_service.dart';
 
-void main() async {
+// Import file yang dibutuhkan
+import 'screens/splash_screen.dart'; 
+import 'providers/subscription_provider.dart';
+import 'services/notification_service.dart'; // <-- Import layanan notifikasi
+
+// Ubah main menjadi Future<void> main() async
+Future<void> main() async {
+  // 1. Wajib: Pastikan inti Flutter sudah siap sebelum memanggil layanan sistem (seperti notifikasi)
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService.init(); // Inisialisasi notifikasi
+
+  // 2. KUNCI KONTAK: Nyalakan mesin notifikasi saat aplikasi baru saja dibuka!
+  await NotificationService.init();
+
+  // 3. Jalankan aplikasi seperti biasa
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => SubProvider(),
-      child: const SubTrackerApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SubProvider()),
+      ],
+      child: const MyApp(),
     ),
   );
 }
 
-class SubTrackerApp extends StatelessWidget {
-  const SubTrackerApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'SubTracker',
-      debugShowCheckedModeBanner: false,
+      debugShowCheckedModeBanner: false, // Menghilangkan tulisan "DEBUG" di pojok kanan atas
       theme: ThemeData(
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF09090B), // Hitam pekat modern
-        textTheme: GoogleFonts.spaceGroteskTextTheme(ThemeData.dark().textTheme), // Font yang lebih unik/techy
+        scaffoldBackgroundColor: const Color(0xFF09090B),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF09090B),
+          elevation: 0,
+        ),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFFD4FF00), // Hijau Neon andalan kita
+          secondary: Color(0xFFD4FF00),
+        ),
         useMaterial3: true,
       ),
-      home: const DashboardScreen(),
+      // Mengarah ke SplashScreen yang sudah kita buat animasinya
+      home: const SplashScreen(), 
     );
   }
 }
