@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; 
 import '../models/subscription.dart';
 import '../providers/subscription_provider.dart'; 
-import '../services/notification_service.dart';
+
 
 class DetailScreen extends StatefulWidget {
   final Subscription sub;
