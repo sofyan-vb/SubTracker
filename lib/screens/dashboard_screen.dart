@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
+import 'dart:math';
+import 'dart:io';
 import '../providers/subscription_provider.dart';
 import '../widgets/subscription_tile.dart';
 import 'add_screen.dart'; 
@@ -15,6 +18,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   bool _isSearching = false;
+  bool _isLoadingAdd = false; 
   final TextEditingController _searchCtrl = TextEditingController();
 
   @override
@@ -69,95 +73,151 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF09090B),
-        elevation: 0,
-        title: _isSearching
-            ? TextField(
-                controller: _searchCtrl,
-                autofocus: true,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                decoration: const InputDecoration(
-                  hintText: 'Cari langganan...',
-                  hintStyle: TextStyle(color: Colors.white54),
-                  border: InputBorder.none,
-                ),
-                onChanged: (val) {
-                  context.read<SubProvider>().setSearchQuery(val); 
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            backgroundColor: const Color(0xFF09090B),
+            elevation: 0,
+            title: _isSearching
+                ? TextField(
+                    controller: _searchCtrl,
+                    autofocus: true,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    decoration: const InputDecoration(
+                      hintText: 'Cari langganan...',
+                      hintStyle: TextStyle(color: Colors.white54),
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (val) {
+                      context.read<SubProvider>().setSearchQuery(val); 
+                    },
+                  )
+                : const Text(
+                    'SubTracker',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5)
+                  ),
+            actions: [
+              IconButton(
+                icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _isSearching = !_isSearching;
+                    if (!_isSearching) {
+                      _searchCtrl.clear();
+                      context.read<SubProvider>().setSearchQuery(''); 
+                    }
+                  });
                 },
-              )
-            : const Text(
-                'SubTracker',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5)
               ),
-        actions: [
-          IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchCtrl.clear();
-                  context.read<SubProvider>().setSearchQuery(''); 
-                }
-              });
-            },
+              if (!_isSearching)
+                IconButton(
+                  icon: const Icon(Icons.tune, color: Colors.white),
+                  onPressed: () => _showFilterSheet(context),
+                ),
+              const SizedBox(width: 8),
+            ],
           ),
-          if (!_isSearching)
-            IconButton(
-              icon: const Icon(Icons.tune, color: Colors.white),
-              onPressed: () => _showFilterSheet(context),
-            ),
-          const SizedBox(width: 8),
-        ],
-      ),
 
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _currentIndex == 0 
-            ? const _HomeView(key: ValueKey('home')) 
-            : const _StatsView(key: ValueKey('stats')),
-      ),
-      
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Container(
-        margin: const EdgeInsets.only(top: 30),
-        child: FloatingActionButton(
-          elevation: 0, 
-          hoverElevation: 0,
-          highlightElevation: 0,
-          backgroundColor: const Color(0xFFD4FF00), 
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: const Icon(Icons.add, size: 32, color: Colors.black), 
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
-          },
-        ),
-      ),
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _currentIndex == 0 
+                ? const _HomeView(key: ValueKey('home')) 
+                : const _StatsView(key: ValueKey('stats')),
+          ),
+          
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: Container(
+            margin: const EdgeInsets.only(top: 30),
+            child: FloatingActionButton(
+              elevation: 0, 
+              hoverElevation: 0,
+              highlightElevation: 0,
+              backgroundColor: const Color(0xFFD4FF00), 
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              child: const Icon(Icons.add, size: 32, color: Colors.black), 
+              
+              onPressed: _isLoadingAdd ? null : () async {
+                setState(() => _isLoadingAdd = true); 
 
-      bottomNavigationBar: BottomAppBar(
-        color: const Color(0xFF121214), 
-        elevation: 0,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 12,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            MaterialButton(
-              minWidth: 50,
-              onPressed: () => setState(() => _currentIndex = 0),
-              child: Icon(Icons.dashboard_rounded, color: _currentIndex == 0 ? const Color(0xFFD4FF00) : Colors.grey[700], size: 28),
+                bool hasInternet = false;
+
+                try {
+                  final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 5));
+                  if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                    hasInternet = true; 
+                  }
+                } catch (_) {
+                  hasInternet = false; 
+                }
+
+                if (!mounted) return;
+
+                if (hasInternet) {
+                  await Future.delayed(const Duration(milliseconds: 600));
+                  setState(() => _isLoadingAdd = false); 
+                  
+                  if (mounted) {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
+                  }
+                } else {
+                  setState(() => _isLoadingAdd = false); 
+                  
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Row(
+                        children: [
+                          Icon(Icons.wifi_off_rounded, color: Colors.white),
+                          SizedBox(width: 12),
+                          Expanded(child: Text('Gagal tersambung! Pastikan internet aktif.', style: TextStyle(fontWeight: FontWeight.bold))),
+                        ],
+                      ),
+                      backgroundColor: Colors.redAccent,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      margin: const EdgeInsets.all(20),
+                    ),
+                  );
+                }
+              },
             ),
-            const SizedBox(width: 50), 
-            MaterialButton(
-              minWidth: 50,
-              onPressed: () => setState(() => _currentIndex = 1),
-              child: Icon(Icons.insert_chart_rounded, color: _currentIndex == 1 ? const Color(0xFFD4FF00) : Colors.grey[700], size: 28),
+          ),
+
+          bottomNavigationBar: BottomAppBar(
+            color: const Color(0xFF121214), 
+            elevation: 0,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 12,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                MaterialButton(
+                  minWidth: 50,
+                  onPressed: () => setState(() => _currentIndex = 0),
+                  child: Icon(Icons.dashboard_rounded, color: _currentIndex == 0 ? const Color(0xFFD4FF00) : Colors.grey[700], size: 28),
+                ),
+                const SizedBox(width: 50), 
+                MaterialButton(
+                  minWidth: 50,
+                  onPressed: () => setState(() => _currentIndex = 1),
+                  child: Icon(Icons.insert_chart_rounded, color: _currentIndex == 1 ? const Color(0xFFD4FF00) : Colors.grey[700], size: 28),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+
+        
+        if (_isLoadingAdd)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black87, 
+              child: const Center(
+                child: WaveDotLoading(), 
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -170,7 +230,6 @@ class _HomeView extends StatelessWidget {
     final provider = context.watch<SubProvider>();
     final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
-   
     final hour = DateTime.now().hour;
     String greeting = 'Selamat Pagi';
     if (hour >= 12 && hour < 15) {
@@ -191,8 +250,6 @@ class _HomeView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          
-          // SAPAAN HILANG-MUNCUL, KECIL, MERAH
           FadeInSlide(
             delay: const Duration(milliseconds: 50),
             child: Padding(
@@ -470,7 +527,6 @@ class _StatsView extends StatelessWidget {
   }
 }
 
-
 class FadeInSlide extends StatefulWidget {
   final Widget child;
   final Duration delay;
@@ -524,7 +580,6 @@ class _FadeInSlideState extends State<FadeInSlide> with SingleTickerProviderStat
   }
 }
 
-
 class BlinkingWidget extends StatefulWidget {
   final Widget child;
 
@@ -560,6 +615,60 @@ class _BlinkingWidgetState extends State<BlinkingWidget> with SingleTickerProvid
     return FadeTransition(
       opacity: _opacityAnim,
       child: widget.child,
+    );
+  }
+}
+
+
+class WaveDotLoading extends StatefulWidget {
+  const WaveDotLoading({super.key});
+  @override
+  State<WaveDotLoading> createState() => _WaveDotLoadingState();
+}
+
+class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))..repeat();
+  }
+  
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  
+  Widget _buildDot(int index) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        double t = _controller.value * 2 * pi;
+        double offset = sin(t + (index * 1.5)) * 4.0; 
+        return Transform.translate(
+          offset: Offset(0, offset),
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 4), 
+            width: 12, 
+            height: 12, 
+           
+            decoration: const BoxDecoration(
+              color: Color(0xFFD4FF00), 
+              shape: BoxShape.circle
+            ) 
+          ),
+        );
+      },
+    );
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center, 
+      children: [_buildDot(0), _buildDot(1), _buildDot(2)]
     );
   }
 }
