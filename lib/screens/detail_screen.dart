@@ -1,10 +1,10 @@
+// lib/screens/detail_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; 
 import '../models/subscription.dart';
 import '../providers/subscription_provider.dart'; 
-
 
 class DetailScreen extends StatefulWidget {
   final Subscription sub;
@@ -36,6 +36,9 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   String _getCountdownText(DateTime dueDate) {
+    // TAMBAHAN: Ubah teks jika sudah ditandai selesai
+    if (currentSub.isFinished) return 'PEMBAYARAN SUDAH SELESAI';
+
     final diff = dueDate.difference(DateTime.now());
     if (diff.isNegative) return 'SEKARANG WAKTUNYA BAYAR!';
     
@@ -80,6 +83,67 @@ class _DetailScreenState extends State<DetailScreen> {
             child: const Text('Hapus', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
           ),
         ],
+      )
+    );
+  }
+
+  // TAMBAHAN: Menu pilihan saat centang diklik
+  void _showCheckOptions() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF121214),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Opsi Catatan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.update, color: Color(0xFFD4FF00)),
+              title: const Text('Perpanjang Langganan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _showRenewInput();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.task_alt, color: Colors.cyanAccent),
+              title: const Text('Tandai Sudah Selesai', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              onTap: () {
+                Navigator.pop(ctx);
+                _markAsFinished();
+              },
+            ),
+          ],
+        ),
+      )
+    );
+  }
+
+  // TAMBAHAN: Fungsi untuk mengubah status selesai
+  void _markAsFinished() {
+    final provider = context.read<SubProvider>();
+    final updatedSub = Subscription(
+      id: currentSub.id,
+      name: currentSub.name,
+      price: currentSub.price,
+      dueDate: currentSub.dueDate,
+      category: currentSub.category,
+      isFinished: true, // Ubah status jadi selesai
+    );
+
+    provider.removeSub(currentSub.id);
+    provider.addSub(updatedSub);
+
+    setState(() {
+      currentSub = updatedSub; 
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Catatan ditandai selesai!', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), 
+        backgroundColor: Colors.cyanAccent,
+        behavior: SnackBarBehavior.floating,
       )
     );
   }
@@ -162,6 +226,7 @@ class _DetailScreenState extends State<DetailScreen> {
       price: currentSub.price,
       dueDate: newDate,
       category: currentSub.category,
+      isFinished: false, // Reset status selesai saat diperpanjang
     );
 
     provider.removeSub(currentSub.id);
@@ -198,9 +263,9 @@ class _DetailScreenState extends State<DetailScreen> {
         title: const Text('Detail Langganan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
-            tooltip: 'Perpanjang Langganan',
+            tooltip: 'Opsi Catatan',
             icon: const Icon(Icons.check_circle, color: Color(0xFFD4FF00), size: 28), 
-            onPressed: _showRenewInput, 
+            onPressed: _showCheckOptions, // TAMBAHAN: Mengubah fungsi tombol centang
           ),
           IconButton(
             tooltip: 'Hapus Catatan',
@@ -240,7 +305,10 @@ class _DetailScreenState extends State<DetailScreen> {
                     Text(
                       _getCountdownText(currentSub.dueDate),
                       style: TextStyle(
-                        color: currentSub.dueDate.isBefore(DateTime.now()) ? Colors.redAccent : Colors.white, 
+                        // TAMBAHAN: Warna menyesuaikan status
+                        color: currentSub.isFinished 
+                            ? Colors.cyanAccent 
+                            : (currentSub.dueDate.isBefore(DateTime.now()) ? Colors.redAccent : Colors.white), 
                         fontSize: 22, 
                         fontWeight: FontWeight.bold
                       ),

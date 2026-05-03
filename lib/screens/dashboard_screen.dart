@@ -334,7 +334,8 @@ class _HomeView extends StatelessWidget {
           FadeInSlide(
             delay: const Duration(milliseconds: 50),
             child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 20, bottom: 10),
+              // PERUBAHAN: Memangkas padding atas dan bawah agar naik
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
               child: BlinkingWidget(
                 child: Text(greeting, style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
               ),
@@ -345,7 +346,8 @@ class _HomeView extends StatelessWidget {
             delay: const Duration(milliseconds: 150),
             child: Container(
               width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              // PERUBAHAN: Memangkas jarak (margin) vertikal dari 10 menjadi 6
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 color: const Color(0xFFD4FF00), 
@@ -383,7 +385,8 @@ class _HomeView extends StatelessWidget {
             FadeInSlide(
               delay: const Duration(milliseconds: 200),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                // PERUBAHAN: Menambahkan padding atas agar tetap ada jeda sedikit
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
                 child: Row(
                   children: [
                     Expanded(
@@ -436,7 +439,8 @@ class _HomeView extends StatelessWidget {
             FadeInSlide(
               delay: const Duration(milliseconds: 250),
               child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20, top: 12, bottom: 10),
+                // PERUBAHAN: Memangkas jarak (margin) agar naik ke atas
+                margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: cardBg, 
@@ -471,12 +475,13 @@ class _HomeView extends StatelessWidget {
               ),
             ),
 
-          const SizedBox(height: 10),
+          // PERUBAHAN: SizedBox di sini dihilangkan penuh
           
           FadeInSlide(
             delay: const Duration(milliseconds: 350),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              // PERUBAHAN: Padding top diatur secukupnya agar pas
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -485,7 +490,8 @@ class _HomeView extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          
+          // PERUBAHAN: SizedBox di sini dihilangkan penuh
 
           Expanded(
             child: provider.subs.isEmpty
@@ -527,7 +533,9 @@ class _HomeView extends StatelessWidget {
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.only(left: 20, right: 20, bottom: 80), 
+                    // PERUBAHAN: Memperbesar bottom padding menjadi 100 agar list yang paling bawah 
+                    // tidak tersangkut di balik tombol "+" dan navigasi bawah.
+                    padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 100), 
                     physics: const BouncingScrollPhysics(),
                     itemCount: provider.subs.length,
                     itemBuilder: (context, index) {

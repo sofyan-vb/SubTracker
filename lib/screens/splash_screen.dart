@@ -1,4 +1,3 @@
-// lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:math';
@@ -34,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
     if (hasInternet) {
       await Future.delayed(const Duration(milliseconds: 600));
       
-      // Langsung ke Dashboard karena sudah pasti setuju Terms
+     
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
       );
@@ -91,9 +90,9 @@ class _SplashScreenState extends State<SplashScreen> {
               
               _buildFeatureItem(icon: Icons.edit_document, title: 'Catat Semua Layanan', desc: 'Kumpulkan semua tagihan langgananmu di satu tempat agar lebih rapi.'),
               const SizedBox(height: 28),
-              _buildFeatureItem(icon: Icons.notifications_active_rounded, title: 'Pengingat Otomatis', desc: 'Tidak ada lagi denda telat bayar karena lupa waktu jatuh tempo.'),
+              _buildFeatureItem(icon: Icons.notifications_active_rounded, title: 'Pengingat Otomatis', desc: 'Tidak ada lagi denda telat bayar karena lupa waktu.'),
               const SizedBox(height: 28),
-              _buildFeatureItem(icon: Icons.insert_chart_rounded, title: 'Pantau Pengeluaran', desc: 'Analisis cerdas kemana uangmu tersedot setiap bulannya.'),
+              _buildFeatureItem(icon: Icons.insert_chart_rounded, title: 'Pantau Pengeluaran', desc: 'Analisis cerdas kemana uangmu habis setiap bulannya.'),
               
               const Spacer(),
               

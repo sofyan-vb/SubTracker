@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:provider/provider.dart';
@@ -42,9 +41,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// =================================================================
-// GATEKEEPER: ANTI LOMPAT (POST-FRAME) & BAYANGAN PROPORSIONAL
-// =================================================================
+
 class GateKeeper extends StatefulWidget {
   const GateKeeper({super.key});
   @override
@@ -97,11 +94,9 @@ class _GateKeeperState extends State<GateKeeper> with SingleTickerProviderStateM
       CurvedAnimation(parent: _controller, curve: const Interval(0.1, 0.8, curve: Curves.easeInOut)),
     );
 
-    // ===============================================================
-    // RAHASIA ANTI-LOMPAT: Tunggu layar HP selesai merender 100%
-    // ===============================================================
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Tambah ekstra jeda 0.8 detik agar HP benar-benar siap dan tidak lag
+    
       Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted) {
           _controller.forward();
@@ -170,23 +165,21 @@ class _GateKeeperState extends State<GateKeeper> with SingleTickerProviderStateM
       backgroundColor: const Color(0xFF09090B),
       body: Stack(
         children: [
-          // ========================================================
-          // 1. ELEMEN BACKGROUND: BAYANGAN YANZ RAKSASA (ANTI TERPOTONG)
-          // ========================================================
+        
           Center(
             child: FadeTransition(
               opacity: _fadeBackground,
               child: SizedBox(
-                // Lebar maksimal dibatasi 90% dari lebar layar agar huruf ujung aman
+                
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: FittedBox(
-                  fit: BoxFit.scaleDown, // Mengatur ukuran agar pas, tidak terlalu besar
+                  fit: BoxFit.scaleDown, 
                   child: Text(
                     'YANZ',
                     style: TextStyle(
-                      fontSize: 160, // Ukuran font dasar yang besar
+                      fontSize: 160, 
                       fontWeight: FontWeight.w900,
-                      letterSpacing: 8, // Spasi huruf diperkecil agar tidak tumpah keluar layar
+                      letterSpacing: 8, 
                       height: 1.0, 
                       foreground: Paint()
                         ..style = PaintingStyle.stroke
@@ -199,9 +192,7 @@ class _GateKeeperState extends State<GateKeeper> with SingleTickerProviderStateM
             ),
           ),
 
-          // ========================================================
-          // 2. ELEMEN UTAMA: ANIMASI YANZ STUDIO
-          // ========================================================
+          
           Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -241,9 +232,7 @@ class _GateKeeperState extends State<GateKeeper> with SingleTickerProviderStateM
             ),
           ),
 
-          // ========================================================
-          // 3. ELEMEN BAWAH: INDIKATOR VERSI 
-          // ========================================================
+          
           Positioned(
             bottom: 40,
             left: 0,

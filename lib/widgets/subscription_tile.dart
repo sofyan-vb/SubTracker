@@ -1,4 +1,3 @@
-// lib/widgets/subscription_tile.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -49,8 +48,8 @@ class _SubTileState extends State<SubTile> {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
-    // Mengecek apakah sudah masuk waktu pembayaran
     final bool isDue = widget.sub.dueDate.isBefore(DateTime.now());
+    final bool isFinished = widget.sub.isFinished; 
     final String countdownText = _getCountdownText(widget.sub.dueDate);
 
     return Container(
@@ -79,19 +78,21 @@ class _SubTileState extends State<SubTile> {
                     children: [
                       Text(widget.sub.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 6),
-                      // JIKA JATUH TEMPO: Tampilkan teks animasi berjalan. JIKA TIDAK: Tampilkan teks biasa.
-                      isDue 
-                          ? SizedBox(
-                              width: double.infinity,
-                              child: MarqueeText(
-                                text: countdownText, 
-                                style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600),
-                              ),
+                      
+                      isFinished
+                          ? const MarqueeText(
+                              text: 'Pembayaran sudah selesai.', 
+                              style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
                             )
-                          : Text(
-                              countdownText, 
-                              style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w600),
-                            ),
+                          : isDue 
+                              ? MarqueeText(
+                                  text: countdownText, 
+                                  style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600),
+                                )
+                              : Text(
+                                  countdownText, 
+                                  style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w600),
+                                ),
                     ],
                   ),
                 ),
@@ -108,9 +109,6 @@ class _SubTileState extends State<SubTile> {
   }
 }
 
-// =========================================================
-// WIDGET TAMBAHAN: Animasi Teks Berjalan (Muncul Tenggelam)
-// =========================================================
 class MarqueeText extends StatefulWidget {
   final String text;
   final TextStyle style;
@@ -129,8 +127,9 @@ class _MarqueeTextState extends State<MarqueeText> with SingleTickerProviderStat
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2500), // Kecepatan teks berjalan
-    )..repeat(); // Mengulang animasi terus-menerus
+      
+      duration: const Duration(milliseconds: 10000), 
+    )..repeat(); 
   }
 
   @override
@@ -141,32 +140,50 @@ class _MarqueeTextState extends State<MarqueeText> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: ShaderMask(
-        // Menambahkan efek gradasi agar teks terlihat "tenggelam" (memudar) di ujung kiri dan kanan
-        shaderCallback: (rect) {
-          return const LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [Colors.transparent, Colors.white, Colors.white, Colors.transparent],
-            stops: [0.0, 0.1, 0.9, 1.0], 
-          ).createShader(rect);
-        },
-        blendMode: BlendMode.dstIn,
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            // Menggerakkan posisi teks dari kanan ke kiri layar
-            return Align(
-              alignment: Alignment(2.0 - (_controller.value * 4.0), 0.0), 
-              child: child,
-            );
+    return SizedBox(
+      height: 18, 
+      width: double.infinity, 
+      child: ClipRect(
+        child: ShaderMask(
+          shaderCallback: (rect) {
+            return const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [Colors.transparent, Colors.white, Colors.white, Colors.transparent],
+              stops: [0.0, 0.1, 0.9, 1.0], 
+            ).createShader(rect);
           },
-          child: Text(
-            widget.text,
-            style: widget.style,
-            maxLines: 1,
-            softWrap: false, // Menahan teks agar tidak turun ke baris bawah
+          blendMode: BlendMode.dstIn,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.hasBoundedWidth ? constraints.maxWidth : 200.0;
+              
+              return Stack(
+                children: [
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                    
+                      final dx = width - (_controller.value * (width + 150));
+                      return Positioned(
+                        left: dx,
+                        top: 0,
+                        bottom: 0,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            widget.text,
+                            style: widget.style,
+                            maxLines: 1,
+                            softWrap: false, 
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
