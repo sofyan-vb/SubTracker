@@ -39,7 +39,6 @@ class NotificationService {
     final tz.TZDateTime scheduledTzTime = tz.TZDateTime.from(scheduledTime, tz.local);
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
 
-   
     const NotificationDetails notifDetails = NotificationDetails(
       android: AndroidNotificationDetails(
         'sub_tracker_pasti_muncul_v7', 
@@ -54,20 +53,19 @@ class NotificationService {
       ),
     );
 
-    
     if (scheduledTzTime.isBefore(now) || scheduledTzTime.isAtSameMomentAs(now)) {
       await _notificationsPlugin.show(id, title, body, notifDetails);
       return; 
     }
 
-  
+    
     await _notificationsPlugin.zonedSchedule(
       id,
       title, 
       body,  
       scheduledTzTime, 
       notifDetails,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle, 
+      androidScheduleMode: AndroidScheduleMode.alarmClock, 
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }

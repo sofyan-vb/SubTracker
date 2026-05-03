@@ -1,3 +1,4 @@
+// lib/widgets/subscription_tile.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +31,6 @@ class _SubTileState extends State<SubTile> {
     super.dispose();
   }
 
-  
   String _getCountdownText(DateTime dueDate) {
     final diff = dueDate.difference(DateTime.now());
     if (diff.isNegative) return 'Waktunya Pembayaran!';
@@ -48,6 +48,10 @@ class _SubTileState extends State<SubTile> {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+    // Mengecek apakah sudah masuk waktu pembayaran
+    final bool isDue = widget.sub.dueDate.isBefore(DateTime.now());
+    final String countdownText = _getCountdownText(widget.sub.dueDate);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -75,14 +79,19 @@ class _SubTileState extends State<SubTile> {
                     children: [
                       Text(widget.sub.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 6),
-                      Text(
-                        _getCountdownText(widget.sub.dueDate), 
-                        style: TextStyle(
-                          color: widget.sub.dueDate.isBefore(DateTime.now()) ? Colors.redAccent : Colors.white54, 
-                          fontSize: 13, 
-                          fontWeight: FontWeight.w600
-                        ),
-                      ),
+                      // JIKA JATUH TEMPO: Tampilkan teks animasi berjalan. JIKA TIDAK: Tampilkan teks biasa.
+                      isDue 
+                          ? SizedBox(
+                              width: double.infinity,
+                              child: MarqueeText(
+                                text: countdownText, 
+                                style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600),
+                              ),
+                            )
+                          : Text(
+                              countdownText, 
+                              style: const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
                     ],
                   ),
                 ),
@@ -92,6 +101,72 @@ class _SubTileState extends State<SubTile> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// =========================================================
+// WIDGET TAMBAHAN: Animasi Teks Berjalan (Muncul Tenggelam)
+// =========================================================
+class MarqueeText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+
+  const MarqueeText({super.key, required this.text, required this.style});
+
+  @override
+  State<MarqueeText> createState() => _MarqueeTextState();
+}
+
+class _MarqueeTextState extends State<MarqueeText> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2500), // Kecepatan teks berjalan
+    )..repeat(); // Mengulang animasi terus-menerus
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRect(
+      child: ShaderMask(
+        // Menambahkan efek gradasi agar teks terlihat "tenggelam" (memudar) di ujung kiri dan kanan
+        shaderCallback: (rect) {
+          return const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Colors.transparent, Colors.white, Colors.white, Colors.transparent],
+            stops: [0.0, 0.1, 0.9, 1.0], 
+          ).createShader(rect);
+        },
+        blendMode: BlendMode.dstIn,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            // Menggerakkan posisi teks dari kanan ke kiri layar
+            return Align(
+              alignment: Alignment(2.0 - (_controller.value * 4.0), 0.0), 
+              child: child,
+            );
+          },
+          child: Text(
+            widget.text,
+            style: widget.style,
+            maxLines: 1,
+            softWrap: false, // Menahan teks agar tidak turun ke baris bawah
           ),
         ),
       ),

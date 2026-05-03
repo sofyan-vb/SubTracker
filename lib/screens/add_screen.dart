@@ -1,4 +1,3 @@
-// lib/screens/add_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +22,9 @@ class _AddScreenState extends State<AddScreen> {
   
   bool _isAutoRenew = true;
   String _selectedStatus = 'Aktif';
-  int _reminderDays = 1;
+  
+  
+  int _reminderDays = 0; 
 
   final List<String> _categories = ['Hiburan', 'Musik', 'Software', 'Utilitas', 'Lainnya'];
   final List<String> _statuses = ['Aktif', 'Non-Aktif'];
@@ -59,24 +60,44 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
+    final TimeOfDay? picked = await showGeneralDialog<TimeOfDay>(
       context: context,
-      initialTime: _selectedTime,
-      builder: (context, child) {
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: Colors.black87, 
+      transitionDuration: const Duration(milliseconds: 350),
+      pageBuilder: (context, animation, secondaryAnimation) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
               primary: Color(0xFFD4FF00),
               onPrimary: Colors.black,
-              surface: Color(0xFF121214),
-              onSurface: Colors.white,
+              surface: Color(0xFF1A1A1C), 
+              onSurface: Colors.white, 
             ),
           ),
-          child: child!,
+          child: TimePickerDialog(
+            initialTime: _selectedTime, 
+          ),
+        );
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutBack, 
+            ),
+            child: child,
+          ),
         );
       },
     );
-    if (picked != null) setState(() => _selectedTime = picked);
+
+    if (picked != null) {
+      setState(() => _selectedTime = picked);
+    }
   }
 
   Widget _buildLabel(String text) {
@@ -160,7 +181,8 @@ class _AddScreenState extends State<AddScreen> {
                       ],
                     ),
 
-                    _buildLabel('H- Berapa Hari Pengingat'),
+                   
+                    _buildLabel('Ingatkan Saya Pada'),
                     _buildDropdown('H-$_reminderDays', ['H-0', 'H-1', 'H-3', 'H-7'], (val) {
                       setState(() => _reminderDays = int.parse(val!.replaceAll('H-', '')));
                     }),
@@ -187,7 +209,7 @@ class _AddScreenState extends State<AddScreen> {
                 onPressed: () {
                   if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
                     
-                    // 1. Gabungkan Tanggal dan Jam menjadi waktu aslinya
+                 
                     DateTime exactDateTime = DateTime(
                       _selectedDate.year, 
                       _selectedDate.month, 
@@ -196,10 +218,23 @@ class _AddScreenState extends State<AddScreen> {
                       _selectedTime.minute,
                     );
 
-                    // 2. Kurangi waktu tersebut dengan pilihan H- Berapa Hari
+                   
                     DateTime scheduledDateTime = exactDateTime.subtract(Duration(days: _reminderDays));
 
-                    // 3. Simpan data ke Provider (Catatan tetap menggunakan waktu asli)
+                    
+                    if (scheduledDateTime.isBefore(DateTime.now())) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Jadwal pengingat (H-$_reminderDays) sudah terlewat! Atur ke waktu yang akan datang.', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          backgroundColor: Colors.redAccent,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          margin: const EdgeInsets.all(20),
+                        ),
+                      );
+                      return; 
+                    }
+
                     final newSub = Subscription(
                       id: DateTime.now().millisecondsSinceEpoch.toString(), 
                       name: _nameCtrl.text,
@@ -209,12 +244,12 @@ class _AddScreenState extends State<AddScreen> {
                     );
                     context.read<SubProvider>().addSub(newSub);
 
-                    // 4. Daftarkan jadwal alarm dengan waktu yang sudah dikurangi
+                    
                     try {
                       NotificationService.scheduleNotification(
                         newSub.id.hashCode, 
-                        'Tagihan ${newSub.name} 💸',
-                        'Waktunya membayar langganan sebesar Rp ${_priceCtrl.text}',
+                        'Pengingat: Tagihan ${newSub.name} 💸',
+                        'Pembayaran layanan sebesar Rp ${_priceCtrl.text} telah tiba waktunya.',
                         scheduledDateTime,
                       );
                     } catch (e) {
