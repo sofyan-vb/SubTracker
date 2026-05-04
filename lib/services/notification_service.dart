@@ -1,3 +1,4 @@
+import 'dart:typed_data'; 
 import 'package:flutter/foundation.dart'; 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -33,23 +34,30 @@ class NotificationService {
     }
   }
 
-  static Future<void> scheduleNotification(int id, String title, String body, DateTime scheduledTime) async {
+  static Future<void> scheduleNotification(int id, String title, String body, DateTime scheduledTime, {bool isAlarm = false}) async {
     if (kIsWeb) return;
 
     final tz.TZDateTime scheduledTzTime = tz.TZDateTime.from(scheduledTime, tz.local);
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    final Int32List additionalFlags = isAlarm ? Int32List.fromList(<int>[4]) : Int32List(0);
+    final AndroidNotificationSound? customSound = isAlarm ? const RawResourceAndroidNotificationSound('alarm_lagu') : null;
+    final String channelId = isAlarm ? 'channel_alarm_lagu_khusus_final' : 'channel_notif_biasa_standar_final';
+    final String channelName = isAlarm ? 'Alarm Tagihan' : 'Notifikasi Tagihan';
 
-    const NotificationDetails notifDetails = NotificationDetails(
+    final NotificationDetails notifDetails = NotificationDetails(
       android: AndroidNotificationDetails(
-        'sub_tracker_pasti_muncul_v7', 
-        'Pengingat Mendesak',
+        channelId, 
+        channelName,
         channelDescription: 'Tagihan yang tidak boleh dilewatkan',
         importance: Importance.max, 
         priority: Priority.high,    
-        playSound: true,            
+        playSound: true,     
+        sound: customSound, // <-- Lagu disisipkan di sini       
         enableVibration: true,      
         visibility: NotificationVisibility.public, 
-        category: AndroidNotificationCategory.alarm, 
+        category: isAlarm ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.reminder, 
+        additionalFlags: additionalFlags, 
+        audioAttributesUsage: isAlarm ? AudioAttributesUsage.alarm : AudioAttributesUsage.notification,
       ),
     );
 
@@ -57,7 +65,6 @@ class NotificationService {
       await _notificationsPlugin.show(id, title, body, notifDetails);
       return; 
     }
-
     
     await _notificationsPlugin.zonedSchedule(
       id,

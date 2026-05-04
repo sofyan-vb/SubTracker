@@ -30,6 +30,10 @@ class _AddScreenState extends State<AddScreen> {
   final List<String> _categories = ['Hiburan', 'Musik', 'Software', 'Utilitas', 'Lainnya'];
   final List<String> _statuses = ['Aktif', 'Non-Aktif'];
 
+  // TAMBAHAN: Variabel untuk pilihan tipe notifikasi
+  String _selectedNotifType = 'Notifikasi Biasa';
+  final List<String> _notifTypes = ['Notifikasi Biasa', 'Alarm Lagu (Terus Berdering)'];
+
   @override
   void dispose() {
     _nameCtrl.dispose();
@@ -260,6 +264,20 @@ class _AddScreenState extends State<AddScreen> {
                           ),
                         ),
 
+                        // TAMBAHAN: Kolom Dropdown Pilihan Notifikasi / Alarm
+                        FadeInSlide(
+                          delay: const Duration(milliseconds: 550),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLabel('Tipe Pengingat', subTextColor),
+                              _buildDropdown(_selectedNotifType, _notifTypes, (val) {
+                                setState(() => _selectedNotifType = val!);
+                              }, cardBg, textColor),
+                            ],
+                          ),
+                        ),
+
                         const SizedBox(height: 20),
                         FadeInSlide(
                           delay: const Duration(milliseconds: 600),
@@ -327,12 +345,16 @@ class _AddScreenState extends State<AddScreen> {
                               ? 'Pengingat: Tagihan ${newSub.name} 💸'
                               : 'Halo $savedName! Pengingat: Tagihan ${newSub.name} 💸';
 
+                          
+                          final bool isUsingAlarm = _selectedNotifType == 'Alarm Lagu (Terus Berdering)';
+
                           try {
                             NotificationService.scheduleNotification(
                               newSub.id.hashCode, 
                               notifTitle, 
                               'Pembayaran layanan sebesar Rp ${_priceCtrl.text} telah tiba waktunya.', 
                               scheduledDateTime,
+                              isAlarm: isUsingAlarm, 
                             );
                           } catch (e) {
                             debugPrint('Gagal set notif: $e');
