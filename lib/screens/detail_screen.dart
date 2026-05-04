@@ -1,4 +1,3 @@
-// lib/screens/detail_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -36,7 +35,6 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   String _getCountdownText(DateTime dueDate) {
-    // TAMBAHAN: Ubah teks jika sudah ditandai selesai
     if (currentSub.isFinished) return 'PEMBAYARAN SUDAH SELESAI';
 
     final diff = dueDate.difference(DateTime.now());
@@ -87,7 +85,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  // TAMBAHAN: Menu pilihan saat centang diklik
   void _showCheckOptions() {
     showDialog(
       context: context,
@@ -107,7 +104,7 @@ class _DetailScreenState extends State<DetailScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.task_alt, color: Colors.cyanAccent),
+              leading: const Icon(Icons.task_alt, color: Color.fromARGB(255, 255, 255, 255)),
               title: const Text('Tandai Sudah Selesai', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
               onTap: () {
                 Navigator.pop(ctx);
@@ -120,7 +117,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  // TAMBAHAN: Fungsi untuk mengubah status selesai
   void _markAsFinished() {
     final provider = context.read<SubProvider>();
     final updatedSub = Subscription(
@@ -129,7 +125,7 @@ class _DetailScreenState extends State<DetailScreen> {
       price: currentSub.price,
       dueDate: currentSub.dueDate,
       category: currentSub.category,
-      isFinished: true, // Ubah status jadi selesai
+      isFinished: true, 
     );
 
     provider.removeSub(currentSub.id);
@@ -142,8 +138,9 @@ class _DetailScreenState extends State<DetailScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Catatan ditandai selesai!', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), 
-        backgroundColor: Colors.cyanAccent,
+        backgroundColor: Colors.white, 
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
       )
     );
   }
@@ -226,7 +223,7 @@ class _DetailScreenState extends State<DetailScreen> {
       price: currentSub.price,
       dueDate: newDate,
       category: currentSub.category,
-      isFinished: false, // Reset status selesai saat diperpanjang
+      isFinished: false, 
     );
 
     provider.removeSub(currentSub.id);
@@ -238,8 +235,8 @@ class _DetailScreenState extends State<DetailScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Sip! Langganan diperpanjang $monthsToAdd Bulan.', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), 
-        backgroundColor: const Color(0xFFD4FF00),
+        content: Text('Langganan diperpanjang $monthsToAdd Bulan.', style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), 
+        backgroundColor: Colors.white, 
         behavior: SnackBarBehavior.floating,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
       )
@@ -262,14 +259,15 @@ class _DetailScreenState extends State<DetailScreen> {
         ),
         title: const Text('Detail Langganan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
+          
           IconButton(
             tooltip: 'Opsi Catatan',
-            icon: const Icon(Icons.check_circle, color: Color(0xFFD4FF00), size: 28), 
-            onPressed: _showCheckOptions, // TAMBAHAN: Mengubah fungsi tombol centang
+            icon: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFFD4FF00), size: 28), 
+            onPressed: _showCheckOptions, 
           ),
           IconButton(
             tooltip: 'Hapus Catatan',
-            icon: const Icon(Icons.delete_forever_rounded, color: Colors.redAccent, size: 30), 
+            icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 28), 
             onPressed: _deleteSub,
           ),
           const SizedBox(width: 8),
@@ -305,9 +303,8 @@ class _DetailScreenState extends State<DetailScreen> {
                     Text(
                       _getCountdownText(currentSub.dueDate),
                       style: TextStyle(
-                        // TAMBAHAN: Warna menyesuaikan status
                         color: currentSub.isFinished 
-                            ? Colors.cyanAccent 
+                            ? Colors.white 
                             : (currentSub.dueDate.isBefore(DateTime.now()) ? Colors.redAccent : Colors.white), 
                         fontSize: 22, 
                         fontWeight: FontWeight.bold

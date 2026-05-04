@@ -11,9 +11,10 @@ import '../widgets/subscription_tile.dart';
 import 'add_screen.dart'; 
 
 // =========================================================
-// STATE GLOBAL UNTUK TEMA 
+// STATE GLOBAL UNTUK TEMA & PROFIL
 // =========================================================
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Hitam');
+final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); // PERUBAHAN: Default dikosongkan
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -31,15 +32,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSavedTheme(); 
+    _loadSavedData(); 
   }
 
-  Future<void> _loadSavedTheme() async {
+  Future<void> _loadSavedData() async {
     final prefs = await SharedPreferences.getInstance();
+    
+    // Load Tema
     final savedTheme = prefs.getString('saved_app_theme');
-    if (savedTheme != null) {
-      themeNotifier.value = savedTheme; 
-    }
+    if (savedTheme != null) themeNotifier.value = savedTheme; 
+    
+    // Load Nama Profil
+    final savedName = prefs.getString('user_name');
+    if (savedName != null) userNameNotifier.value = savedName;
   }
 
   @override
@@ -334,10 +339,19 @@ class _HomeView extends StatelessWidget {
           FadeInSlide(
             delay: const Duration(milliseconds: 50),
             child: Padding(
-              // PERUBAHAN: Memangkas padding atas dan bawah agar naik
               padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
               child: BlinkingWidget(
-                child: Text(greeting, style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                child: ValueListenableBuilder<String>(
+                  valueListenable: userNameNotifier,
+                  builder: (context, userName, child) {
+                    // PERUBAHAN: Jika kosong, sapaan murni. Jika ada nama, ditambah sapaan.
+                    final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
+                    return Text(
+                      displayText, 
+                      style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                    );
+                  },
+                ),
               ),
             ),
           ),
@@ -346,7 +360,6 @@ class _HomeView extends StatelessWidget {
             delay: const Duration(milliseconds: 150),
             child: Container(
               width: double.infinity,
-              // PERUBAHAN: Memangkas jarak (margin) vertikal dari 10 menjadi 6
               margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
               padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
@@ -385,7 +398,6 @@ class _HomeView extends StatelessWidget {
             FadeInSlide(
               delay: const Duration(milliseconds: 200),
               child: Padding(
-                // PERUBAHAN: Menambahkan padding atas agar tetap ada jeda sedikit
                 padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
                 child: Row(
                   children: [
@@ -439,7 +451,6 @@ class _HomeView extends StatelessWidget {
             FadeInSlide(
               delay: const Duration(milliseconds: 250),
               child: Container(
-                // PERUBAHAN: Memangkas jarak (margin) agar naik ke atas
                 margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -474,13 +485,10 @@ class _HomeView extends StatelessWidget {
                 ),
               ),
             ),
-
-          // PERUBAHAN: SizedBox di sini dihilangkan penuh
           
           FadeInSlide(
             delay: const Duration(milliseconds: 350),
             child: Padding(
-              // PERUBAHAN: Padding top diatur secukupnya agar pas
               padding: const EdgeInsets.only(left: 24, right: 24, top: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -490,8 +498,6 @@ class _HomeView extends StatelessWidget {
               ),
             ),
           ),
-          
-          // PERUBAHAN: SizedBox di sini dihilangkan penuh
 
           Expanded(
             child: provider.subs.isEmpty
@@ -520,7 +526,7 @@ class _HomeView extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 
+                            'Catat pengeluaran langgan pertamamu\ndengan menekan tombol (+) di bawah.', 
                             textAlign: TextAlign.center,
                             style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
                           ),
@@ -533,8 +539,6 @@ class _HomeView extends StatelessWidget {
                     ),
                   )
                 : ListView.builder(
-                    // PERUBAHAN: Memperbesar bottom padding menjadi 100 agar list yang paling bawah 
-                    // tidak tersangkut di balik tombol "+" dan navigasi bawah.
                     padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 100), 
                     physics: const BouncingScrollPhysics(),
                     itemCount: provider.subs.length,
@@ -703,7 +707,7 @@ class _CalendarViewState extends State<_CalendarView> {
           
           Expanded(
             child: subsOnSelectedDate.isEmpty 
-              ? Center(child: Text('Bebas tagihan di hari ini 🎉', style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
+              ? Center(child: Text('Bebas tagihan di hari ini', style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
               : ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   itemCount: subsOnSelectedDate.length,
@@ -901,6 +905,45 @@ class _SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<_SettingsView> {
   bool _notifEnabled = true; 
 
+  void _showProfileDialog() {
+    final ctrl = TextEditingController(text: userNameNotifier.value);
+    final isLight = widget.theme == 'Putih';
+    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
+    final textColor = isLight ? Colors.black87 : Colors.white;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dialogBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+        title: Text('Profil Pengguna', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+          decoration: InputDecoration(
+            hintText: 'Masukkan nama panggilan',
+            hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: textColor.withOpacity(0.2))),
+            focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD4FF00))),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Batal', style: TextStyle(color: textColor.withOpacity(0.6)))),
+          TextButton(
+            onPressed: () async {
+              userNameNotifier.value = ctrl.text.trim();
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('user_name', ctrl.text.trim());
+              if (mounted) Navigator.pop(ctx);
+            }, 
+            child: const Text('Simpan', style: TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold))
+          ),
+        ],
+      )
+    );
+  }
+
   void _showThemeSelector() {
     final isLight = widget.theme == 'Putih';
     final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
@@ -978,10 +1021,10 @@ class _SettingsViewState extends State<_SettingsView> {
                         Text('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
                         
-                        _buildPrivacyPoint('1. Pengumpulan Data', 'SubTracker TIDAK MENGUMPULKAN atau merekam data identitas pribadi Anda. Kami tidak mewajibkan proses pendaftaran (login), pengisian email, atau nomor telepon. Anda menggunakan aplikasi ini secara anonim.', textColor, subTextColor),
-                        _buildPrivacyPoint('2. Penyimpanan Lokal (On-Device)', 'Semua data yang Anda input—termasuk nama langganan, nominal uang, dan kalender tagihan—disimpan SECARA LOKAL dan dienkripsi di dalam memori internal (Storage) perangkat Anda. Kami tidak memiliki server awan (cloud) untuk mencadangkan data tersebut.', textColor, subTextColor),
-                        _buildPrivacyPoint('3. Izin Sistem (Permissions)', 'Aplikasi hanya meminta izin dasar seperti "Set Alarms" dan "Post Notifications". Izin ini semata-mata digunakan oleh sistem Android/iOS di HP Anda untuk membangunkan perangkat dan memunculkan notifikasi jadwal bayar, bukan untuk melacak Anda.', textColor, subTextColor),
-                        _buildPrivacyPoint('4. Pihak Ketiga & Analitik', 'Kami tidak menggunakan SDK pelacak pihak ketiga (seperti Facebook Pixel atau Analytics eksternal) yang berpotensi menjual kebiasaan pengeluaran langganan Anda kepada perusahaan iklan.', textColor, subTextColor),
+                        _buildPrivacyPoint('1', 'Pengumpulan Data', 'SubTracker tidak mengumpulkan atau merekam data identitas pribadi Anda. Kami tidak mewajibkan proses pendaftaran (login), pengisian email, atau nomor telepon. Anda menggunakan aplikasi ini secara anonim.', textColor, subTextColor),
+                        _buildPrivacyPoint('2', 'Penyimpanan Lokal (On-Device)', 'Semua data yang Anda input termasuk nama langganan, nominal uang, dan kalender tagihan disimpan secara lokal dan dienkripsi di dalam memori internal (Storage) perangkat Anda. Kami tidak memiliki server awan (cloud) untuk mencadangkan data tersebut.', textColor, subTextColor),
+                        _buildPrivacyPoint('3', 'Izin Sistem (Permissions)', 'Aplikasi hanya meminta izin dasar seperti "Set Alarms" dan "Post Notifications". Izin ini semata-mata digunakan oleh sistem Android/iOS di HP Anda untuk membangunkan perangkat dan memunculkan notifikasi jadwal bayar, bukan untuk melacak Anda.', textColor, subTextColor),
+                        _buildPrivacyPoint('4', 'Pihak Ketiga & Analitik', 'Kami tidak menggunakan SDK pelacak pihak ketiga (seperti Facebook Pixel atau Analytics eksternal) yang berpotensi menjual kebiasaan pengeluaran langganan Anda kepada perusahaan iklan.', textColor, subTextColor),
                         
                         const SizedBox(height: 30),
                         Container(
@@ -997,9 +1040,41 @@ class _SettingsViewState extends State<_SettingsView> {
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, elevation: 0),
-                                onPressed: () {
+                                onPressed: () async {
                                   Navigator.pop(ctx);
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sistem Keamanan: Penghapusan dibatalkan.')));
+                                  
+                                  showDialog(
+                                    context: context,
+                                    builder: (confirmCtx) => AlertDialog(
+                                      backgroundColor: sheetBg,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+                                      title: Text('Reboot Sistem?', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                                      content: Text('Semua data langganan, profil, dan pengaturan tema akan terhapus secara permanen. Lanjutkan?', style: TextStyle(color: subTextColor)),
+                                      actions: [
+                                        TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text('Batal', style: TextStyle(color: textColor.withOpacity(0.6)))),
+                                        TextButton(
+                                          onPressed: () async {
+                                            Navigator.pop(confirmCtx);
+                                            
+                                            final prefs = await SharedPreferences.getInstance();
+                                            await prefs.clear();
+                                            
+                                            final provider = context.read<SubProvider>();
+                                            final subsList = provider.subs.toList();
+                                            for (var sub in subsList) {
+                                              provider.removeSub(sub.id);
+                                            }
+                                            
+                                            themeNotifier.value = 'Hitam';
+                                            userNameNotifier.value = ''; // PERUBAHAN: Saat reboot, nama juga dikosongkan ke asalnya
+                                            
+                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sistem berhasil di-reboot. Semua data telah dikosongkan.', style: TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
+                                          }, 
+                                          child: const Text('Ya, Hapus Semua', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
+                                        ),
+                                      ]
+                                    )
+                                  );
                                 },
                                 child: const Text('Hapus Seluruh Data Aplikasi', style: TextStyle(fontWeight: FontWeight.bold)),
                               )
@@ -1019,15 +1094,24 @@ class _SettingsViewState extends State<_SettingsView> {
     );
   }
 
-  Widget _buildPrivacyPoint(String title, String desc, Color textColor, Color subTextColor) {
+  Widget _buildPrivacyPoint(String number, String title, String desc, Color textColor, Color subTextColor) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
-          const SizedBox(height: 6),
-          Text(desc, style: TextStyle(color: subTextColor, fontSize: 13, height: 1.5)),
+          Text('$number.', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+                const SizedBox(height: 6),
+                Text(desc, style: TextStyle(color: subTextColor, fontSize: 13, height: 1.5)),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -1061,6 +1145,11 @@ class _SettingsViewState extends State<_SettingsView> {
             const SizedBox(height: 24),
             
             FadeInSlide(
+              delay: const Duration(milliseconds: 150),
+              child: _buildSettingTile(Icons.person_rounded, 'Profil', 'Sesuaikan nama pengguna yang anda inginkan ', _showProfileDialog, cardBg, textColor, subTextColor, widget.theme),
+            ),
+
+            FadeInSlide(
               delay: const Duration(milliseconds: 200),
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -1078,7 +1167,7 @@ class _SettingsViewState extends State<_SettingsView> {
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   secondary: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.notifications_active_rounded, color: Color(0xFFD4FF00), size: 24)),
                   title: Text('Notifikasi Pengingat', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
-                  subtitle: Text('Alarm akan berbunyi saat jatuh tempo', style: TextStyle(color: subTextColor, fontSize: 12)),
+                  subtitle: Text('Alarm akan berbunyi saat tiba waktunya tagihan', style: TextStyle(color: subTextColor, fontSize: 12)),
                   value: _notifEnabled,
                   onChanged: (val) {
                     setState(() => _notifEnabled = val);

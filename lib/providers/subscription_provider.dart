@@ -1,4 +1,3 @@
-// lib/providers/subscription_provider.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,19 +43,18 @@ class SubProvider extends ChangeNotifier {
     return filtered;
   }
 
-  // --- RUMUS UNTUK HALAMAN STATISTIK ---
+  
   
   double get totalMonthly {
     return _subs.fold(0, (sum, item) => sum + item.price);
   }
 
-  // 1. Menghitung pengeluaran dalam setahun
+
   double get totalYearly => totalMonthly * 12;
 
-  // 2. Mengelompokkan pengeluaran berdasarkan Kategori
   Map<String, double> get categoryBreakdown {
     Map<String, double> breakdown = {};
-    for (var sub in _subs) { // Kita hitung dari _subs asli agar tidak terpengaruh kolom pencarian
+    for (var sub in _subs) { 
       if (breakdown.containsKey(sub.category)) {
         breakdown[sub.category] = breakdown[sub.category]! + sub.price;
       } else {
@@ -64,14 +62,13 @@ class SubProvider extends ChangeNotifier {
       }
     }
     
-    // Urutkan dari kategori yang paling banyak menguras uang
+
     var sortedEntries = breakdown.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     
     return Map.fromEntries(sortedEntries);
   }
 
-  // --------------------------------------
 
   void addSub(Subscription sub) {
     _subs.add(sub);
