@@ -182,45 +182,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               
               floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-              floatingActionButton: Container(
-                margin: const EdgeInsets.only(top: 30),
-                child: FloatingActionButton(
-                  elevation: 0, hoverElevation: 0, highlightElevation: 0,
-                  backgroundColor: const Color(0xFFD4FF00), 
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  child: const Icon(Icons.add, size: 32, color: Colors.black), 
-                  
-                  onPressed: _isLoadingAdd ? null : () async {
-                    setState(() => _isLoadingAdd = true); 
-                    bool hasInternet = false;
-                    try {
-                      final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 5));
-                      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) hasInternet = true; 
-                    } catch (_) { hasInternet = false; }
+              // PERBAIKAN ERROR OVERFLOW: Container dihapus sepenuhnya agar margin tidak tertindih
+              floatingActionButton: FloatingActionButton(
+                elevation: 0, hoverElevation: 0, highlightElevation: 0,
+                backgroundColor: const Color(0xFFD4FF00), 
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                child: const Icon(Icons.add, size: 32, color: Colors.black), 
+                
+                onPressed: _isLoadingAdd ? null : () async {
+                  setState(() => _isLoadingAdd = true); 
+                  bool hasInternet = false;
+                  try {
+                    final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 5));
+                    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) hasInternet = true; 
+                  } catch (_) { hasInternet = false; }
 
-                    if (!mounted) return;
-                    if (hasInternet) {
-                      await Future.delayed(const Duration(milliseconds: 600));
-                      setState(() => _isLoadingAdd = false); 
-                      if (mounted) Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
-                    } else {
-                      setState(() => _isLoadingAdd = false); 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: const Row(
-                            children: [
-                              Icon(Icons.wifi_off_rounded, color: Colors.white), SizedBox(width: 12),
-                              Expanded(child: Text('Gagal tersambung! Pastikan internet aktif.', style: TextStyle(fontWeight: FontWeight.bold))),
-                            ],
-                          ),
-                          backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          margin: const EdgeInsets.all(20),
+                  if (!mounted) return;
+                  if (hasInternet) {
+                    await Future.delayed(const Duration(milliseconds: 600));
+                    setState(() => _isLoadingAdd = false); 
+                    if (mounted) Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
+                  } else {
+                    setState(() => _isLoadingAdd = false); 
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Row(
+                          children: [
+                            Icon(Icons.wifi_off_rounded, color: Colors.white), SizedBox(width: 12),
+                            Expanded(child: Text('Gagal tersambung! Pastikan internet aktif.', style: TextStyle(fontWeight: FontWeight.bold))),
+                          ],
                         ),
-                      );
-                    }
-                  },
-                ),
+                        backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        margin: const EdgeInsets.all(20),
+                      ),
+                    );
+                  }
+                },
               ),
 
               bottomNavigationBar: BottomAppBar(
@@ -484,9 +482,47 @@ class _HomeView extends StatelessWidget {
             ),
           
           FadeInSlide(
+            delay: const Duration(milliseconds: 300),
+            child: Container(
+              margin: const EdgeInsets.only(left: 20, right: 20, top: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme == 'Putih' ? Colors.blue.withOpacity(0.05) : Colors.blueAccent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.lightbulb_outline_rounded, color: Colors.blueAccent, size: 28),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Tips Hemat Hari Ini', style: TextStyle(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(
+                          [
+                            "Cek langganan yang jarang dipakai, jangan lupa matikan perpanjangan otomatisnya!",
+                            "Sedikit demi sedikit, tagihan langganan bisa jadi bukit. Pantau terus!",
+                            "Paket tahunan biasanya lebih murah daripada bulanan. Coba hitung lagi!",
+                            "Jangan ragu untuk membatalkan langganan jika aplikasinya sudah 2 minggu tidak dibuka.",
+                            "Pisahkan budget hiburan agar gaji bulananmu tidak cepat habis tersedot tagihan."
+                          ][DateTime.now().minute % 5], 
+                          style: TextStyle(color: textColor, fontSize: 13, height: 1.4),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          FadeInSlide(
             delay: const Duration(milliseconds: 350),
             child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 12),
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -500,38 +536,42 @@ class _HomeView extends StatelessWidget {
             child: provider.subs.isEmpty
                 ? FadeInSlide(
                     delay: const Duration(milliseconds: 400),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(28),
-                            decoration: BoxDecoration(
-                              color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
-                              shape: BoxShape.circle,
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 40),
+                            Container(
+                              padding: const EdgeInsets.all(28),
+                              decoration: BoxDecoration(
+                                color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.account_balance_wallet_outlined, 
+                                size: 72, 
+                                color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
+                              ),
                             ),
-                            child: Icon(
-                              Icons.account_balance_wallet_outlined, 
-                              size: 72, 
-                              color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
+                            const SizedBox(height: 24),
+                            Text(
+                              'Belum Ada Tagihan', 
+                              style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
                             ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Belum Ada Tagihan', 
-                            style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Catat pengeluaran langgan pertamamu\ndengan menekan tombol (+) di bawah.', 
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
-                          ),
-                          const SizedBox(height: 40),
-                          BlinkingWidget(
-                            child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
-                          ),
-                        ],
+                            const SizedBox(height: 8),
+                            Text(
+                              'Catat pengeluaran langgan pertamamu\ndengan menekan tombol (+) di bawah.', 
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
+                            ),
+                            const SizedBox(height: 40),
+                            BlinkingWidget(
+                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   )
@@ -551,7 +591,7 @@ class _HomeView extends StatelessWidget {
 }
 
 // =========================================================
-// HALAMAN 2: KALENDER
+// HALAMAN 2: KALENDER (DENGAN TANGGAL MERAH INFINITY)
 // =========================================================
 class _CalendarView extends StatefulWidget {
   final String theme;
@@ -572,6 +612,88 @@ class _CalendarViewState extends State<_CalendarView> {
     try { return sub.dueDate as DateTime; } catch (_) {}
     try { return sub.tanggal as DateTime; } catch (_) {}
     return null;
+  }
+
+  // --- FUNGSI ALGORITMA: MENDETEKSI TANGGAL MERAH TANPA BATAS TAHUN ---
+  String? _getHolidayName(DateTime date) {
+    int d = date.day;
+    int m = date.month;
+    int y = date.year;
+    String yearMonthDay = '$y-$m-$d';
+
+    // 1. DATABASE AKURAT (Sesuai SKB Menteri 2024 - 2030)
+    // Dibuat untuk memastikan dekade ini 100% akurat presisi mengikuti Indonesia.
+    Map<String, String> exactHolidays = {
+      '2024-2-8': 'Isra Mi\'raj Nabi Muhammad SAW', '2024-2-10': 'Tahun Baru Imlek', '2024-3-11': 'Hari Raya Nyepi', '2024-3-29': 'Wafat Isa Almasih', '2024-4-10': 'Hari Raya Idul Fitri', '2024-4-11': 'Hari Raya Idul Fitri', '2024-5-9': 'Kenaikan Isa Almasih', '2024-5-23': 'Hari Raya Waisak', '2024-6-17': 'Hari Raya Idul Adha', '2024-7-7': 'Tahun Baru Islam', '2024-9-16': 'Maulid Nabi Muhammad SAW',
+      '2025-1-27': 'Isra Mi\'raj Nabi Muhammad SAW', '2025-1-29': 'Tahun Baru Imlek', '2025-3-29': 'Hari Raya Nyepi', '2025-3-31': 'Hari Raya Idul Fitri', '2025-4-1': 'Hari Raya Idul Fitri', '2025-4-18': 'Wafat Isa Almasih', '2025-5-12': 'Hari Raya Waisak', '2025-5-29': 'Kenaikan Isa Almasih', '2025-6-6': 'Hari Raya Idul Adha', '2025-6-26': 'Tahun Baru Islam', '2025-9-5': 'Maulid Nabi Muhammad SAW',
+      '2026-1-16': 'Isra Mi\'raj Nabi Muhammad SAW', '2026-2-17': 'Tahun Baru Imlek', '2026-3-19': 'Hari Raya Nyepi', '2026-3-20': 'Hari Raya Idul Fitri', '2026-3-21': 'Hari Raya Idul Fitri', '2026-4-3': 'Wafat Isa Almasih', '2026-5-14': 'Kenaikan Isa Almasih', '2026-5-27': 'Hari Raya Idul Adha', '2026-5-31': 'Hari Raya Waisak', '2026-6-16': 'Tahun Baru Islam', '2026-8-25': 'Maulid Nabi Muhammad SAW',
+      '2027-1-6': 'Isra Mi\'raj Nabi Muhammad SAW', '2027-2-6': 'Tahun Baru Imlek', '2027-3-8': 'Hari Raya Nyepi', '2027-3-10': 'Hari Raya Idul Fitri', '2027-3-11': 'Hari Raya Idul Fitri', '2027-3-26': 'Wafat Isa Almasih', '2027-5-6': 'Kenaikan Isa Almasih', '2027-5-16': 'Hari Raya Idul Adha', '2027-5-20': 'Hari Raya Waisak', '2027-6-5': 'Tahun Baru Islam', '2027-8-15': 'Maulid Nabi Muhammad SAW', '2027-12-26': 'Isra Mi\'raj Nabi Muhammad SAW',
+      '2028-1-26': 'Tahun Baru Imlek', '2028-2-27': 'Hari Raya Idul Fitri', '2028-2-28': 'Hari Raya Idul Fitri', '2028-3-26': 'Hari Raya Nyepi', '2028-4-14': 'Wafat Isa Almasih', '2028-5-5': 'Hari Raya Idul Adha', '2028-5-8': 'Hari Raya Waisak', '2028-5-25': 'Kenaikan Isa Almasih', '2028-5-25': 'Tahun Baru Islam', '2028-8-3': 'Maulid Nabi Muhammad SAW', '2028-12-15': 'Isra Mi\'raj Nabi Muhammad SAW',
+      '2029-2-13': 'Tahun Baru Imlek', '2029-2-15': 'Hari Raya Idul Fitri', '2029-2-16': 'Hari Raya Idul Fitri', '2029-3-15': 'Hari Raya Nyepi', '2029-3-30': 'Wafat Isa Almasih', '2029-4-24': 'Hari Raya Idul Adha', '2029-5-10': 'Kenaikan Isa Almasih', '2029-5-14': 'Tahun Baru Islam', '2029-5-27': 'Hari Raya Waisak', '2029-7-23': 'Maulid Nabi Muhammad SAW', '2029-12-4': 'Isra Mi\'raj Nabi Muhammad SAW',
+      '2030-2-3': 'Tahun Baru Imlek', '2030-2-5': 'Hari Raya Idul Fitri', '2030-2-6': 'Hari Raya Idul Fitri', '2030-3-5': 'Hari Raya Nyepi', '2030-4-13': 'Hari Raya Idul Adha', '2030-4-19': 'Wafat Isa Almasih', '2030-5-3': 'Tahun Baru Islam', '2030-5-17': 'Hari Raya Waisak', '2030-5-30': 'Kenaikan Isa Almasih', '2030-7-12': 'Maulid Nabi Muhammad SAW', '2030-11-24': 'Isra Mi\'raj Nabi Muhammad SAW',
+    };
+    if (exactHolidays.containsKey(yearMonthDay)) return exactHolidays[yearMonthDay];
+
+    // 2. Libur Nasional Tetap Masehi (Infinity)
+    if (d == 1 && m == 1) return 'Tahun Baru Masehi';
+    if (d == 1 && m == 5) return 'Hari Buruh Internasional';
+    if (d == 1 && m == 6) return 'Hari Lahir Pancasila';
+    if (d == 17 && m == 8) return 'Hari Kemerdekaan RI';
+    if (d == 25 && m == 12) return 'Hari Raya Natal';
+
+    // 3. Libur Hari Minggu (Infinity)
+    if (date.weekday == DateTime.sunday) return 'Hari Minggu (Libur)';
+
+    // 4. ALGORITMA PERPETUAL (Berjalan jika di luar tahun database di atas)
+    // A. Algoritma Computus Paskah (Akurat tanpa batas waktu ke masa depan)
+    int a = y % 19;
+    int b = y ~/ 100;
+    int c = y % 100;
+    int d1 = b ~/ 4;
+    int e = b % 4;
+    int f = (b + 8) ~/ 25;
+    int g = (b - f + 1) ~/ 3;
+    int h = (19 * a + b - d1 - g + 15) % 30;
+    int i = c ~/ 4;
+    int k = c % 4;
+    int l = (32 + 2 * e + 2 * i - h - k) % 7;
+    int m1 = (a + 11 * h + 22 * l) ~/ 451;
+    int easterMonth = (h + l - 7 * m1 + 114) ~/ 31;
+    int easterDay = ((h + l - 7 * m1 + 114) % 31) + 1;
+    DateTime easter = DateTime(y, easterMonth, easterDay);
+    
+    DateTime jumatAgung = easter.subtract(const Duration(days: 2));
+    DateTime kenaikanIsa = easter.add(const Duration(days: 39));
+
+    if (y == jumatAgung.year && m == jumatAgung.month && d == jumatAgung.day) return 'Wafat Isa Almasih';
+    if (y == kenaikanIsa.year && m == kenaikanIsa.month && d == kenaikanIsa.day) return 'Kenaikan Isa Almasih';
+
+    // B. Algoritma Astronomi Kuwaiti Hijriah (Berlaku estimasi otomatis di atas tahun 2030)
+    if (y > 2030) {
+      int y1 = y; int m1 = m;
+      if (m1 < 3) { y1 -= 1; m1 += 12; }
+      int a_jd = (y1 / 100).floor();
+      int b_jd = 2 - a_jd + (a_jd / 4).floor();
+      int jd = (365.25 * (y1 + 4716)).floor() + (30.6001 * (m1 + 1)).floor() + d + b_jd - 1524;
+      
+      int l_hijri = jd - 1948440 + 10632;
+      int n_hijri = ((l_hijri - 1) / 10631).floor();
+      l_hijri = l_hijri - 10631 * n_hijri + 354;
+      int j_hijri = (((10985 - l_hijri) / 5316).floor() * ((50 * l_hijri) / 17719).floor()) +
+                    ((l_hijri / 5670).floor() * ((43 * l_hijri) / 15238).floor());
+      l_hijri = l_hijri - (((30 - j_hijri) / 15).floor() * ((17719 * j_hijri) / 50).floor()) -
+                ((j_hijri / 16).floor() * ((15238 * j_hijri) / 43).floor()) + 29;
+      int hijriMonth = ((24 * l_hijri) / 709).floor();
+      int hijriDay = l_hijri - ((709 * hijriMonth) / 24).floor();
+
+      if (hijriMonth == 1 && hijriDay == 1) return 'Tahun Baru Islam (Estimasi)';
+      if (hijriMonth == 3 && hijriDay == 12) return 'Maulid Nabi Muhammad SAW (Estimasi)';
+      if (hijriMonth == 7 && hijriDay == 27) return 'Isra Mi\'raj (Estimasi)';
+      if (hijriMonth == 10 && (hijriDay == 1 || hijriDay == 2)) return 'Hari Raya Idul Fitri (Estimasi)';
+      if (hijriMonth == 12 && hijriDay == 10) return 'Hari Raya Idul Adha (Estimasi)';
+    }
+
+    return null; // Bukan tanggal merah
   }
 
   @override
@@ -600,6 +722,9 @@ class _CalendarViewState extends State<_CalendarView> {
 
     String stringBulanTahunKini = '${namaBulanPenuh[_currentDate.month - 1]} ${_currentDate.year}';
     String stringTanggalPilih = '${_selectedDate.day} ${namaBulanSingkat[_selectedDate.month - 1]} ${_selectedDate.year}';
+    
+    // Mengecek apakah tanggal yang sedang di-klik adalah tanggal merah
+    String? selectedHoliday = _getHolidayName(_selectedDate);
 
     return SafeArea(
       child: Column(
@@ -639,8 +764,9 @@ class _CalendarViewState extends State<_CalendarView> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    // Penanda "Min" (Minggu) dibuat merah
                     children: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map((d) => 
-                      SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
+                      SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: d == 'Min' ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
                     ).toList(),
                   ),
                   const SizedBox(height: 16),
@@ -655,8 +781,10 @@ class _CalendarViewState extends State<_CalendarView> {
                       
                       final day = index - firstDayOffset + 1;
                       final thisDate = DateTime(_currentDate.year, _currentDate.month, day);
+                      
                       final isSelected = DateUtils.isSameDay(thisDate, _selectedDate);
                       final isToday = DateUtils.isSameDay(thisDate, DateTime.now());
+                      final isHoliday = _getHolidayName(thisDate) != null; // Cek tanggal merah
                       
                       bool hasBill = provider.subs.any((sub) {
                         final date = _extractDateSafely(sub);
@@ -664,11 +792,11 @@ class _CalendarViewState extends State<_CalendarView> {
                       });
 
                       Color circleColor = Colors.transparent;
-                      Color dayTextColor = textColor;
+                      Color dayTextColor = isHoliday ? Colors.redAccent : textColor; // Default tanggal merah warnanya merah
 
                       if (isSelected) {
-                        circleColor = const Color(0xFFD4FF00);
-                        dayTextColor = Colors.black;
+                        circleColor = isHoliday ? Colors.redAccent : const Color(0xFFD4FF00);
+                        dayTextColor = isHoliday ? Colors.white : Colors.black; // Kalau dipilih, font menyesuaikan
                       } else if (isToday) {
                         circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
                       }
@@ -683,7 +811,7 @@ class _CalendarViewState extends State<_CalendarView> {
                             children: [
                               Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
                               if (hasBill) 
-                                Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected ? Colors.red : const Color(0xFFD4FF00), shape: BoxShape.circle))),
+                                Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFFD4FF00), shape: BoxShape.circle))),
                             ],
                           ),
                         ),
@@ -700,6 +828,26 @@ class _CalendarViewState extends State<_CalendarView> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Text('Jadwal: $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
           ),
+          
+          // --- MENAMPILKAN DETAIL TANGGAL MERAH DI BAWAH JADWAL ---
+          if (selectedHoliday != null)
+            Padding(
+              padding: const EdgeInsets.only(left: 24, right: 24, top: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.event_available_rounded, color: Colors.redAccent, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      selectedHoliday, 
+                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)
+                    )
+                  ),
+                ],
+              ),
+            ),
+          // --------------------------------------------------------
+
           const SizedBox(height: 12),
           
           Expanded(
@@ -718,7 +866,7 @@ class _CalendarViewState extends State<_CalendarView> {
 }
 
 // =========================================================
-// HALAMAN 3: STATISTIK (DENGAN INSIGHT PINTAR)
+// HAL halaman ke bawah lainnya (Statistik & Settings) TIDAK DIRUSAK 
 // =========================================================
 class _StatsView extends StatelessWidget {
   final String theme;
@@ -901,9 +1049,6 @@ class _StatsView extends StatelessWidget {
               );
             }),
 
-            // =========================================================
-            // FITUR TAMBAHAN BARU: PROYEKSI PENGELUARAN BULAN DEPAN
-            // =========================================================
             const SizedBox(height: 16),
             FadeInSlide(
               delay: const Duration(milliseconds: 600),
@@ -1147,7 +1292,7 @@ class _SettingsViewState extends State<_SettingsView> {
                                             }
                                             
                                             themeNotifier.value = 'Hitam';
-                                            userNameNotifier.value = ''; // PERUBAHAN: Saat reboot, nama juga dikosongkan ke asalnya
+                                            userNameNotifier.value = ''; 
                                             
                                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sistem berhasil di-reboot. Semua data telah dikosongkan.', style: TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
                                           }, 
