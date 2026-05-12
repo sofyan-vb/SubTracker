@@ -14,7 +14,7 @@ import 'add_screen.dart';
 // STATE GLOBAL UNTUK TEMA & PROFIL
 // =========================================================
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Hitam');
-final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); // PERUBAHAN: Default dikosongkan
+final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); 
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -245,7 +245,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(width: 48),
                       
                       IconButton(
-                        // sesuatu
                         icon: Icon(Icons.insert_chart_rounded, color: _currentIndex == 2 ? const Color(0xFFD4FF00) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
                         onPressed: () => setState(() => _currentIndex = 2),
                       ),
@@ -289,7 +288,6 @@ class _HomeView extends StatelessWidget {
     final provider = context.watch<SubProvider>();
     final currencyFormat = NumberFormat.currency(symbol: 'Rp ', decimalDigits: 0);
     
-    // Array Manual untuk mencegah LocaleDataException
     final List<String> namaBulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
 
     final hour = DateTime.now().hour;
@@ -326,7 +324,6 @@ class _HomeView extends StatelessWidget {
     final upcomingSub = upcomingSubs.isNotEmpty ? upcomingSubs.first : null;
     final double averagePrice = provider.subs.isEmpty ? 0 : (provider.totalMonthly / provider.subs.length);
 
-    // Menerjemahkan tanggal aman
     String upcomingDateStr = '';
     if (upcomingSub != null) {
       final date = _extractDateSafely(upcomingSub)!;
@@ -345,7 +342,6 @@ class _HomeView extends StatelessWidget {
                 child: ValueListenableBuilder<String>(
                   valueListenable: userNameNotifier,
                   builder: (context, userName, child) {
-                    // PERUBAHAN: Jika kosong, sapaan murni. Jika ada nama, ditambah sapaan.
                     final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
                     return Text(
                       displayText, 
@@ -722,7 +718,7 @@ class _CalendarViewState extends State<_CalendarView> {
 }
 
 // =========================================================
-// HALAMAN 3: STATISTIK
+// HALAMAN 3: STATISTIK (DENGAN INSIGHT PINTAR)
 // =========================================================
 class _StatsView extends StatelessWidget {
   final String theme;
@@ -744,6 +740,13 @@ class _StatsView extends StatelessWidget {
       mostExpensiveText = mostExpensive.name;
     }
 
+    // Insight Pintar: Cari Kategori Paling Boros
+    String topCategory = '-';
+    if (breakdown.isNotEmpty) {
+      final sortedBreakdown = breakdown.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+      topCategory = sortedBreakdown.first.key;
+    }
+
     Color cardBg = const Color(0xFF121214);
     Color textColor = Colors.white;
     Color subTextColor = Colors.white54;
@@ -763,6 +766,47 @@ class _StatsView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // FITUR TAMBAHAN BARU: INSIGHT CERDAS 
+            FadeInSlide(
+              delay: const Duration(milliseconds: 50),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                // PERBAIKAN TYPO: Menggunakan EdgeInsets.only(bottom: 24)
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFD4FF00), Color(0xFFAFD100)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.tips_and_updates_rounded, color: Colors.black87),
+                        SizedBox(width: 8),
+                        Text('Insight Pintar', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 16)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      activeSubs.isEmpty 
+                          ? 'Belum ada data. Tambahkan langganan pertamamu untuk melihat analisis pengeluaran di sini!'
+                          : 'Pengeluaran terbesarmu bulan ini jatuh pada kategori "$topCategory". Selain itu, tagihan termahalmu dipegang oleh "$mostExpensiveText".',
+                      style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             FadeInSlide(delay: const Duration(milliseconds: 100), child: Text('Ringkasan', style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
             const SizedBox(height: 16),
             
