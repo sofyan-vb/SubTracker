@@ -772,7 +772,6 @@ class _StatsView extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
-                // PERBAIKAN TYPO: Menggunakan EdgeInsets.only(bottom: 24)
                 margin: const EdgeInsets.only(bottom: 24),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
@@ -901,6 +900,43 @@ class _StatsView extends StatelessWidget {
                 ),
               );
             }),
+
+            // =========================================================
+            // FITUR TAMBAHAN BARU: PROYEKSI PENGELUARAN BULAN DEPAN
+            // =========================================================
+            const SizedBox(height: 16),
+            FadeInSlide(
+              delay: const Duration(milliseconds: 600),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: theme == 'Putih' ? Colors.blue.withOpacity(0.05) : Colors.blueAccent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.trending_up_rounded, color: Colors.blueAccent, size: 32),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Proyeksi Bulan Depan', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+                          const SizedBox(height: 8),
+                          Text(
+                            activeSubs.isEmpty 
+                              ? 'Tambahkan tagihan untuk melihat proyeksi.' 
+                              : 'Jika semua langganan ini diperpanjang, kamu harus menyiapkan ${currencyFormat.format(totalMonthly)} lagi bulan depan. Yuk, evaluasi aplikasi yang jarang dipakai!',
+                            style: TextStyle(color: textColor, fontSize: 13, height: 1.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             
             const SizedBox(height: 80), 
           ],
