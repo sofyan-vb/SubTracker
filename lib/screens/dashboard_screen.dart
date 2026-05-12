@@ -182,7 +182,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               
               floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-              // PERBAIKAN ERROR OVERFLOW: Container dihapus sepenuhnya agar margin tidak tertindih
               floatingActionButton: FloatingActionButton(
                 elevation: 0, hoverElevation: 0, highlightElevation: 0,
                 backgroundColor: const Color(0xFFD4FF00), 
@@ -482,44 +481,6 @@ class _HomeView extends StatelessWidget {
             ),
           
           FadeInSlide(
-            delay: const Duration(milliseconds: 300),
-            child: Container(
-              margin: const EdgeInsets.only(left: 20, right: 20, top: 12),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: theme == 'Putih' ? Colors.blue.withOpacity(0.05) : Colors.blueAccent.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.lightbulb_outline_rounded, color: Colors.blueAccent, size: 28),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Tips Hemat Hari Ini', style: TextStyle(color: Colors.blueAccent, fontSize: 12, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 4),
-                        Text(
-                          [
-                            "Cek langganan yang jarang dipakai, jangan lupa matikan perpanjangan otomatisnya!",
-                            "Sedikit demi sedikit, tagihan langganan bisa jadi bukit. Pantau terus!",
-                            "Paket tahunan biasanya lebih murah daripada bulanan. Coba hitung lagi!",
-                            "Jangan ragu untuk membatalkan langganan jika aplikasinya sudah 2 minggu tidak dibuka.",
-                            "Pisahkan budget hiburan agar gaji bulananmu tidak cepat habis tersedot tagihan."
-                          ][DateTime.now().minute % 5], 
-                          style: TextStyle(color: textColor, fontSize: 13, height: 1.4),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          FadeInSlide(
             delay: const Duration(milliseconds: 350),
             child: Padding(
               padding: const EdgeInsets.only(left: 24, right: 24, top: 16),
@@ -534,44 +495,41 @@ class _HomeView extends StatelessWidget {
 
           Expanded(
             child: provider.subs.isEmpty
+                // PERBAIKAN: Dikembalikan 100% persis seperti aslinya di file pertama
                 ? FadeInSlide(
                     delay: const Duration(milliseconds: 400),
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const SizedBox(height: 40),
-                            Container(
-                              padding: const EdgeInsets.all(28),
-                              decoration: BoxDecoration(
-                                color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.account_balance_wallet_outlined, 
-                                size: 72, 
-                                color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
-                              ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(28),
+                            decoration: BoxDecoration(
+                              color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
+                              shape: BoxShape.circle,
                             ),
-                            const SizedBox(height: 24),
-                            Text(
-                              'Belum Ada Tagihan', 
-                              style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
+                            child: Icon(
+                              Icons.account_balance_wallet_outlined, 
+                              size: 72, 
+                              color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Catat pengeluaran langgan pertamamu\ndengan menekan tombol (+) di bawah.', 
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
-                            ),
-                            const SizedBox(height: 40),
-                            BlinkingWidget(
-                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 24),
+                          Text(
+                            'Belum Ada Tagihan', 
+                            style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Catat pengeluaran langgan pertamamu\ndengan menekan tombol (+) di bawah.', 
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
+                          ),
+                          const SizedBox(height: 40),
+                          BlinkingWidget(
+                            child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
+                          ),
+                        ],
                       ),
                     ),
                   )
@@ -622,7 +580,6 @@ class _CalendarViewState extends State<_CalendarView> {
     String yearMonthDay = '$y-$m-$d';
 
     // 1. DATABASE AKURAT (Sesuai SKB Menteri 2024 - 2030)
-    // Dibuat untuk memastikan dekade ini 100% akurat presisi mengikuti Indonesia.
     Map<String, String> exactHolidays = {
       '2024-2-8': 'Isra Mi\'raj Nabi Muhammad SAW', '2024-2-10': 'Tahun Baru Imlek', '2024-3-11': 'Hari Raya Nyepi', '2024-3-29': 'Wafat Isa Almasih', '2024-4-10': 'Hari Raya Idul Fitri', '2024-4-11': 'Hari Raya Idul Fitri', '2024-5-9': 'Kenaikan Isa Almasih', '2024-5-23': 'Hari Raya Waisak', '2024-6-17': 'Hari Raya Idul Adha', '2024-7-7': 'Tahun Baru Islam', '2024-9-16': 'Maulid Nabi Muhammad SAW',
       '2025-1-27': 'Isra Mi\'raj Nabi Muhammad SAW', '2025-1-29': 'Tahun Baru Imlek', '2025-3-29': 'Hari Raya Nyepi', '2025-3-31': 'Hari Raya Idul Fitri', '2025-4-1': 'Hari Raya Idul Fitri', '2025-4-18': 'Wafat Isa Almasih', '2025-5-12': 'Hari Raya Waisak', '2025-5-29': 'Kenaikan Isa Almasih', '2025-6-6': 'Hari Raya Idul Adha', '2025-6-26': 'Tahun Baru Islam', '2025-9-5': 'Maulid Nabi Muhammad SAW',
@@ -644,8 +601,7 @@ class _CalendarViewState extends State<_CalendarView> {
     // 3. Libur Hari Minggu (Infinity)
     if (date.weekday == DateTime.sunday) return 'Hari Minggu (Libur)';
 
-    // 4. ALGORITMA PERPETUAL (Berjalan jika di luar tahun database di atas)
-    // A. Algoritma Computus Paskah (Akurat tanpa batas waktu ke masa depan)
+    // 4. ALGORITMA PERPETUAL (Berjalan otomatis jika di luar tahun 2030)
     int a = y % 19;
     int b = y ~/ 100;
     int c = y % 100;
@@ -668,7 +624,6 @@ class _CalendarViewState extends State<_CalendarView> {
     if (y == jumatAgung.year && m == jumatAgung.month && d == jumatAgung.day) return 'Wafat Isa Almasih';
     if (y == kenaikanIsa.year && m == kenaikanIsa.month && d == kenaikanIsa.day) return 'Kenaikan Isa Almasih';
 
-    // B. Algoritma Astronomi Kuwaiti Hijriah (Berlaku estimasi otomatis di atas tahun 2030)
     if (y > 2030) {
       int y1 = y; int m1 = m;
       if (m1 < 3) { y1 -= 1; m1 += 12; }
@@ -693,7 +648,7 @@ class _CalendarViewState extends State<_CalendarView> {
       if (hijriMonth == 12 && hijriDay == 10) return 'Hari Raya Idul Adha (Estimasi)';
     }
 
-    return null; // Bukan tanggal merah
+    return null; 
   }
 
   @override
@@ -866,7 +821,7 @@ class _CalendarViewState extends State<_CalendarView> {
 }
 
 // =========================================================
-// HAL halaman ke bawah lainnya (Statistik & Settings) TIDAK DIRUSAK 
+// HALAMAN 3: STATISTIK 
 // =========================================================
 class _StatsView extends StatelessWidget {
   final String theme;
