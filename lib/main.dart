@@ -1,4 +1,3 @@
-// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:provider/provider.dart';
@@ -67,6 +66,7 @@ class _GateKeeperState extends State<GateKeeper> {
     final name = prefs.getString('user_name');
     final hasAccepted = prefs.getBool('hasAcceptedTerms') ?? false;
 
+    // LOGIKA PENGGUNA LAMA: Langsung Lewati Semua Layar Awal!
     if (name != null && name.trim().isNotEmpty) {
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -74,6 +74,7 @@ class _GateKeeperState extends State<GateKeeper> {
         );
       }
     } else {
+      // LOGIKA PENGGUNA BARU
       await Future.delayed(const Duration(milliseconds: 4500));
       if (mounted) {
         if (hasAccepted) {
@@ -94,8 +95,7 @@ class _GateKeeperState extends State<GateKeeper> {
     if (_showLanguageSelect) {
       return Scaffold(
         backgroundColor: const Color(0xFF09090B),
-        // TIDAK ADA APPBAR & TOMBOL KEMBALI DI SINI
-        body: Center(
+        body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(28.0),
             child: Column(
@@ -122,7 +122,7 @@ class _GateKeeperState extends State<GateKeeper> {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setString('app_lang', 'EN');
                       if (mounted) {
-                        Navigator.of(context).push( // Menggunakan push biasa agar di TermsScreen bisa kembali
+                        Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => const TermsScreen()),
                         );
                       }
@@ -146,7 +146,7 @@ class _GateKeeperState extends State<GateKeeper> {
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setString('app_lang', 'ID');
                       if (mounted) {
-                        Navigator.of(context).push( // Menggunakan push biasa
+                        Navigator.of(context).push(
                           MaterialPageRoute(builder: (context) => const TermsScreen()),
                         );
                       }
@@ -178,7 +178,7 @@ class HandwritingWelcomeText extends StatefulWidget {
 
 class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> {
   String _currentText = "";
-  final String _fullText = "Welcome to\nSubTracker"; 
+  late String _fullText; 
   int _charIndex = 0;
   Timer? _timer;
   bool _showCursor = true;
@@ -187,6 +187,8 @@ class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> {
   @override
   void initState() {
     super.initState();
+    // PERBAIKAN: Menambahkan kata "di" pada teks animasi bahasa Indonesia
+    _fullText = tr('Selamat datang di\nSubTracker', 'Welcome to\nSubTracker');
     _startAnimation();
     _cursorTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (mounted) setState(() => _showCursor = !_showCursor);
@@ -220,11 +222,14 @@ class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> {
     String cursivePart = "";
     String boldPart = "";
 
-    if (_currentText.length <= 11) { 
+    // Logika Pemotongan Teks Otomatis berdasarkan Enter (\n)
+    int splitIndex = _fullText.indexOf('\n') + 1;
+
+    if (_currentText.length <= splitIndex) { 
       cursivePart = _currentText;
     } else {
-      cursivePart = "Welcome to\n";
-      boldPart = _currentText.substring(11); 
+      cursivePart = _fullText.substring(0, splitIndex);
+      boldPart = _currentText.substring(splitIndex); 
     }
 
     return RichText(

@@ -1,9 +1,10 @@
+// lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_screen.dart';
 
-enum SplashState { onboarding, form, loading } // langSelect sudah dihapus dari sini
+enum SplashState { onboarding, form, loading } 
 
 class SplashScreen extends StatefulWidget {
   final bool isNewUser;
@@ -15,6 +16,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   late SplashState _state;
+  late PageController _pageController;
+  int _onboardingPageIndex = 0;
 
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _budgetCtrl = TextEditingController();
@@ -23,8 +26,16 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Langsung mulai di onboarding (Pengenalan Fitur)
     _state = SplashState.onboarding;
+    _pageController = PageController(initialPage: 0);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _nameCtrl.dispose();
+    _budgetCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _processEntry() async {
@@ -48,7 +59,6 @@ class _SplashScreenState extends State<SplashScreen> {
     await Future.delayed(const Duration(milliseconds: 300)); 
     
     if (mounted) {
-      // pushAndRemoveUntil digunakan agar pengguna tidak bisa kembali lagi ke onboarding saat sudah masuk dashboard
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const DashboardScreen()),
         (route) => false,
@@ -56,56 +66,65 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
+  String _getButtonText() {
+    if (_state == SplashState.form) {
+      return tr('SIMPAN & MASUK', 'SAVE & ENTER');
+    }
+    if (_onboardingPageIndex < 2) {
+      return tr('LANJUT', 'NEXT');
+    }
+    return widget.isNewUser ? tr('LANJUT', 'NEXT') : tr('MASUK', 'ENTER');
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool showTopExitButton = widget.isNewUser || _state == SplashState.form;
+
     return Scaffold(
       backgroundColor: const Color(0xFF09090B),
       resizeToAvoidBottomInset: true, 
       body: Stack(
         children: [
-          // ==================================
-          // LAYAR FITUR & FORM PROFIL
-          // ==================================
           if (_state == SplashState.onboarding || _state == SplashState.form)
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final screenHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom;
+                  final screenHeight = constraints.maxHeight; 
                   return SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(minHeight: screenHeight),
                       child: IntrinsicHeight(
                         child: Padding(
-                          padding: const EdgeInsets.all(28.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0), 
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // PANAH KEMBALI
                               Align(
                                 alignment: Alignment.centerLeft,
-                                child: IconButton(
-                                  icon: const Icon(Icons.arrow_back, color: Colors.white),
-                                  onPressed: () {
-                                    if (_state == SplashState.form) {
-                                      // Jika di form profil, kembali ke fitur
-                                      setState(() => _state = SplashState.onboarding);
-                                    } else if (_state == SplashState.onboarding && widget.isNewUser) {
-                                      // Jika di fitur, kembali ke Syarat & Ketentuan
-                                      Navigator.pop(context);
-                                    }
-                                  },
-                                ),
+                                child: showTopExitButton
+                                    ? IconButton(
+                                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                                        onPressed: () {
+                                          if (_state == SplashState.form) {
+                                            setState(() => _state = SplashState.onboarding);
+                                          } else {
+                                            Navigator.pop(context); 
+                                          }
+                                        },
+                                      )
+                                    : const SizedBox(height: 48), 
                               ),
+                              
                               const Spacer(),
                               
                               if (_state == SplashState.form) ...[
-                                const Icon(Icons.face_retouching_natural_rounded, size: 80, color: Color(0xFFD4FF00)),
+                                const Icon(Icons.face_retouching_natural_rounded, size: 60, color: Color(0xFFD4FF00)), 
+                                const SizedBox(height: 12),
+                                Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
+                                const SizedBox(height: 6),
+                                Text(tr('Atur profil dan target anggaran bulananmu.', 'Set your profile and monthly budget.'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 13)),
                                 const SizedBox(height: 24),
-                                Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white)),
-                                const SizedBox(height: 8),
-                                Text(tr('Atur profil dan target anggaran bulananmu.', 'Set your profile and monthly budget.'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 14)),
-                                const SizedBox(height: 40),
                                 
                                 TextField(
                                   controller: _nameCtrl,
@@ -115,10 +134,11 @@ class _SplashScreenState extends State<SplashScreen> {
                                     labelStyle: const TextStyle(color: Colors.white54),
                                     prefixIcon: const Icon(Icons.person, color: Color(0xFFD4FF00)),
                                     filled: true, fillColor: const Color(0xFF1A1A1C),
+                                    contentPadding: const EdgeInsets.all(16), 
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 12),
                                 
                                 TextField(
                                   controller: _budgetCtrl,
@@ -131,10 +151,11 @@ class _SplashScreenState extends State<SplashScreen> {
                                     prefixText: tr('Rp ', '\$ '),
                                     prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                     filled: true, fillColor: const Color(0xFF1A1A1C),
+                                    contentPadding: const EdgeInsets.all(16),
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                                   ),
                                 ),
-                                const SizedBox(height: 16),
+                                const SizedBox(height: 12),
 
                                 DropdownButtonFormField<String>(
                                   value: _selectedGoal.isEmpty ? tr('Pantau Pengeluaran', 'Track Expenses') : _selectedGoal,
@@ -145,6 +166,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                     labelStyle: const TextStyle(color: Colors.white54),
                                     prefixIcon: const Icon(Icons.flag_circle_rounded, color: Color(0xFFD4FF00)),
                                     filled: true, fillColor: const Color(0xFF1A1A1C),
+                                    contentPadding: const EdgeInsets.all(16),
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                                   ),
                                   items: [tr('Pantau Pengeluaran', 'Track Expenses'), tr('Lebih Hemat', 'Save More'), tr('Stop Langganan Boros', 'Stop Wasting Subs')]
@@ -156,51 +178,162 @@ class _SplashScreenState extends State<SplashScreen> {
                                 ),
                               ] 
                               else ...[
-                                Container(
-                                  width: 100, height: 100,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFD4FF00), borderRadius: BorderRadius.circular(32),
-                                    boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.2), blurRadius: 30, offset: const Offset(0, 10))],
+                                // ==========================================
+                                // TAMPILAN SLIDE GAMBAR MEMAKAI onboarding.jpg
+                                // ==========================================
+                                SizedBox(
+                                  height: screenHeight * 0.58, 
+                                  child: PageView(
+                                    controller: _pageController,
+                                    physics: const NeverScrollableScrollPhysics(), 
+                                    onPageChanged: (index) {
+                                      setState(() {
+                                        _onboardingPageIndex = index;
+                                      });
+                                    },
+                                    children: [
+                                      // Slide 1 - Memotong Otomatis Bagian Kiri (Pria)
+                                      _buildOnboardingSlide(
+                                        imagePath: 'assets/onboarding.jpg', // KUNCI UTAMA DI SINI
+                                        alignment: Alignment.centerLeft,    // Memotong ke kiri
+                                        title: tr('Catat Semua Layanan', 'Record All Services'),
+                                        desc: tr('Kumpulkan semua tagihan di satu tempat agar lebih rapi.', 'Keep all your subscriptions in one neat place.')
+                                      ),
+                                      // Slide 2 - Memotong Otomatis Bagian Tengah (Wanita)
+                                      _buildOnboardingSlide(
+                                        imagePath: 'assets/onboarding.jpg', // KUNCI UTAMA DI SINI
+                                        alignment: Alignment.center,        // Memotong ke tengah
+                                        title: tr('Pengingat Otomatis', 'Automatic Reminders'),
+                                        desc: tr('Tidak ada lagi denda telat bayar karena lupa waktu.', 'No more late payment fines because you forgot the date.')
+                                      ),
+                                      // Slide 3 - Memotong Otomatis Bagian Kanan (Pasangan)
+                                      _buildOnboardingSlide(
+                                        imagePath: 'assets/onboarding.jpg', // KUNCI UTAMA DI SINI
+                                        alignment: Alignment.centerRight,   // Memotong ke kanan
+                                        title: tr('Pantau Pengeluaran', 'Track Expenses'),
+                                        desc: tr('Analisis cerdas kemana uangmu habis setiap bulannya.', 'Smart analysis of where your money goes every month.')
+                                      ),
+                                    ],
                                   ),
-                                  child: const Center(child: Text('S', style: TextStyle(fontSize: 60, fontWeight: FontWeight.w900, color: Colors.black, height: 1.1))),
                                 ),
-                                const SizedBox(height: 24),
-                                const Text('SubTracker', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -1.0)),
-                                const SizedBox(height: 48),
-                                _buildFeatureItem(icon: Icons.edit_document, title: tr('Catat Semua Layanan', 'Record All Services'), desc: tr('Kumpulkan semua tagihan di satu tempat agar lebih rapi.', 'Keep all your subscriptions in one neat place.')),
-                                const SizedBox(height: 28),
-                                _buildFeatureItem(icon: Icons.notifications_active_rounded, title: tr('Pengingat Otomatis', 'Automatic Reminders'), desc: tr('Tidak ada lagi denda telat bayar karena lupa waktu.', 'No more late payment fines because you forgot the date.')),
-                                const SizedBox(height: 28),
-                                _buildFeatureItem(icon: Icons.insert_chart_rounded, title: tr('Pantau Pengeluaran', 'Track Expenses'), desc: tr('Analisis cerdas kemana uangmu habis setiap bulannya.', 'Smart analysis of where your money goes every month.')),
+                                const SizedBox(height: 20),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(3, (index) => AnimatedContainer(
+                                    duration: const Duration(milliseconds: 300),
+                                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                                    height: 8,
+                                    width: _onboardingPageIndex == index ? 24 : 8,
+                                    decoration: BoxDecoration(
+                                      color: _onboardingPageIndex == index ? const Color(0xFFD4FF00) : Colors.white24,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                  )),
+                                ),
                               ],
                               
                               const Spacer(),
                               
-                              SizedBox(
-                                width: double.infinity, height: 65,
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFD4FF00), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                    elevation: 0,
-                                  ),
-                                  onPressed: () {
-                                    if (_state == SplashState.onboarding) {
-                                      if (widget.isNewUser) {
-                                        setState(() => _state = SplashState.form); 
-                                      } else {
-                                        _processEntry(); 
-                                      }
-                                    } else if (_state == SplashState.form) {
-                                      _processEntry(); 
-                                    }
-                                  }, 
-                                  child: Text(
-                                    _state == SplashState.form ? tr('SIMPAN & MASUK', 'SAVE & ENTER') : (widget.isNewUser ? tr('LANJUT', 'NEXT') : tr('MASUK', 'ENTER')), 
-                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1.0)
-                                  ),
-                                ),
+                              Builder(
+                                builder: (context) {
+                                  if (_state == SplashState.onboarding && _onboardingPageIndex > 0) {
+                                    return Row(
+                                      children: [
+                                        Expanded(
+                                          flex: 3, 
+                                          child: SizedBox(
+                                            height: 60,
+                                            child: OutlinedButton(
+                                              style: OutlinedButton.styleFrom(
+                                                padding: const EdgeInsets.symmetric(horizontal: 4), 
+                                                side: const BorderSide(color: Colors.white24, width: 1.5),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                              ),
+                                              onPressed: () {
+                                                _pageController.previousPage(
+                                                  duration: const Duration(milliseconds: 500), 
+                                                  curve: Curves.easeOutCubic
+                                                );
+                                              },
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  tr('KEMBALI', 'BACK'),
+                                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70),
+                                                  softWrap: false,
+                                                  overflow: TextOverflow.visible,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          flex: 4, 
+                                          child: SizedBox(
+                                            height: 60,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: const Color(0xFFD4FF00),
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                                elevation: 0,
+                                              ),
+                                              onPressed: () {
+                                                if (_onboardingPageIndex < 2) {
+                                                  _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+                                                } else {
+                                                  if (widget.isNewUser) {
+                                                    setState(() => _state = SplashState.form); 
+                                                  } else {
+                                                    _processEntry(); 
+                                                  }
+                                                }
+                                              }, 
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  _getButtonText(),
+                                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1.0)
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                  
+                                  return SizedBox(
+                                    width: double.infinity, height: 60,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFD4FF00), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                        elevation: 0,
+                                      ),
+                                      onPressed: () {
+                                        if (_state == SplashState.onboarding) {
+                                          if (_onboardingPageIndex < 2) {
+                                            _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+                                          } else {
+                                            if (widget.isNewUser) {
+                                              setState(() => _state = SplashState.form); 
+                                            } else {
+                                              _processEntry(); 
+                                            }
+                                          }
+                                        } else if (_state == SplashState.form) {
+                                          _processEntry(); 
+                                        }
+                                      }, 
+                                      child: Text(
+                                        _getButtonText(),
+                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1.0)
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 8),
                             ],
                           ),
                         ),
@@ -211,9 +344,6 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-          // ==================================
-          // LAYAR 4: LOADING GELOMBANG
-          // ==================================
           if (_state == SplashState.loading)
             Positioned.fill(
               child: Container(
@@ -249,26 +379,30 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  Widget _buildFeatureItem({required IconData icon, required String title, required String desc}) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(color: const Color(0xFF1A1A1C), borderRadius: BorderRadius.circular(24)),
-          child: Icon(icon, color: const Color(0xFFD4FF00), size: 32),
-        ),
-        const SizedBox(width: 20),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              Text(desc, style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.4)),
-            ],
+  // WIDGET FOTO DIKEMBALIKAN KE MODE POTONG ALIGNMENT
+  Widget _buildOnboardingSlide({required String imagePath, required Alignment alignment, required String title, required String desc}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: Image.asset(
+                imagePath,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                alignment: alignment, // FOKUS PEMOTONGAN OTOMATIS: Kiri, Tengah, Kanan
+              ),
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 20),
+          Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
+          const SizedBox(height: 8),
+          Text(desc, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.5)),
+        ],
+      ),
     );
   }
 }
