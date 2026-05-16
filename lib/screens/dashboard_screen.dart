@@ -11,10 +11,15 @@ import '../widgets/subscription_tile.dart';
 import 'add_screen.dart'; 
 
 // =========================================================
-// STATE GLOBAL UNTUK TEMA & PROFIL
+// STATE GLOBAL UNTUK TEMA, PROFIL, DAN BAHASA (MULTILINGUAL)
 // =========================================================
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Hitam');
 final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); 
+final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); // Default English
+
+String tr(String idText, String enText) {
+  return languageNotifier.value == 'ID' ? idText : enText;
+}
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -38,19 +43,96 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _loadSavedData() async {
     final prefs = await SharedPreferences.getInstance();
     
-    // Load Tema
     final savedTheme = prefs.getString('saved_app_theme');
     if (savedTheme != null) themeNotifier.value = savedTheme; 
     
-    // Load Nama Profil
     final savedName = prefs.getString('user_name');
     if (savedName != null) userNameNotifier.value = savedName;
+
+    final savedLang = prefs.getString('app_lang');
+    if (savedLang != null) languageNotifier.value = savedLang;
   }
 
   @override
   void dispose() {
     _searchCtrl.dispose();
     super.dispose();
+  }
+
+  DateTime? _extractDateSafely(dynamic sub) {
+    try { return sub.date as DateTime; } catch (_) {}
+    try { return sub.dueDate as DateTime; } catch (_) {}
+    try { return sub.tanggal as DateTime; } catch (_) {}
+    return null;
+  }
+
+  void _showNotificationsSheet(BuildContext context, Color bgColor, Color textColor) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: bgColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetContext) {
+        return Consumer<SubProvider>(
+          builder: (context, provider, child) {
+            final now = DateTime.now();
+            final upcomingSubs = provider.subs.where((sub) {
+              final date = _extractDateSafely(sub);
+              if (date == null) return false;
+              return date.isAfter(now.subtract(const Duration(days: 1))) && date.isBefore(now.add(const Duration(days: 7)));
+            }).toList();
+
+            upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
+
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.notifications_active_rounded, color: Color(0xFFD4FF00)),
+                      const SizedBox(width: 12),
+                      Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  upcomingSubs.isEmpty 
+                    ? Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: Text(tr('Tidak ada tagihan mendesak (7 hari ke depan).', 'No urgent bills (next 7 days).'), style: TextStyle(color: textColor.withOpacity(0.5)))),
+                      )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: upcomingSubs.length,
+                        itemBuilder: (ctx, i) {
+                          final sub = upcomingSubs[i];
+                          final subDate = _extractDateSafely(sub);
+                          int daysLeft = subDate != null ? subDate.difference(now).inDays : 0;
+                          String daysLeftStr = daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft';
+
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.15), shape: BoxShape.circle),
+                              child: const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 20),
+                            ),
+                            title: Text(sub.name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                            subtitle: Text(tr('Segera jatuh tempo', 'Due soon'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12)),
+                            trailing: Text(daysLeftStr, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                          );
+                        }
+                      ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          }
+        );
+      }
+    );
   }
 
   void _showFilterSheet(BuildContext context, Color bgColor, Color textColor) {
@@ -67,11 +149,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Urutkan Berdasarkan', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(tr('Urutkan Berdasarkan', 'Sort By'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
-                  _buildSortTile(context, provider, 'Terdekat', Icons.calendar_today, textColor),
-                  _buildSortTile(context, provider, 'Termahal', Icons.arrow_upward, textColor),
-                  _buildSortTile(context, provider, 'Termurah', Icons.arrow_downward, textColor),
+                  _buildSortTile(context, provider, tr('Terdekat', 'Closest'), Icons.calendar_today, textColor),
+                  _buildSortTile(context, provider, tr('Termahal', 'Highest Price'), Icons.arrow_upward, textColor),
+                  _buildSortTile(context, provider, tr('Termurah', 'Lowest Price'), Icons.arrow_downward, textColor),
                   _buildSortTile(context, provider, 'A-Z', Icons.sort_by_alpha, textColor),
                   const SizedBox(height: 20),
                 ],
@@ -84,14 +166,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildSortTile(BuildContext context, SubProvider provider, String title, IconData icon, Color defaultTextColor) {
-    final isActive = provider.sortBy == title;
+    bool isActive = provider.sortBy == title || 
+                    (provider.sortBy == 'Terdekat' && title == 'Closest') ||
+                    (provider.sortBy == 'Termahal' && title == 'Highest Price') ||
+                    (provider.sortBy == 'Termurah' && title == 'Lowest Price');
+
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: isActive ? const Color(0xFFD4FF00) : defaultTextColor.withOpacity(0.6)),
       title: Text(title, style: TextStyle(color: isActive ? const Color(0xFFD4FF00) : defaultTextColor, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
       trailing: isActive ? const Icon(Icons.check_circle, color: Color(0xFFD4FF00)) : null,
       onTap: () {
-        provider.setSortBy(title);
+        if (title == 'Closest' || title == 'Terdekat') provider.setSortBy('Terdekat');
+        else if (title == 'Highest Price' || title == 'Termahal') provider.setSortBy('Termahal');
+        else if (title == 'Lowest Price' || title == 'Termurah') provider.setSortBy('Termurah');
+        else provider.setSortBy('A-Z');
+        
         Navigator.pop(context); 
       },
     );
@@ -142,7 +232,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         autofocus: true,
                         style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
-                          hintText: 'Cari langganan...',
+                          hintText: tr('Cari langganan...', 'Search subscriptions...'),
                           hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
                           border: InputBorder.none,
                         ),
@@ -167,6 +257,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       });
                     },
                   ),
+                  
+                  if (!_isSearching)
+                    IconButton(
+                      icon: Stack(
+                        children: [
+                          Icon(Icons.notifications_none_rounded, color: appBarIcons),
+                          Positioned(
+                            right: 2, top: 2,
+                            child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                          )
+                        ]
+                      ),
+                      onPressed: () => _showNotificationsSheet(context, bottomNavBg, textColor),
+                    ),
+
                   if (!_isSearching)
                     IconButton(
                       icon: Icon(Icons.tune, color: appBarIcons),
@@ -178,7 +283,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               body: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 300),
-                child: _buildBodyContent(currentTheme),
+                child: ValueListenableBuilder<String>(
+                  valueListenable: languageNotifier, 
+                  builder: (context, lang, child) => _buildBodyContent(currentTheme),
+                ),
               ),
               
               floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -205,10 +313,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     setState(() => _isLoadingAdd = false); 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: const Row(
+                        content: Row(
                           children: [
-                            Icon(Icons.wifi_off_rounded, color: Colors.white), SizedBox(width: 12),
-                            Expanded(child: Text('Gagal tersambung! Pastikan internet aktif.', style: TextStyle(fontWeight: FontWeight.bold))),
+                            const Icon(Icons.wifi_off_rounded, color: Colors.white), const SizedBox(width: 12),
+                            Expanded(child: Text(tr('Gagal tersambung! Pastikan internet aktif.', 'Connection failed! Make sure internet is active.'), style: const TextStyle(fontWeight: FontWeight.bold))),
                           ],
                         ),
                         backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating,
@@ -238,9 +346,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         icon: Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFFD4FF00) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
                         onPressed: () => setState(() => _currentIndex = 1),
                       ),
-                      
                       const SizedBox(width: 48),
-                      
                       IconButton(
                         icon: Icon(Icons.insert_chart_rounded, color: _currentIndex == 2 ? const Color(0xFFD4FF00) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
                         onPressed: () => setState(() => _currentIndex = 2),
@@ -266,9 +372,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-// =========================================================
-// HALAMAN 1: HOME 
-// =========================================================
 class _HomeView extends StatelessWidget {
   final String theme;
   const _HomeView({super.key, required this.theme});
@@ -283,15 +386,17 @@ class _HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SubProvider>();
-    final currencyFormat = NumberFormat.currency(symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(locale: languageNotifier.value == 'ID' ? 'id_ID' : 'en_US', symbol: languageNotifier.value == 'ID' ? 'Rp ' : '\$ ', decimalDigits: 0);
     
-    final List<String> namaBulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    final List<String> namaBulanSingkatID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+    final List<String> namaBulanSingkatEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final namaBulanSingkat = languageNotifier.value == 'ID' ? namaBulanSingkatID : namaBulanSingkatEN;
 
     final hour = DateTime.now().hour;
-    String greeting = 'Selamat Pagi';
-    if (hour >= 12 && hour < 15) greeting = 'Selamat Siang';
-    else if (hour >= 15 && hour < 18) greeting = 'Selamat Sore';
-    else if (hour >= 18 || hour < 4) greeting = 'Selamat Malam';
+    String greeting = tr('Selamat Pagi', 'Good Morning');
+    if (hour >= 12 && hour < 15) greeting = tr('Selamat Siang', 'Good Afternoon');
+    else if (hour >= 15 && hour < 18) greeting = tr('Selamat Sore', 'Good Evening');
+    else if (hour >= 18 || hour < 4) greeting = tr('Selamat Malam', 'Good Night');
 
     Color cardBg = const Color(0xFF1A1A1C);
     Color textColor = Colors.white;
@@ -312,11 +417,7 @@ class _HomeView extends StatelessWidget {
       return date.isAfter(now) || DateUtils.isSameDay(date, now);
     }).toList();
 
-    upcomingSubs.sort((a, b) {
-      final dateA = _extractDateSafely(a)!;
-      final dateB = _extractDateSafely(b)!;
-      return dateA.compareTo(dateB);
-    });
+    upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
 
     final upcomingSub = upcomingSubs.isNotEmpty ? upcomingSubs.first : null;
     final double averagePrice = provider.subs.isEmpty ? 0 : (provider.totalMonthly / provider.subs.length);
@@ -372,7 +473,7 @@ class _HomeView extends StatelessWidget {
                         child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
                       ),
                       const SizedBox(width: 12),
-                      const Text('Total Tagihan Bulanan', style: TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                      Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 24),
@@ -406,8 +507,8 @@ class _HomeView extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Layanan', style: TextStyle(color: subTextColor, fontSize: 11)),
-                                Text('${provider.subs.length} Aktif', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                                Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                                Text('${provider.subs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
                               ],
                             )
                           ],
@@ -426,8 +527,9 @@ class _HomeView extends StatelessWidget {
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                // PERBAIKAN: Menambahkan array children yang benar
                                 children: [
-                                  Text('Rata-rata', style: TextStyle(color: subTextColor, fontSize: 11)),
+                                  Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 11)),
                                   FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
                                 ],
                               ),
@@ -464,12 +566,12 @@ class _HomeView extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(upcomingSub != null ? 'Tagihan Terdekat' : 'Semua Tagihan Aman', style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
                           Text(
                             upcomingSub != null 
                                 ? '${upcomingSub.name} • $upcomingDateStr' 
-                                : 'Tidak ada tagihan dalam waktu dekat.', 
+                                : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
                             style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
                           ),
                         ],
@@ -487,7 +589,7 @@ class _HomeView extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Semua Layanan', style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w800)),
+                  Text(tr('Semua Layanan', 'All Services'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w800)),
                 ],
               ),
             ),
@@ -495,7 +597,6 @@ class _HomeView extends StatelessWidget {
 
           Expanded(
             child: provider.subs.isEmpty
-                // PERBAIKAN: Dikembalikan 100% persis seperti aslinya di file pertama
                 ? FadeInSlide(
                     delay: const Duration(milliseconds: 400),
                     child: Center(
@@ -516,12 +617,12 @@ class _HomeView extends StatelessWidget {
                           ),
                           const SizedBox(height: 24),
                           Text(
-                            'Belum Ada Tagihan', 
+                            tr('Belum Ada Tagihan', 'No Bills Yet'), 
                             style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Catat pengeluaran langgan pertamamu\ndengan menekan tombol (+) di bawah.', 
+                            tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
                             textAlign: TextAlign.center,
                             style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
                           ),
@@ -548,9 +649,6 @@ class _HomeView extends StatelessWidget {
   }
 }
 
-// =========================================================
-// HALAMAN 2: KALENDER (DENGAN TANGGAL MERAH INFINITY)
-// =========================================================
 class _CalendarView extends StatefulWidget {
   final String theme;
   const _CalendarView({super.key, required this.theme});
@@ -558,12 +656,20 @@ class _CalendarView extends StatefulWidget {
   State<_CalendarView> createState() => _CalendarViewState();
 }
 
+class _CalendarViewExpanded extends State<_CalendarView> {
+  @override
+  Widget build(BuildContext context) { return const SizedBox(); }
+}
+
 class _CalendarViewState extends State<_CalendarView> {
   DateTime _currentDate = DateTime.now();
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> namaBulanSingkat = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
-  final List<String> namaBulanPenuh = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  final List<String> namaBulanSingkatID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+  final List<String> namaBulanSingkatEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  
+  final List<String> namaBulanPenuhID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  final List<String> namaBulanPenuhEN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
   DateTime? _extractDateSafely(dynamic sub) {
     try { return sub.date as DateTime; } catch (_) {}
@@ -572,81 +678,25 @@ class _CalendarViewState extends State<_CalendarView> {
     return null;
   }
 
-  // --- FUNGSI ALGORITMA: MENDETEKSI TANGGAL MERAH TANPA BATAS TAHUN ---
   String? _getHolidayName(DateTime date) {
+    if (languageNotifier.value == 'EN') return null;
+
     int d = date.day;
     int m = date.month;
     int y = date.year;
     String yearMonthDay = '$y-$m-$d';
 
-    // 1. DATABASE AKURAT (Sesuai SKB Menteri 2024 - 2030)
     Map<String, String> exactHolidays = {
       '2024-2-8': 'Isra Mi\'raj Nabi Muhammad SAW', '2024-2-10': 'Tahun Baru Imlek', '2024-3-11': 'Hari Raya Nyepi', '2024-3-29': 'Wafat Isa Almasih', '2024-4-10': 'Hari Raya Idul Fitri', '2024-4-11': 'Hari Raya Idul Fitri', '2024-5-9': 'Kenaikan Isa Almasih', '2024-5-23': 'Hari Raya Waisak', '2024-6-17': 'Hari Raya Idul Adha', '2024-7-7': 'Tahun Baru Islam', '2024-9-16': 'Maulid Nabi Muhammad SAW',
-      '2025-1-27': 'Isra Mi\'raj Nabi Muhammad SAW', '2025-1-29': 'Tahun Baru Imlek', '2025-3-29': 'Hari Raya Nyepi', '2025-3-31': 'Hari Raya Idul Fitri', '2025-4-1': 'Hari Raya Idul Fitri', '2025-4-18': 'Wafat Isa Almasih', '2025-5-12': 'Hari Raya Waisak', '2025-5-29': 'Kenaikan Isa Almasih', '2025-6-6': 'Hari Raya Idul Adha', '2025-6-26': 'Tahun Baru Islam', '2025-9-5': 'Maulid Nabi Muhammad SAW',
-      '2026-1-16': 'Isra Mi\'raj Nabi Muhammad SAW', '2026-2-17': 'Tahun Baru Imlek', '2026-3-19': 'Hari Raya Nyepi', '2026-3-20': 'Hari Raya Idul Fitri', '2026-3-21': 'Hari Raya Idul Fitri', '2026-4-3': 'Wafat Isa Almasih', '2026-5-14': 'Kenaikan Isa Almasih', '2026-5-27': 'Hari Raya Idul Adha', '2026-5-31': 'Hari Raya Waisak', '2026-6-16': 'Tahun Baru Islam', '2026-8-25': 'Maulid Nabi Muhammad SAW',
-      '2027-1-6': 'Isra Mi\'raj Nabi Muhammad SAW', '2027-2-6': 'Tahun Baru Imlek', '2027-3-8': 'Hari Raya Nyepi', '2027-3-10': 'Hari Raya Idul Fitri', '2027-3-11': 'Hari Raya Idul Fitri', '2027-3-26': 'Wafat Isa Almasih', '2027-5-6': 'Kenaikan Isa Almasih', '2027-5-16': 'Hari Raya Idul Adha', '2027-5-20': 'Hari Raya Waisak', '2027-6-5': 'Tahun Baru Islam', '2027-8-15': 'Maulid Nabi Muhammad SAW', '2027-12-26': 'Isra Mi\'raj Nabi Muhammad SAW',
-      '2028-1-26': 'Tahun Baru Imlek', '2028-2-27': 'Hari Raya Idul Fitri', '2028-2-28': 'Hari Raya Idul Fitri', '2028-3-26': 'Hari Raya Nyepi', '2028-4-14': 'Wafat Isa Almasih', '2028-5-5': 'Hari Raya Idul Adha', '2028-5-8': 'Hari Raya Waisak', '2028-5-25': 'Kenaikan Isa Almasih', '2028-5-25': 'Tahun Baru Islam', '2028-8-3': 'Maulid Nabi Muhammad SAW', '2028-12-15': 'Isra Mi\'raj Nabi Muhammad SAW',
-      '2029-2-13': 'Tahun Baru Imlek', '2029-2-15': 'Hari Raya Idul Fitri', '2029-2-16': 'Hari Raya Idul Fitri', '2029-3-15': 'Hari Raya Nyepi', '2029-3-30': 'Wafat Isa Almasih', '2029-4-24': 'Hari Raya Idul Adha', '2029-5-10': 'Kenaikan Isa Almasih', '2029-5-14': 'Tahun Baru Islam', '2029-5-27': 'Hari Raya Waisak', '2029-7-23': 'Maulid Nabi Muhammad SAW', '2029-12-4': 'Isra Mi\'raj Nabi Muhammad SAW',
-      '2030-2-3': 'Tahun Baru Imlek', '2030-2-5': 'Hari Raya Idul Fitri', '2030-2-6': 'Hari Raya Idul Fitri', '2030-3-5': 'Hari Raya Nyepi', '2030-4-13': 'Hari Raya Idul Adha', '2030-4-19': 'Wafat Isa Almasih', '2030-5-3': 'Tahun Baru Islam', '2030-5-17': 'Hari Raya Waisak', '2030-5-30': 'Kenaikan Isa Almasih', '2030-7-12': 'Maulid Nabi Muhammad SAW', '2030-11-24': 'Isra Mi\'raj Nabi Muhammad SAW',
     };
     if (exactHolidays.containsKey(yearMonthDay)) return exactHolidays[yearMonthDay];
 
-    // 2. Libur Nasional Tetap Masehi (Infinity)
     if (d == 1 && m == 1) return 'Tahun Baru Masehi';
     if (d == 1 && m == 5) return 'Hari Buruh Internasional';
     if (d == 1 && m == 6) return 'Hari Lahir Pancasila';
     if (d == 17 && m == 8) return 'Hari Kemerdekaan RI';
     if (d == 25 && m == 12) return 'Hari Raya Natal';
-
-    // 3. Libur Hari Minggu (Infinity)
     if (date.weekday == DateTime.sunday) return 'Hari Minggu (Libur)';
-
-    // 4. ALGORITMA PERPETUAL (Berjalan otomatis jika di luar tahun 2030)
-    int a = y % 19;
-    int b = y ~/ 100;
-    int c = y % 100;
-    int d1 = b ~/ 4;
-    int e = b % 4;
-    int f = (b + 8) ~/ 25;
-    int g = (b - f + 1) ~/ 3;
-    int h = (19 * a + b - d1 - g + 15) % 30;
-    int i = c ~/ 4;
-    int k = c % 4;
-    int l = (32 + 2 * e + 2 * i - h - k) % 7;
-    int m1 = (a + 11 * h + 22 * l) ~/ 451;
-    int easterMonth = (h + l - 7 * m1 + 114) ~/ 31;
-    int easterDay = ((h + l - 7 * m1 + 114) % 31) + 1;
-    DateTime easter = DateTime(y, easterMonth, easterDay);
-    
-    DateTime jumatAgung = easter.subtract(const Duration(days: 2));
-    DateTime kenaikanIsa = easter.add(const Duration(days: 39));
-
-    if (y == jumatAgung.year && m == jumatAgung.month && d == jumatAgung.day) return 'Wafat Isa Almasih';
-    if (y == kenaikanIsa.year && m == kenaikanIsa.month && d == kenaikanIsa.day) return 'Kenaikan Isa Almasih';
-
-    if (y > 2030) {
-      int y1 = y; int m1 = m;
-      if (m1 < 3) { y1 -= 1; m1 += 12; }
-      int a_jd = (y1 / 100).floor();
-      int b_jd = 2 - a_jd + (a_jd / 4).floor();
-      int jd = (365.25 * (y1 + 4716)).floor() + (30.6001 * (m1 + 1)).floor() + d + b_jd - 1524;
-      
-      int l_hijri = jd - 1948440 + 10632;
-      int n_hijri = ((l_hijri - 1) / 10631).floor();
-      l_hijri = l_hijri - 10631 * n_hijri + 354;
-      int j_hijri = (((10985 - l_hijri) / 5316).floor() * ((50 * l_hijri) / 17719).floor()) +
-                    ((l_hijri / 5670).floor() * ((43 * l_hijri) / 15238).floor());
-      l_hijri = l_hijri - (((30 - j_hijri) / 15).floor() * ((17719 * j_hijri) / 50).floor()) -
-                ((j_hijri / 16).floor() * ((15238 * j_hijri) / 43).floor()) + 29;
-      int hijriMonth = ((24 * l_hijri) / 709).floor();
-      int hijriDay = l_hijri - ((709 * hijriMonth) / 24).floor();
-
-      if (hijriMonth == 1 && hijriDay == 1) return 'Tahun Baru Islam (Estimasi)';
-      if (hijriMonth == 3 && hijriDay == 12) return 'Maulid Nabi Muhammad SAW (Estimasi)';
-      if (hijriMonth == 7 && hijriDay == 27) return 'Isra Mi\'raj (Estimasi)';
-      if (hijriMonth == 10 && (hijriDay == 1 || hijriDay == 2)) return 'Hari Raya Idul Fitri (Estimasi)';
-      if (hijriMonth == 12 && hijriDay == 10) return 'Hari Raya Idul Adha (Estimasi)';
-    }
 
     return null; 
   }
@@ -675,11 +725,14 @@ class _CalendarViewState extends State<_CalendarView> {
       cardBg = const Color(0xFF1A2235); 
     }
 
-    String stringBulanTahunKini = '${namaBulanPenuh[_currentDate.month - 1]} ${_currentDate.year}';
-    String stringTanggalPilih = '${_selectedDate.day} ${namaBulanSingkat[_selectedDate.month - 1]} ${_selectedDate.year}';
+    final isID = languageNotifier.value == 'ID';
+    String stringBulanTahunKini = '${(isID ? namaBulanPenuhID : namaBulanPenuhEN)[_currentDate.month - 1]} ${_currentDate.year}';
+    String stringTanggalPilih = '${_selectedDate.day} ${(isID ? namaBulanSingkatID : namaBulanSingkatEN)[_selectedDate.month - 1]} ${_selectedDate.year}';
     
-    // Mengecek apakah tanggal yang sedang di-klik adalah tanggal merah
     String? selectedHoliday = _getHolidayName(_selectedDate);
+
+    final List<String> daysID = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+    final List<String> daysEN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
     return SafeArea(
       child: Column(
@@ -719,9 +772,8 @@ class _CalendarViewState extends State<_CalendarView> {
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    // Penanda "Min" (Minggu) dibuat merah
-                    children: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'].map((d) => 
-                      SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: d == 'Min' ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
+                    children: (isID ? daysID : daysEN).map((d) => 
+                      SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
                     ).toList(),
                   ),
                   const SizedBox(height: 16),
@@ -739,7 +791,7 @@ class _CalendarViewState extends State<_CalendarView> {
                       
                       final isSelected = DateUtils.isSameDay(thisDate, _selectedDate);
                       final isToday = DateUtils.isSameDay(thisDate, DateTime.now());
-                      final isHoliday = _getHolidayName(thisDate) != null; // Cek tanggal merah
+                      final isHoliday = _getHolidayName(thisDate) != null; 
                       
                       bool hasBill = provider.subs.any((sub) {
                         final date = _extractDateSafely(sub);
@@ -747,11 +799,11 @@ class _CalendarViewState extends State<_CalendarView> {
                       });
 
                       Color circleColor = Colors.transparent;
-                      Color dayTextColor = isHoliday ? Colors.redAccent : textColor; // Default tanggal merah warnanya merah
+                      Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
 
                       if (isSelected) {
                         circleColor = isHoliday ? Colors.redAccent : const Color(0xFFD4FF00);
-                        dayTextColor = isHoliday ? Colors.white : Colors.black; // Kalau dipilih, font menyesuaikan
+                        dayTextColor = isHoliday ? Colors.white : Colors.black; 
                       } else if (isToday) {
                         circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
                       }
@@ -781,10 +833,9 @@ class _CalendarViewState extends State<_CalendarView> {
           
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text('Jadwal: $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+            child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
           ),
           
-          // --- MENAMPILKAN DETAIL TANGGAL MERAH DI BAWAH JADWAL ---
           if (selectedHoliday != null)
             Padding(
               padding: const EdgeInsets.only(left: 24, right: 24, top: 8),
@@ -801,13 +852,12 @@ class _CalendarViewState extends State<_CalendarView> {
                 ],
               ),
             ),
-          // --------------------------------------------------------
 
           const SizedBox(height: 12),
           
           Expanded(
             child: subsOnSelectedDate.isEmpty 
-              ? Center(child: Text('Bebas tagihan di hari ini', style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
+              ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
               : ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   itemCount: subsOnSelectedDate.length,
@@ -820,9 +870,6 @@ class _CalendarViewState extends State<_CalendarView> {
   }
 }
 
-// =========================================================
-// HALAMAN 3: STATISTIK 
-// =========================================================
 class _StatsView extends StatelessWidget {
   final String theme;
   const _StatsView({super.key, required this.theme});
@@ -830,7 +877,7 @@ class _StatsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SubProvider>();
-    final currencyFormat = NumberFormat.currency(symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(locale: languageNotifier.value == 'ID' ? 'id_ID' : 'en_US', symbol: languageNotifier.value == 'ID' ? 'Rp ' : '\$ ', decimalDigits: 0);
 
     final totalMonthly = provider.totalMonthly;
     final breakdown = provider.categoryBreakdown;
@@ -841,13 +888,6 @@ class _StatsView extends StatelessWidget {
     if (activeSubs.isNotEmpty) {
       final mostExpensive = activeSubs.reduce((curr, next) => curr.price > next.price ? curr : next);
       mostExpensiveText = mostExpensive.name;
-    }
-
-    // Insight Pintar: Cari Kategori Paling Boros
-    String topCategory = '-';
-    if (breakdown.isNotEmpty) {
-      final sortedBreakdown = breakdown.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
-      topCategory = sortedBreakdown.first.key;
     }
 
     Color cardBg = const Color(0xFF121214);
@@ -869,56 +909,16 @@ class _StatsView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // FITUR TAMBAHAN BARU: INSIGHT CERDAS 
-            FadeInSlide(
-              delay: const Duration(milliseconds: 50),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                margin: const EdgeInsets.only(bottom: 24),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFD4FF00), Color(0xFFAFD100)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(Icons.tips_and_updates_rounded, color: Colors.black87),
-                        SizedBox(width: 8),
-                        Text('Insight Pintar', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 16)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      activeSubs.isEmpty 
-                          ? 'Belum ada data. Tambahkan langganan pertamamu untuk melihat analisis pengeluaran di sini!'
-                          : 'Pengeluaran terbesarmu bulan ini jatuh pada kategori "$topCategory". Selain itu, tagihan termahalmu dipegang oleh "$mostExpensiveText".',
-                      style: const TextStyle(color: Colors.black87, fontSize: 14, height: 1.5, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            FadeInSlide(delay: const Duration(milliseconds: 100), child: Text('Ringkasan', style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
+            FadeInSlide(delay: const Duration(milliseconds: 100), child: Text(tr('Ringkasan', 'Summary'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
             const SizedBox(height: 16),
             
             FadeInSlide(
               delay: const Duration(milliseconds: 200),
               child: Row(
                 children: [
-                  Expanded(child: _buildSummaryCard('Tahunan', currencyFormat.format(provider.totalYearly), Icons.all_inclusive, Colors.purpleAccent, cardBg, textColor, subTextColor, theme)),
+                  Expanded(child: _buildSummaryCard(tr('Tahunan', 'Yearly'), currencyFormat.format(provider.totalYearly), Icons.all_inclusive, Colors.purpleAccent, cardBg, textColor, subTextColor, theme)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildSummaryCard('Layanan', '${activeSubs.length} Aktif', Icons.subscriptions_rounded, Colors.cyanAccent, cardBg, textColor, subTextColor, theme)),
+                  Expanded(child: _buildSummaryCard(tr('Layanan', 'Services'), '${activeSubs.length} ${tr('Aktif', 'Active')}', Icons.subscriptions_rounded, Colors.cyanAccent, cardBg, textColor, subTextColor, theme)),
                 ],
               ),
             ),
@@ -928,16 +928,16 @@ class _StatsView extends StatelessWidget {
               delay: const Duration(milliseconds: 300),
               child: Row(
                 children: [
-                  Expanded(child: _buildSummaryCard('Rata-rata /Bulan', currencyFormat.format(averagePrice), Icons.analytics_outlined, Colors.orangeAccent, cardBg, textColor, subTextColor, theme)),
+                  Expanded(child: _buildSummaryCard(tr('Rata-rata /Bulan', 'Average /Month'), currencyFormat.format(averagePrice), Icons.analytics_outlined, Colors.orangeAccent, cardBg, textColor, subTextColor, theme)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildSummaryCard('Termahal', mostExpensiveText, Icons.diamond_outlined, Colors.pinkAccent, cardBg, textColor, subTextColor, theme)),
+                  Expanded(child: _buildSummaryCard(tr('Termahal', 'Most Expensive'), mostExpensiveText, Icons.diamond_outlined, Colors.pinkAccent, cardBg, textColor, subTextColor, theme)),
                 ],
               ),
             ),
             
             const SizedBox(height: 40),
-            
-            FadeInSlide(delay: const Duration(milliseconds: 400), child: Text('Analisis Kategori', style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
+
+            FadeInSlide(delay: const Duration(milliseconds: 400), child: Text(tr('Analisis Kategori', 'Category Analysis'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
             const SizedBox(height: 16),
 
             if (breakdown.isEmpty)
@@ -950,7 +950,7 @@ class _StatsView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     border: theme == 'Putih' ? Border.all(color: Colors.grey.shade200) : null,
                   ),
-                  child: Center(child: Text('Belum ada data pengeluaran.', style: TextStyle(color: subTextColor))),
+                  child: Center(child: Text(tr('Belum ada data pengeluaran.', 'No expense data yet.'), style: TextStyle(color: subTextColor))),
                 ),
               ),
 
@@ -996,7 +996,7 @@ class _StatsView extends StatelessWidget {
                       
                       Align(
                         alignment: Alignment.centerRight,
-                        child: Text('${(percentage * 100).toStringAsFixed(1)}% dari total', style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text('${(percentage * 100).toStringAsFixed(1)}% ${tr('dari total', 'of total')}', style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -1022,12 +1022,12 @@ class _StatsView extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Proyeksi Bulan Depan', style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 16)),
                           const SizedBox(height: 8),
                           Text(
                             activeSubs.isEmpty 
-                              ? 'Tambahkan tagihan untuk melihat proyeksi.' 
-                              : 'Jika semua langganan ini diperpanjang, kamu harus menyiapkan ${currencyFormat.format(totalMonthly)} lagi bulan depan. Yuk, evaluasi aplikasi yang jarang dipakai!',
+                              ? tr('Tambahkan tagihan untuk melihat proyeksi.', 'Add bills to see projections.') 
+                              : tr('Jika semua langganan ini diperpanjang, kamu harus menyiapkan ${currencyFormat.format(totalMonthly)} lagi bulan depan. Yuk, evaluasi aplikasi yang jarang dipakai!', 'If all these subscriptions renew, you must prepare ${currencyFormat.format(totalMonthly)} next month. Let\'s evaluate unused apps!'),
                             style: TextStyle(color: textColor, fontSize: 13, height: 1.5),
                           ),
                         ],
@@ -1072,9 +1072,6 @@ class _StatsView extends StatelessWidget {
   }
 }
 
-// =========================================================
-// HALAMAN 4: PENGATURAN 
-// =========================================================
 class _SettingsView extends StatefulWidget {
   final String theme;
   const _SettingsView({super.key, required this.theme});
@@ -1086,42 +1083,21 @@ class _SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<_SettingsView> {
   bool _notifEnabled = true; 
 
-  void _showProfileDialog() {
-    final ctrl = TextEditingController(text: userNameNotifier.value);
-    final isLight = widget.theme == 'Putih';
-    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
-    final textColor = isLight ? Colors.black87 : Colors.white;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Text('Profil Pengguna', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
-          decoration: InputDecoration(
-            hintText: 'Masukkan nama panggilan',
-            hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
-            enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: textColor.withOpacity(0.2))),
-            focusedBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD4FF00))),
-          ),
+  void _showSecuritySnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.lock_outline_rounded, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(tr('Fitur Keamanan Biometrik / PIN akan segera tersedia!', 'Biometric / PIN Security feature coming soon!'), style: const TextStyle(fontWeight: FontWeight.bold))),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Batal', style: TextStyle(color: textColor.withOpacity(0.6)))),
-          TextButton(
-            onPressed: () async {
-              userNameNotifier.value = ctrl.text.trim();
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setString('user_name', ctrl.text.trim());
-              if (mounted) Navigator.pop(ctx);
-            }, 
-            child: const Text('Simpan', style: TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold))
-          ),
-        ],
-      )
+        backgroundColor: Colors.blueAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        margin: const EdgeInsets.all(20),
+      ),
     );
   }
 
@@ -1136,7 +1112,7 @@ class _SettingsViewState extends State<_SettingsView> {
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.palette, color: Color(0xFFD4FF00)), const SizedBox(width: 10), Text('Pilih Tema', style: TextStyle(color: textColor))]),
+        title: Row(children: [const Icon(Icons.palette, color: Color(0xFFD4FF00)), const SizedBox(width: 10), Text(tr('Pilih Tema', 'Choose Theme'), style: TextStyle(color: textColor))]),
         
         content: Theme(
           data: Theme.of(context).copyWith(
@@ -1158,6 +1134,57 @@ class _SettingsViewState extends State<_SettingsView> {
                 },
               );
             }).toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageSelector() {
+    final isLight = widget.theme == 'Putih';
+    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
+    final textColor = isLight ? Colors.black87 : Colors.white;
+    final unselectedRadioColor = isLight ? Colors.black54 : Colors.white54; 
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dialogBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+        title: Row(children: [const Icon(Icons.language, color: Color(0xFFD4FF00)), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
+        
+        content: Theme(
+          data: Theme.of(context).copyWith(
+            unselectedWidgetColor: unselectedRadioColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                title: Text('English', style: TextStyle(color: textColor)),
+                value: 'EN',
+                groupValue: languageNotifier.value, 
+                activeColor: const Color(0xFFD4FF00),
+                onChanged: (val) async {
+                  languageNotifier.value = val!; 
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('app_lang', val); 
+                  if (mounted) Navigator.pop(ctx);
+                },
+              ),
+              RadioListTile<String>(
+                title: Text('Bahasa Indonesia', style: TextStyle(color: textColor)),
+                value: 'ID',
+                groupValue: languageNotifier.value, 
+                activeColor: const Color(0xFFD4FF00),
+                onChanged: (val) async {
+                  languageNotifier.value = val!; 
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('app_lang', val); 
+                  if (mounted) Navigator.pop(ctx);
+                },
+              ),
+            ],
           ),
         ),
       ),
@@ -1186,7 +1213,7 @@ class _SettingsViewState extends State<_SettingsView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Privasi & Keamanan Data', style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(tr('Privasi & Keamanan Data', 'Privacy & Data Security'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
                     IconButton(icon: Icon(Icons.close, color: textColor), onPressed: () => Navigator.pop(ctx))
                   ],
                 ),
@@ -1197,15 +1224,13 @@ class _SettingsViewState extends State<_SettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Perlindungan Data Anda', style: TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold, fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', style: TextStyle(color: subTextColor, height: 1.5)),
+                        Text(tr('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTracker, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
                         
-                        _buildPrivacyPoint('1', 'Pengumpulan Data', 'SubTracker tidak mengumpulkan atau merekam data identitas pribadi Anda. Kami tidak mewajibkan proses pendaftaran (login), pengisian email, atau nomor telepon. Anda menggunakan aplikasi ini secara anonim.', textColor, subTextColor),
-                        _buildPrivacyPoint('2', 'Penyimpanan Lokal (On-Device)', 'Semua data yang Anda input termasuk nama langganan, nominal uang, dan kalender tagihan disimpan secara lokal dan dienkripsi di dalam memori internal (Storage) perangkat Anda. Kami tidak memiliki server awan (cloud) untuk mencadangkan data tersebut.', textColor, subTextColor),
-                        _buildPrivacyPoint('3', 'Izin Sistem (Permissions)', 'Aplikasi hanya meminta izin dasar seperti "Set Alarms" dan "Post Notifications". Izin ini semata-mata digunakan oleh sistem Android/iOS di HP Anda untuk membangunkan perangkat dan memunculkan notifikasi jadwal bayar, bukan untuk melacak Anda.', textColor, subTextColor),
-                        _buildPrivacyPoint('4', 'Pihak Ketiga & Analitik', 'Kami tidak menggunakan SDK pelacak pihak ketiga (seperti Facebook Pixel atau Analytics eksternal) yang berpotensi menjual kebiasaan pengeluaran langganan Anda kepada perusahaan iklan.', textColor, subTextColor),
+                        _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubTracker tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubTracker does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
+                        _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage'), tr('Semua data yang Anda input disimpan secara lokal dan dienkripsi di dalam memori internal HP Anda. Tidak ada Cloud.', 'All your inputted data is saved locally and encrypted in your phone. No Cloud storage.'), textColor, subTextColor),
                         
                         const SizedBox(height: 30),
                         Container(
@@ -1215,28 +1240,26 @@ class _SettingsViewState extends State<_SettingsView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Row(children: [Icon(Icons.warning_rounded, color: Colors.redAccent), SizedBox(width: 8), Text('Zona Bahaya', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16))]),
+                              Row(children: [const Icon(Icons.warning_rounded, color: Colors.redAccent), const SizedBox(width: 8), Text(tr('Zona Bahaya', 'Danger Zone'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16))]),
                               const SizedBox(height: 8),
-                              Text('Menghapus semua data akan menghilangkan seluruh catatan langganan Anda secara permanen. Aksi ini tidak dapat dibatalkan.', style: TextStyle(color: subTextColor, fontSize: 12)),
+                              Text(tr('Menghapus semua data akan menghilangkan seluruh catatan Anda secara permanen.', 'Deleting all data will permanently remove all your records.'), style: TextStyle(color: subTextColor, fontSize: 12)),
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, elevation: 0),
                                 onPressed: () async {
                                   Navigator.pop(ctx);
-                                  
                                   showDialog(
                                     context: context,
                                     builder: (confirmCtx) => AlertDialog(
                                       backgroundColor: sheetBg,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-                                      title: Text('Reboot Sistem?', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                                      content: Text('Semua data langganan, profil, dan pengaturan tema akan terhapus secara permanen. Lanjutkan?', style: TextStyle(color: subTextColor)),
+                                      title: Text(tr('Reboot Sistem?', 'System Reboot?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                                      content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?'), style: TextStyle(color: subTextColor)),
                                       actions: [
-                                        TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text('Batal', style: TextStyle(color: textColor.withOpacity(0.6)))),
+                                        TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: textColor.withOpacity(0.6)))),
                                         TextButton(
                                           onPressed: () async {
                                             Navigator.pop(confirmCtx);
-                                            
                                             final prefs = await SharedPreferences.getInstance();
                                             await prefs.clear();
                                             
@@ -1248,16 +1271,17 @@ class _SettingsViewState extends State<_SettingsView> {
                                             
                                             themeNotifier.value = 'Hitam';
                                             userNameNotifier.value = ''; 
+                                            // Jangan reset bahasa agar user tidak kaget
                                             
-                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sistem berhasil di-reboot. Semua data telah dikosongkan.', style: TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Sistem berhasil di-reboot. Semua data telah dikosongkan.', 'System rebooted. All data cleared.'), style: const TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
                                           }, 
-                                          child: const Text('Ya, Hapus Semua', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
+                                          child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
                                         ),
                                       ]
                                     )
                                   );
                                 },
-                                child: const Text('Hapus Seluruh Data Aplikasi', style: TextStyle(fontWeight: FontWeight.bold)),
+                                child: Text(tr('Hapus Seluruh Data Aplikasi', 'Delete All App Data'), style: const TextStyle(fontWeight: FontWeight.bold)),
                               )
                             ],
                           ),
@@ -1321,13 +1345,13 @@ class _SettingsViewState extends State<_SettingsView> {
           children: [
             FadeInSlide(
               delay: const Duration(milliseconds: 100),
-              child: Text('Pengaturan', style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+              child: Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 24),
             
             FadeInSlide(
               delay: const Duration(milliseconds: 150),
-              child: _buildSettingTile(Icons.person_rounded, 'Profil', 'Sesuaikan nama pengguna yang anda inginkan ', _showProfileDialog, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.fingerprint_rounded, tr('Kunci Aplikasi', 'App Lock'), tr('Gunakan PIN atau Sidik Jari', 'Use PIN or Fingerprint'), _showSecuritySnackbar, cardBg, textColor, subTextColor, widget.theme),
             ),
 
             FadeInSlide(
@@ -1347,36 +1371,41 @@ class _SettingsViewState extends State<_SettingsView> {
                   inactiveTrackColor: Colors.black26,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   secondary: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.notifications_active_rounded, color: Color(0xFFD4FF00), size: 24)),
-                  title: Text('Notifikasi Pengingat', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
-                  subtitle: Text('Alarm akan berbunyi saat tiba waktunya tagihan', style: TextStyle(color: subTextColor, fontSize: 12)),
+                  title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                  subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 12)),
                   value: _notifEnabled,
                   onChanged: (val) {
                     setState(() => _notifEnabled = val);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(val ? 'Notifikasi Diaktifkan' : 'Notifikasi Dimatikan')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(val ? tr('Notifikasi Diaktifkan', 'Notifications Enabled') : tr('Notifikasi Dimatikan', 'Notifications Disabled'))));
                   },
                 ),
               ),
             ),
 
             FadeInSlide(
+              delay: const Duration(milliseconds: 250),
+              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, widget.theme),
+            ),
+
+            FadeInSlide(
               delay: const Duration(milliseconds: 300),
-              child: _buildSettingTile(Icons.dark_mode_rounded, 'Tema Aplikasi', widget.theme, _showThemeSelector, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.dark_mode_rounded, tr('Tema Aplikasi', 'App Theme'), widget.theme, _showThemeSelector, cardBg, textColor, subTextColor, widget.theme),
             ),
 
             FadeInSlide(
               delay: const Duration(milliseconds: 400),
-              child: _buildSettingTile(Icons.security_rounded, 'Privasi & Data', 'Kelola hak akses dan penyimpanan lokal', _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme),
             ),
 
             FadeInSlide(
               delay: const Duration(milliseconds: 500),
               child: _buildSettingTile(
-                Icons.info_rounded, 'Tentang SubTracker', 'Versi 1.0.0',
+                Icons.info_rounded, tr('Tentang SubTracker', 'About SubTracker'), 'Version 1.0.0',
                 () => showAboutDialog(
                   context: context,
                   applicationName: 'SubTracker',
                   applicationVersion: '1.0.0',
-                  applicationLegalese: 'Dikembangkan oleh YANZ.\n© 2026 Hak Cipta Dilindungi.',
+                  applicationLegalese: 'Developed carefully.\n© 2026 Copyright.',
                   applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFFD4FF00), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.black)),
                 ),
                 cardBg, textColor, subTextColor, widget.theme
@@ -1409,9 +1438,6 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 }
 
-// =========================================================
-// WIDGET ANIMASI
-// =========================================================
 class FadeInSlide extends StatefulWidget {
   final Widget child;
   final Duration delay;

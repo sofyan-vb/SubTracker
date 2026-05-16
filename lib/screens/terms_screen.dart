@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:math';
-import 'dart:io';
 import 'splash_screen.dart'; 
+import 'dashboard_screen.dart'; // import tr() untuk terjemahan
 
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});
@@ -19,75 +19,51 @@ class _TermsScreenState extends State<TermsScreen> {
   Future<void> _acceptTerms(BuildContext context) async {
     setState(() => _isLoading = true);
 
-    bool hasInternet = false;
-
-    try {
-      final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 5));
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        hasInternet = true; 
-      }
-    } catch (_) {
-      hasInternet = false; 
-    }
-
-    if (!context.mounted) return;
-
-    if (hasInternet) {
-      await Future.delayed(const Duration(milliseconds: 600)); // Jeda agar animasi loading terlihat
-      
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('hasAcceptedTerms', true); 
-      
-      if (context.mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const SplashScreen()),
-        );
-      }
-    } else {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.wifi_off_rounded, color: Colors.white),
-              SizedBox(width: 12),
-              Expanded(child: Text('Gagal tersambung! Pastikan internet aktif.', style: TextStyle(fontWeight: FontWeight.bold))),
-            ],
-          ),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-          margin: const EdgeInsets.all(20),
-        ),
+    await Future.delayed(const Duration(milliseconds: 200)); 
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('hasAcceptedTerms', true); 
+    
+    if (context.mounted) {
+      Navigator.of(context).push( // Menggunakan push agar layar setelahnya bisa di-back
+        MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: true)),
       );
+      setState(() => _isLoading = false); // kembalikan status loading jika di-back
     }
   }
 
   void _declineTerms() {
-    SystemNavigator.pop(); 
+    Navigator.pop(context); 
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF09090B),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF09090B),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context), // Kembali ke Pilihan Bahasa
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(28.0),
+                padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 8.0),
                 physics: const BouncingScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Selamat Datang di', style: TextStyle(fontSize: 18, color: Colors.white54)),
+                    Text(tr('Selamat Datang di', 'Welcome to'), style: const TextStyle(fontSize: 18, color: Colors.white54)),
                     const Text('SubTracker', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -1.0)),
                     const SizedBox(height: 24),
 
-                    const Text('Syarat & Ketentuan Penggunaan', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                    Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
                     const SizedBox(height: 12),
-                    
                     
                     Container(
                       height: 400, 
@@ -102,36 +78,59 @@ class _TermsScreenState extends State<TermsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
-                              'Dengan menggunakan aplikasi SubTracker, Anda secara otomatis menyetujui seluruh ketentuan berikut:',
-                              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+                            Text(
+                              tr('Dengan menggunakan aplikasi SubTracker, Anda secara otomatis menyetujui seluruh ketentuan berikut:', 'By using the SubTracker application, you automatically agree to all of the following terms:'),
+                              style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
                             ),
                             const SizedBox(height: 20),
 
-                            
-                            _buildTermItem('1', 'PENYIMPANAN DATA LOKAL', 'Semua data yang Anda masukkan ke dalam aplikasi ini (termasuk nama langganan, harga, tenggat waktu, dan pengaturan lainnya) disimpan secara eksklusif di dalam memori internal perangkat Anda. Kami tidak memiliki akses ke data tersebut, tidak mencadangkannya di cloud, dan tidak membagikannya ke pihak ketiga manapun.'),
-                            _buildTermItem('2', 'IZIN SISTEM PERANGKAT', 'Untuk memastikan fitur pengingat berjalan dengan sempurna, aplikasi ini mewajibkan pengguna untuk memberikan izin akses Notifikasi dan Alarm Tepat Waktu (Exact Alarms). Anda bertanggung jawab untuk memastikan bahwa pengaturan penghemat baterai (Battery Saver) di perangkat Anda tidak memblokir aplikasi ini berjalan di latar belakang.'),
-                            _buildTermItem('3', 'PEMBATASAN TANGGUNG JAWAB', 'SubTracker dirancang sebagai alat bantu produktivitas semata. Segala bentuk kerugian finansial, denda keterlambatan pembayaran langganan, atau pemutusan layanan yang disebabkan oleh kelalaian pengguna, kegagalan perangkat dalam memunculkan notifikasi, atau bug sistem, berada sepenuhnya di luar tanggung jawab pengembang.'),
-                            _buildTermItem('4', 'PENGHAPUSAN APLIKASI', 'Karena data disimpan secara lokal, menghapus (uninstall) aplikasi dari perangkat Anda akan mengakibatkan hilangnya seluruh data catatan langganan secara permanen tanpa kemungkinan pemulihan.'),
-                            _buildTermItem('5', 'PEMBARUAN KETENTUAN', 'Pengembang berhak untuk mengubah, memodifikasi, atau memperbarui Syarat & Ketentuan ini kapan saja tanpa pemberitahuan sebelumnya, demi menyesuaikan dengan kebijakan keamanan atau penambahan fitur baru.'),
+                            _buildTermItem(
+                              '1', 
+                              tr('PENYIMPANAN DATA LOKAL', 'LOCAL DATA STORAGE'), 
+                              tr('Semua data yang Anda masukkan ke dalam aplikasi ini (termasuk nama langganan, harga, tenggat waktu, dan pengaturan lainnya) disimpan secara eksklusif di dalam memori internal perangkat Anda. Kami tidak memiliki akses ke data tersebut, tidak mencadangkannya di cloud, dan tidak membagikannya ke pihak ketiga manapun.', 
+                                 'All data you enter into this app (including subscription names, prices, deadlines, and other settings) is stored exclusively in your device\'s internal memory. We do not have access to this data, do not back it up to the cloud, and do not share it with any third parties.')
+                            ),
+                            _buildTermItem(
+                              '2', 
+                              tr('IZIN SISTEM PERANGKAT', 'DEVICE SYSTEM PERMISSIONS'), 
+                              tr('Untuk memastikan fitur pengingat berjalan dengan sempurna, aplikasi ini mewajibkan pengguna untuk memberikan izin akses Notifikasi dan Alarm Tepat Waktu (Exact Alarms). Anda bertanggung jawab untuk memastikan bahwa pengaturan penghemat baterai (Battery Saver) di perangkat Anda tidak memblokir aplikasi ini berjalan di latar belakang.', 
+                                 'To ensure the reminder feature runs perfectly, this app requires users to grant access to Notifications and Exact Alarms. You are responsible for ensuring that the Battery Saver settings on your device do not block this app from running in the background.')
+                            ),
+                            _buildTermItem(
+                              '3', 
+                              tr('PEMBATASAN TANGGUNG JAWAB', 'LIMITATION OF LIABILITY'), 
+                              tr('SubTracker dirancang sebagai alat bantu produktivitas semata. Segala bentuk kerugian finansial, denda keterlambatan pembayaran langganan, atau pemutusan layanan yang disebabkan oleh kelalaian pengguna, kegagalan perangkat dalam memunculkan notifikasi, atau bug sistem, berada sepenuhnya di luar tanggung jawab pengembang.', 
+                                 'SubTracker is designed solely as a productivity tool. Any form of financial loss, subscription late payment fines, or service termination caused by user negligence, device failure to show notifications, or system bugs, are entirely beyond the developer\'s responsibility.')
+                            ),
+                            _buildTermItem(
+                              '4', 
+                              tr('PENGHAPUSAN APLIKASI', 'APP UNINSTALLATION'), 
+                              tr('Karena data disimpan secara lokal, menghapus (uninstall) aplikasi dari perangkat Anda akan mengakibatkan hilangnya seluruh data catatan langganan secara permanen tanpa kemungkinan pemulihan.', 
+                                 'Because data is stored locally, uninstalling the app from your device will result in the permanent loss of all subscription record data without the possibility of recovery.')
+                            ),
+                            _buildTermItem(
+                              '5', 
+                              tr('PEMBARUAN KETENTUAN', 'TERMS UPDATE'), 
+                              tr('Pengembang berhak untuk mengubah, memodifikasi, atau memperbarui Syarat & Ketentuan ini kapan saja tanpa pemberitahuan sebelumnya, demi menyesuaikan dengan kebijakan keamanan atau penambahan fitur baru.', 
+                                 'The developer reserves the right to change, modify, or update these Terms & Conditions at any time without prior notice, to adapt to security policies or the addition of new features.')
+                            ),
                             
                             const SizedBox(height: 16),
                             const Divider(color: Colors.white12, thickness: 1),
                             const SizedBox(height: 16),
-
-                          
-                            const Text('Aplikasi ini dirancang dan dikembangkan secara independen.', style: TextStyle(color: Colors.white54, fontSize: 12, height: 1.5)),
+                            
+                            Text(tr('Aplikasi ini dirancang dan dikembangkan secara independen.', 'This application is designed and developed independently.'), style: const TextStyle(color: Colors.white54, fontSize: 12, height: 1.5)),
                             const SizedBox(height: 4),
-                            const Text('Dibuat oleh: Sofyan Ibnu', style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                            Text(tr('Dibuat oleh: Sofyan Ibnu', 'Created by: Sofyan Ibnu'), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 2),
-                            const Text('Tahun Rilis: 2026', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                            Text(tr('Tahun Rilis: 2026', 'Release Year: 2026'), style: const TextStyle(color: Colors.white54, fontSize: 12)),
                             const SizedBox(height: 16),
                             const Divider(color: Colors.white12, thickness: 1),
                             const SizedBox(height: 16),
                             
-                            const Text(
-                              'Harap klik "Terima & Lanjut" di bawah jika Anda memahami dan menyetujui seluruh kebijakan di atas.',
-                              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5, fontStyle: FontStyle.italic),
+                            Text(
+                              tr('Harap klik "Terima & Lanjut" di bawah jika Anda memahami dan menyetujui seluruh kebijakan di atas.', 'Please click "Accept & Next" below if you understand and agree to all the policies above.'),
+                              style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5, fontStyle: FontStyle.italic),
                             ),
                           ],
                         ),
@@ -142,7 +141,6 @@ class _TermsScreenState extends State<TermsScreen> {
               ),
             ),
             
-          
             Container(
               padding: const EdgeInsets.all(24.0),
               decoration: const BoxDecoration(color: Color(0xFF09090B), border: Border(top: BorderSide(color: Colors.white10))),
@@ -157,7 +155,7 @@ class _TermsScreenState extends State<TermsScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: _isLoading ? null : _declineTerms,
-                      child: const Text('Tolak', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold)),
+                      child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.white54, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -165,13 +163,11 @@ class _TermsScreenState extends State<TermsScreen> {
                     flex: 2,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD4FF00),
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        backgroundColor: const Color(0xFFD4FF00), padding: const EdgeInsets.symmetric(vertical: 18),
+                        elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: _isLoading ? null : () => _acceptTerms(context),
-                      child: _isLoading ? const WaveDotLoading() : const Text('TERIMA & LANJUT', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      child: _isLoading ? const WaveDotLoading() : Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                     ),
                   ),
                 ],
@@ -183,38 +179,21 @@ class _TermsScreenState extends State<TermsScreen> {
     );
   }
 
-
   Widget _buildTermItem(String number, String title, String description) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0), 
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-        
-          Text(
-            '$number.',
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-          ),
-          
+          Text('$number.', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(width: 12),
-          
-         
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-         
-                Text(
-                  title,
-                  style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                ),
+                Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                 const SizedBox(height: 6),
-                
-                
-                Text(
-                  description,
-                  style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
-                ),
+                Text(description, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5)),
               ],
             ),
           ),
@@ -224,7 +203,6 @@ class _TermsScreenState extends State<TermsScreen> {
   }
 }
 
-
 class WaveDotLoading extends StatefulWidget {
   const WaveDotLoading({super.key});
   @override
@@ -233,19 +211,16 @@ class WaveDotLoading extends StatefulWidget {
 
 class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))..repeat();
   }
-  
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
-  
   Widget _buildDot(int index) {
     return AnimatedBuilder(
       animation: _controller,
@@ -264,12 +239,8 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
       },
     );
   }
-  
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center, 
-      children: [_buildDot(0), _buildDot(1), _buildDot(2)]
-    );
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [_buildDot(0), _buildDot(1), _buildDot(2)]);
   }
 }

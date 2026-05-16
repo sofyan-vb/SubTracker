@@ -1,15 +1,21 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart'; 
+import 'dart:async';
 import 'providers/subscription_provider.dart';
 import 'services/notification_service.dart';
 import 'screens/splash_screen.dart'; 
 import 'screens/terms_screen.dart'; 
+import 'screens/dashboard_screen.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.init();
+
+  final prefs = await SharedPreferences.getInstance();
+  languageNotifier.value = prefs.getString('app_lang') ?? 'EN';
 
   runApp(
     MultiProvider(
@@ -41,227 +47,213 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 class GateKeeper extends StatefulWidget {
   const GateKeeper({super.key});
   @override
   State<GateKeeper> createState() => _GateKeeperState();
 }
 
-class _GateKeeperState extends State<GateKeeper> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  
-  late Animation<double> _fadeY, _fadeA, _fadeN, _fadeZ;
-  late Animation<Offset> _slideY, _slideA, _slideN, _slideZ;
-  late Animation<double> _scaleY, _scaleA, _scaleN, _scaleZ;
-  
-  late Animation<double> _fadeStudio;
-  late Animation<Offset> _slideStudio;
-  late Animation<double> _scaleStudio;
-
-  late Animation<double> _fadeBackground;
+class _GateKeeperState extends State<GateKeeper> {
+  bool _showLanguageSelect = false;
 
   @override
   void initState() {
     super.initState();
-    
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 6000), 
-    );
-
-    _fadeY = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.25, curve: Curves.easeIn)));
-    _slideY = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.25, curve: Curves.easeOutCubic)));
-    _scaleY = Tween<double>(begin: 1.5, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.25, curve: Curves.easeOutCubic)));
-
-    _fadeA = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.2, 0.45, curve: Curves.easeIn)));
-    _slideA = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.2, 0.45, curve: Curves.easeOutCubic)));
-    _scaleA = Tween<double>(begin: 1.5, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.2, 0.45, curve: Curves.easeOutCubic)));
-
-    _fadeN = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.4, 0.65, curve: Curves.easeIn)));
-    _slideN = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.4, 0.65, curve: Curves.easeOutCubic)));
-    _scaleN = Tween<double>(begin: 1.5, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.4, 0.65, curve: Curves.easeOutCubic)));
-
-    _fadeZ = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.6, 0.85, curve: Curves.easeIn)));
-    _slideZ = Tween<Offset>(begin: const Offset(0, 0.5), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.6, 0.85, curve: Curves.easeOutCubic)));
-    _scaleZ = Tween<double>(begin: 1.5, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.6, 0.85, curve: Curves.easeOutCubic)));
-
-    _fadeStudio = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.8, 1.0, curve: Curves.easeInOut)));
-    _slideStudio = Tween<Offset>(begin: const Offset(0, 1.5), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.8, 1.0, curve: Curves.easeOutCubic)));
-    _scaleStudio = Tween<double>(begin: 0.5, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.8, 1.0, curve: Curves.easeOutBack)));
-
-    _fadeBackground = Tween<double>(begin: 0.0, end: 0.08).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.1, 0.8, curve: Curves.easeInOut)),
-    );
-
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-    
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (mounted) {
-          _controller.forward();
-          _playSyncSounds(); 
-          _checkRoute(); 
-        }
-      });
-    });
-  }
-
-  void _playSyncSounds() async {
-    SystemSound.play(SystemSoundType.click); 
-    await Future.delayed(const Duration(milliseconds: 1200));
-    SystemSound.play(SystemSoundType.click); 
-    await Future.delayed(const Duration(milliseconds: 1200));
-    SystemSound.play(SystemSoundType.click); 
-    await Future.delayed(const Duration(milliseconds: 1200));
-    SystemSound.play(SystemSoundType.click); 
-    await Future.delayed(const Duration(milliseconds: 1200));
-    SystemSound.play(SystemSoundType.click); 
-    await Future.delayed(const Duration(milliseconds: 150)); 
-    SystemSound.play(SystemSoundType.click); 
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    _checkRoute();
   }
 
   Future<void> _checkRoute() async {
-    await Future.delayed(const Duration(milliseconds: 8500));
     final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('user_name');
     final hasAccepted = prefs.getBool('hasAcceptedTerms') ?? false;
-    if (mounted) {
-      if (hasAccepted) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const SplashScreen())); 
-      } else {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const TermsScreen()));
+
+    if (name != null && name.trim().isNotEmpty) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: false)),
+        );
+      }
+    } else {
+      await Future.delayed(const Duration(milliseconds: 4500));
+      if (mounted) {
+        if (hasAccepted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: true)),
+          ); 
+        } else {
+          setState(() {
+            _showLanguageSelect = true;
+          });
+        }
       }
     }
   }
 
-  Widget _buildLetter(String letter, Animation<double> fade, Animation<Offset> slide, Animation<double> scale, bool isLast) {
-    return FadeTransition(
-      opacity: fade,
-      child: SlideTransition(
-        position: slide,
-        child: ScaleTransition(
-          scale: scale,
-          child: Padding(
-            padding: EdgeInsets.only(right: isLast ? 0 : 18.0),
-            child: Text(
-              letter,
-              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
-      body: Stack(
-        children: [
-        
-          Center(
-            child: FadeTransition(
-              opacity: _fadeBackground,
-              child: SizedBox(
-                
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown, 
-                  child: Text(
-                    'YANZ',
-                    style: TextStyle(
-                      fontSize: 160, 
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 8, 
-                      height: 1.0, 
-                      foreground: Paint()
-                        ..style = PaintingStyle.stroke
-                        ..strokeWidth = 3 
-                        ..color = Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-          
-          Center(
+    if (_showLanguageSelect) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF09090B),
+        // TIDAK ADA APPBAR & TOMBOL KEMBALI DI SINI
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildLetter('Y', _fadeY, _slideY, _scaleY, false),
-                    _buildLetter('A', _fadeA, _slideA, _scaleA, false),
-                    _buildLetter('N', _fadeN, _slideN, _scaleN, false),
-                    _buildLetter('Z', _fadeZ, _slideZ, _scaleZ, true),
-                  ],
-                ),
-                const SizedBox(height: 12), 
-                FadeTransition(
-                  opacity: _fadeStudio,
-                  child: SlideTransition(
-                    position: _slideStudio,
-                    child: ScaleTransition(
-                      scale: _scaleStudio,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD4FF00).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFD4FF00).withOpacity(0.3)),
-                        ),
-                        child: const Text(
-                          'STUDIO',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFD4FF00), letterSpacing: 6.0),
-                        ),
-                      ),
+                const Icon(Icons.language_rounded, size: 80, color: Color(0xFFD4FF00)),
+                const SizedBox(height: 24),
+                const Text('Choose Language', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white)),
+                const Text('Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white54)),
+                const SizedBox(height: 40),
+                
+                SizedBox(
+                  width: double.infinity,
+                  height: 65,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1A1A1C),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      side: const BorderSide(color: Color(0xFFD4FF00), width: 1.5),
+                      elevation: 0,
                     ),
+                    onPressed: () async {
+                      languageNotifier.value = 'EN';
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('app_lang', 'EN');
+                      if (mounted) {
+                        Navigator.of(context).push( // Menggunakan push biasa agar di TermsScreen bisa kembali
+                          MaterialPageRoute(builder: (context) => const TermsScreen()),
+                        );
+                      }
+                    },
+                    child: const Text('🇬🇧   English', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 65,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1A1A1C),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      side: const BorderSide(color: Color(0xFFD4FF00), width: 1.5),
+                      elevation: 0,
+                    ),
+                    onPressed: () async {
+                      languageNotifier.value = 'ID';
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('app_lang', 'ID');
+                      if (mounted) {
+                        Navigator.of(context).push( // Menggunakan push biasa
+                          MaterialPageRoute(builder: (context) => const TermsScreen()),
+                        );
+                      }
+                    },
+                    child: const Text('🇮🇩   Bahasa Indonesia', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
                   ),
                 ),
               ],
             ),
           ),
+        ),
+      );
+    }
 
-          
-          Positioned(
-            bottom: 40,
-            left: 0,
-            right: 0,
-            child: FadeTransition(
-              opacity: _fadeStudio, 
-              child: Column(
-                children: [
-                  Container(
-                    width: 30,
-                    height: 2,
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'SYSTEM BOOT • V 1.0.0',
-                    style: TextStyle(
-                      fontSize: 10, 
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.white38, 
-                      letterSpacing: 4.0
-                    ),
-                  ),
-                ],
-              ),
+    return const Scaffold(
+      backgroundColor: Color(0xFF09090B),
+      body: Center(
+        child: HandwritingWelcomeText(), 
+      ),
+    );
+  }
+}
+
+class HandwritingWelcomeText extends StatefulWidget {
+  const HandwritingWelcomeText({super.key});
+  @override
+  State<HandwritingWelcomeText> createState() => _HandwritingWelcomeTextState();
+}
+
+class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> {
+  String _currentText = "";
+  final String _fullText = "Welcome to\nSubTracker"; 
+  int _charIndex = 0;
+  Timer? _timer;
+  bool _showCursor = true;
+  Timer? _cursorTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startAnimation();
+    _cursorTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) setState(() => _showCursor = !_showCursor);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _cursorTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAnimation() {
+    _timer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
+      if (_charIndex < _fullText.length) {
+        if (mounted) {
+          setState(() {
+            _currentText += _fullText[_charIndex];
+            _charIndex++;
+          });
+        }
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String cursivePart = "";
+    String boldPart = "";
+
+    if (_currentText.length <= 11) { 
+      cursivePart = _currentText;
+    } else {
+      cursivePart = "Welcome to\n";
+      boldPart = _currentText.substring(11); 
+    }
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: cursivePart,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 32, 
+              fontStyle: FontStyle.italic,
+              fontFamily: 'cursive', 
+              height: 1.2,
             ),
+          ),
+          TextSpan(
+            text: boldPart,
+            style: const TextStyle(
+              color: Color(0xFFD4FF00), 
+              fontSize: 42,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.5,
+              height: 1.5, 
+            ),
+          ),
+          TextSpan(
+            text: _showCursor ? "|" : " ",
+            style: const TextStyle(color: Colors.white70, fontSize: 32, fontWeight: FontWeight.w200),
           ),
         ],
       ),
