@@ -1,6 +1,6 @@
 // lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
-import 'dart:math';
+import 'dart:math'; // Wajib ada agar sin dan pi tidak error merah!
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_screen.dart';
 
@@ -178,9 +178,6 @@ class _SplashScreenState extends State<SplashScreen> {
                                 ),
                               ] 
                               else ...[
-                                // ==========================================
-                                // TAMPILAN SLIDE GAMBAR MEMAKAI onboarding.jpg
-                                // ==========================================
                                 SizedBox(
                                   height: screenHeight * 0.58, 
                                   child: PageView(
@@ -192,26 +189,26 @@ class _SplashScreenState extends State<SplashScreen> {
                                       });
                                     },
                                     children: [
-                                      // Slide 1 - Memotong Otomatis Bagian Kiri (Pria)
+                                      // Slide 1 - PERBAIKAN: Fokus geser 0.15 (Lebih pas, tidak terlalu ke kiri)
                                       _buildOnboardingSlide(
-                                        imagePath: 'assets/onboarding.jpg', // KUNCI UTAMA DI SINI
-                                        alignment: Alignment.centerLeft,    // Memotong ke kiri
+                                        imagePath: tr('assets/gambar1_id.png', 'assets/gambar1_en.png'), 
                                         title: tr('Catat Semua Layanan', 'Record All Services'),
-                                        desc: tr('Kumpulkan semua tagihan di satu tempat agar lebih rapi.', 'Keep all your subscriptions in one neat place.')
+                                        desc: tr('Kumpulkan semua tagihan di satu tempat agar lebih rapi.', 'Keep all your subscriptions in one neat place.'),
+                                        alignment: const Alignment(0.15, -1.0), // <-- CUMA GESER SEDIKIT (0.15)
                                       ),
-                                      // Slide 2 - Memotong Otomatis Bagian Tengah (Wanita)
+                                      // Slide 2 - Fokus ke Tengah & Mentok Atas (-1.0)
                                       _buildOnboardingSlide(
-                                        imagePath: 'assets/onboarding.jpg', // KUNCI UTAMA DI SINI
-                                        alignment: Alignment.center,        // Memotong ke tengah
+                                        imagePath: tr('assets/gambar2_id.png', 'assets/gambar2_en.png'), 
                                         title: tr('Pengingat Otomatis', 'Automatic Reminders'),
-                                        desc: tr('Tidak ada lagi denda telat bayar karena lupa waktu.', 'No more late payment fines because you forgot the date.')
+                                        desc: tr('Tidak ada lagi denda telat bayar karena lupa waktu.', 'No more late payment fines because you forgot the date.'),
+                                        alignment: const Alignment(0.0, -1.0),
                                       ),
-                                      // Slide 3 - Memotong Otomatis Bagian Kanan (Pasangan)
+                                      // Slide 3 - Fokus ke Tengah & Mentok Atas (-1.0)
                                       _buildOnboardingSlide(
-                                        imagePath: 'assets/onboarding.jpg', // KUNCI UTAMA DI SINI
-                                        alignment: Alignment.centerRight,   // Memotong ke kanan
+                                        imagePath: tr('assets/gambar3_id.png', 'assets/gambar3_en.png'), 
                                         title: tr('Pantau Pengeluaran', 'Track Expenses'),
-                                        desc: tr('Analisis cerdas kemana uangmu habis setiap bulannya.', 'Smart analysis of where your money goes every month.')
+                                        desc: tr('Analisis cerdas kemana uangmu habis setiap bulannya.', 'Smart analysis of where your money goes every month.'),
+                                        alignment: const Alignment(0.0, -1.0),
                                       ),
                                     ],
                                   ),
@@ -379,8 +376,12 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  // WIDGET FOTO DIKEMBALIKAN KE MODE POTONG ALIGNMENT
-  Widget _buildOnboardingSlide({required String imagePath, required Alignment alignment, required String title, required String desc}) {
+  Widget _buildOnboardingSlide({
+    required String imagePath, 
+    required String title, 
+    required String desc,
+    Alignment alignment = const Alignment(0.0, -1.0), // Default ke Tengah-Atas
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
@@ -392,8 +393,8 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Image.asset(
                 imagePath,
                 width: double.infinity,
-                fit: BoxFit.cover,
-                alignment: alignment, // FOKUS PEMOTONGAN OTOMATIS: Kiri, Tengah, Kanan
+                fit: BoxFit.cover, 
+                alignment: alignment, // Menerapkan fokus kustom (X, Y)
               ),
             ),
           ),
