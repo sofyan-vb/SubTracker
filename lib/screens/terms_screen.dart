@@ -60,7 +60,6 @@ class _TermsScreenState extends State<TermsScreen> {
               Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               const SizedBox(height: 12),
               
-              // PERBAIKAN: Menggunakan Expanded agar box text pas dengan sisa layar (Anti-Scroll luar)
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(20), 

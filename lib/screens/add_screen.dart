@@ -1,4 +1,3 @@
-// lib/screens/add_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -136,7 +135,7 @@ class _AddScreenState extends State<AddScreen> {
                         final prefs = await SharedPreferences.getInstance();
                         final savedName = prefs.getString('user_name') ?? ''; 
 
-                        // Penyesuaian Bahasa Notifikasi yang dikirimkan ke sistem Android/iOS
+                        
                         final notifTitle = savedName.isEmpty 
                             ? tr('Pengingat: Tagihan ${newSub.name} 💸', 'Reminder: ${newSub.name} Bill 💸')
                             : tr('Halo $savedName! Pengingat: Tagihan ${newSub.name} 💸', 'Hi $savedName! Reminder: ${newSub.name} Bill 💸');

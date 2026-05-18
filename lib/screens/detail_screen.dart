@@ -1,4 +1,3 @@
-// lib/screens/detail_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

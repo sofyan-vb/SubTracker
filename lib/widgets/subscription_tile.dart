@@ -1,4 +1,3 @@
-// lib/widgets/subscription_tile.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
