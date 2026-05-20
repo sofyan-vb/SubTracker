@@ -1,10 +1,12 @@
 // lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:math'; 
+import 'dart:async'; 
+import 'dart:ui'; // Diperlukan untuk ImageFilter (efek kaca/blur asli)
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_screen.dart';
 
-enum SplashState { onboarding, form, loading, returningWelcome } 
+enum SplashState { welcomeNew, welcomeReturning, onboarding, form, loading } 
 
 class SplashScreen extends StatefulWidget {
   final bool isNewUser;
@@ -16,52 +18,50 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   late SplashState _state;
-  PageController? _pageController;
+  late PageController _pageController;
   int _onboardingPageIndex = 0;
 
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _budgetCtrl = TextEditingController();
   String _selectedGoal = '';
   
-  String _savedName = ''; // Untuk menyimpan nama pengguna lama
+  String _savedName = ''; 
 
   @override
   void initState() {
     super.initState();
-    // LOGIKA CERDAS: Pisahkan rute pengguna baru dan pengguna lama
+    _pageController = PageController(initialPage: 0);
+    
+    // PEMISAHAN LOGIKA: Baru vs Sudah Pernah Install
     if (widget.isNewUser) {
-      _state = SplashState.onboarding; 
-      _pageController = PageController(initialPage: 0);
+      _state = SplashState.onboarding; // Langsung masuk ke onboarding slide untuk pengguna baru
+      _onboardingPageIndex = 0;
     } else {
-      _state = SplashState.returningWelcome;
+      _state = SplashState.welcomeReturning;
       _loadReturningUser();
     }
   }
 
-  // Fungsi khusus untuk menangani pengguna lama
   Future<void> _loadReturningUser() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _savedName = prefs.getString('user_name') ?? '';
+      _savedName = prefs.getString('user_name') ?? 'SubTracker';
     });
-    
-    // Tampilkan layar transisi "Welcome Back" selama 2.5 detik
-    await Future.delayed(const Duration(milliseconds: 2500));
-    
-    if (mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        (route) => false,
-      );
-    }
   }
 
   @override
   void dispose() {
-    _pageController?.dispose();
+    _pageController.dispose();
     _nameCtrl.dispose();
     _budgetCtrl.dispose();
     super.dispose();
+  }
+
+  void _goToDashboard() {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const DashboardScreen()),
+      (route) => false,
+    );
   }
 
   Future<void> _processEntry() async {
@@ -89,28 +89,18 @@ class _SplashScreenState extends State<SplashScreen> {
     setState(() => _state = SplashState.loading); 
 
     await Future.delayed(const Duration(milliseconds: 300)); 
-    
-    if (mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-        (route) => false,
-      );
-    }
+    _goToDashboard();
   }
 
   String _getButtonText() {
-    if (_state == SplashState.form) {
-      return tr('SIMPAN & MASUK', 'SAVE & ENTER');
-    }
-    if (_onboardingPageIndex < 2) {
-      return tr('LANJUT', 'NEXT');
-    }
-    return widget.isNewUser ? tr('LANJUT', 'NEXT') : tr('MASUK', 'ENTER');
+    if (_state == SplashState.form) return tr('SIMPAN & MASUK', 'SAVE & ENTER');
+    if (_onboardingPageIndex < 2) return tr('LANJUT', 'NEXT');
+    return tr('MASUK', 'ENTER');
   }
 
   @override
   Widget build(BuildContext context) {
-    bool showTopExitButton = widget.isNewUser || _state == SplashState.form;
+    bool showTopExitButton = _state == SplashState.form;
 
     return Scaffold(
       backgroundColor: const Color(0xFF09090B),
@@ -118,61 +108,45 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Stack(
         children: [
           // ==========================================
-          // 1. LAYAR TRANSISI KHUSUS PENGGUNA LAMA
+          // 1. LAYAR PENGGUNA LAMA (SUDAH PERNAH INSTALL)
           // ==========================================
-          if (_state == SplashState.returningWelcome)
+          if (_state == SplashState.welcomeReturning)
             Positioned.fill(
-              child: Container(
-                color: const Color(0xFF09090B),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 1000),
-                        curve: Curves.elasticOut,
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: value,
-                            child: Container(
-                              width: 100, height: 100,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD4FF00), 
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.3), blurRadius: 30, offset: const Offset(0, 10))],
-                              ),
-                              child: const Center(child: Text('S', style: TextStyle(fontSize: 55, fontWeight: FontWeight.w900, color: Colors.black, height: 1.1))),
-                            ),
-                          );
-                        }
-                      ),
-                      const SizedBox(height: 40),
-                      Text(tr('Selamat Datang Kembali!', 'Welcome Back!'), style: const TextStyle(color: Colors.white54, fontSize: 16)),
-                      const SizedBox(height: 8),
-                      Text(_savedName.isEmpty ? 'SubTracker' : _savedName, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
-                      const SizedBox(height: 40),
-                      const WaveDotLoading(), 
-                    ],
-                  ),
-                ),
+              child: WelcomeReturningView(
+                userName: _savedName,
+                onEnter: _goToDashboard,
               ),
             ),
 
           // ==========================================
-          // 2. BACKGROUND ALBUM UNTUK FORM (PENGGUNA BARU)
+          // 2. LAYAR WELCOME (PENGGUNA BARU) - TANPA ROKET
+          // ==========================================
+          if (_state == SplashState.welcomeNew)
+            Positioned.fill(
+              child: WelcomeNewView(
+                onNext: () {
+                  setState(() {
+                    _state = SplashState.onboarding;
+                    _onboardingPageIndex = 0;
+                  });
+                },
+              ),
+            ),
+
+          // ==========================================
+          // 3. BACKGROUND ALBUM FORM (GAMBAR TANGAN PEGANG HP PALING DEPAN)
           // ==========================================
           if (_state == SplashState.form)
-            Positioned.fill(
-              child: const StaggeredAlbumBackground(
-                img1: 'assets/welcome1.jpg',
-                img2: 'assets/welcome2.jpg', 
-                img3: 'assets/welcome3.jpg',
+            const Positioned.fill(
+              child: StaggeredAlbumBackground(
+                img1: 'assets/welcome1.jpg', // Gambar orang
+                img2: 'assets/welcome3.jpg', // Gambar Tangan Pegang HP (Paling Depan)
+                img3: 'assets/welcome2.jpg', // Gambar cewe cowo
               ),
             ),
 
           // ==========================================
-          // 3. LAYER KONTEN UTAMA (ONBOARDING & FORM PENGGUNA BARU)
+          // 4. LAYER KONTEN UTAMA (ONBOARDING & FORM)
           // ==========================================
           if (_state == SplashState.onboarding || _state == SplashState.form)
             SafeArea(
@@ -201,12 +175,8 @@ class _SplashScreenState extends State<SplashScreen> {
                                               _onboardingPageIndex = 2; 
                                             });
                                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                                              if (_pageController != null && _pageController!.hasClients) {
-                                                _pageController!.jumpToPage(2);
-                                              }
+                                              if (_pageController.hasClients) _pageController.jumpToPage(2);
                                             });
-                                          } else {
-                                            Navigator.pop(context); 
                                           }
                                         },
                                       )
@@ -283,7 +253,7 @@ class _SplashScreenState extends State<SplashScreen> {
                               ] 
                               
                               // --- TAMPILAN SLIDE GAMBAR LAYANAN (ONBOARDING) ---
-                              else ...[
+                              else if (_state == SplashState.onboarding) ...[
                                 SizedBox(
                                   height: screenHeight * 0.58, 
                                   child: PageView(
@@ -301,7 +271,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                         desc: tr('Kumpulkan semua tagihan di satu tempat agar lebih rapi.', 'Keep all your subscriptions in one neat place.'),
                                         alignment: const Alignment(0.15, -1.0),
                                       ),
-                                      _buildOnboardingSlide(  
+                                      _buildOnboardingSlide(
                                         imagePath: tr('assets/gambar2_id.png', 'assets/gambar2_en.png'), 
                                         title: tr('Pengingat Otomatis', 'Automatic Reminders'),
                                         desc: tr('Tidak ada lagi denda telat bayar karena lupa waktu.', 'No more late payment fines because you forgot the date.'),
@@ -343,7 +313,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                         Expanded(
                                           flex: 3, 
                                           child: SizedBox(
-                                          height: 60,
+                                            height: 60,
                                             child: OutlinedButton(
                                               style: OutlinedButton.styleFrom(
                                                 padding: const EdgeInsets.symmetric(horizontal: 4), 
@@ -351,7 +321,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                               ),
                                               onPressed: () {
-                                                _pageController?.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+                                                _pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
                                               },
                                               child: FittedBox(
                                                 fit: BoxFit.scaleDown,
@@ -373,13 +343,9 @@ class _SplashScreenState extends State<SplashScreen> {
                                               ),
                                               onPressed: () {
                                                 if (_onboardingPageIndex < 2) {
-                                                  _pageController?.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+                                                  _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
                                                 } else {
-                                                  if (widget.isNewUser) {
-                                                    setState(() => _state = SplashState.form); 
-                                                  } else {
-                                                    _processEntry(); 
-                                                  }
+                                                  setState(() => _state = SplashState.form); 
                                                 }
                                               }, 
                                               child: FittedBox(
@@ -402,7 +368,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                       ),
                                       onPressed: () {
                                         if (_state == SplashState.onboarding) {
-                                          _pageController?.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+                                          _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
                                         } else if (_state == SplashState.form) {
                                           _processEntry(); 
                                         }
@@ -424,7 +390,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
 
           // ==========================================
-          // 4. LAYER LOADING (SAAT PROSES SIMPAN)
+          // 5. LAYER LOADING SAAT MENYIMPAN DATA
           // ==========================================
           if (_state == SplashState.loading)
             Positioned.fill(
@@ -438,6 +404,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         width: 80, height: 80,
                         decoration: BoxDecoration(
                           color: const Color(0xFFD4FF00), borderRadius: BorderRadius.circular(24),
+                          boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.3), blurRadius: 30, spreadRadius: 5)],
                         ),
                         child: const Center(child: Text('S', style: TextStyle(fontSize: 45, fontWeight: FontWeight.w900, color: Colors.black, height: 1.1))),
                       ),
@@ -483,7 +450,386 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 // ==========================================
-// WIDGET ALBUM BACKGROUND EKSKLUSIF (FORM PERKENALAN PENGGUNA BARU)
+// WIDGET KHUSUS PENGGUNA LAMA (TAMPILAN MEWAH GLASSMORPHISM KACA)
+// ==========================================
+class WelcomeReturningView extends StatefulWidget {
+  final String userName;
+  final VoidCallback onEnter;
+
+  const WelcomeReturningView({super.key, required this.userName, required this.onEnter});
+
+  @override
+  State<WelcomeReturningView> createState() => _WelcomeReturningViewState();
+}
+
+class _WelcomeReturningViewState extends State<WelcomeReturningView> with TickerProviderStateMixin {
+  late AnimationController _logoCtrl;
+  late AnimationController _textCtrl;
+  late AnimationController _arrowCtrl;
+
+  late Animation<double> _logoScale;
+  late Animation<double> _textOpacity;
+  late Animation<Offset> _textSlide;
+  late Animation<double> _arrowSlide;
+
+  @override
+  void initState() {
+    super.initState();
+    _logoCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
+    _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut));
+
+    _textCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
+    _textOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeIn));
+    _textSlide = Tween<Offset>(begin: const Offset(0, 0.25), end: Offset.zero).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeOutCubic));
+
+    // Animasi panah bergeser lembut pada tombol masuk
+    _arrowCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+    _arrowSlide = Tween<double>(begin: 0.0, end: 6.0).animate(CurvedAnimation(parent: _arrowCtrl, curve: Curves.easeInOut));
+
+    _startAnimations();
+  }
+
+  void _startAnimations() async {
+    await Future.delayed(const Duration(milliseconds: 150));
+    if (mounted) _logoCtrl.forward();
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) _textCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _logoCtrl.dispose();
+    _textCtrl.dispose();
+    _arrowCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFF09090B),
+      width: double.infinity,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Logo S Box dengan Efek Kaca Minimalis (Tanpa Cahaya/Neon/Shadow)
+              ScaleTransition(
+                scale: _logoScale,
+                child: Container(
+                  width: 110, height: 110,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(32),
+                    border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'S',
+                      style: TextStyle(
+                        fontSize: 60,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                        height: 1.05,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 45),
+              
+              // Kartu Frosted Glass Asli (Glassmorphism Premium Tanpa Shadow/Glow)
+              SlideTransition(
+                position: _textSlide,
+                child: FadeTransition(
+                  opacity: _textOpacity,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(28),
+                            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                tr('Selamat Datang Kembali,', 'Welcome Back,'),
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                widget.userName.isEmpty ? 'SubTracker' : widget.userName,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 36),
+
+                              // Tombol Glassmorphism Kaca Elegan (Tanpa Shadow/Cahaya)
+                              Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
+                                ),
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    padding: const EdgeInsets.symmetric(vertical: 20),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    elevation: 0,
+                                  ),
+                                  onPressed: widget.onEnter,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        tr('MASUK KE DASHBOARD', 'ENTER DASHBOARD'),
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      AnimatedBuilder(
+                                        animation: _arrowSlide,
+                                        builder: (context, child) {
+                                          return Transform.translate(
+                                            offset: Offset(_arrowSlide.value, 0),
+                                            child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ==========================================
+// WIDGET KHUSUS PENGGUNA BARU (ANIMASI KETIK TANPA ROKET)
+// ==========================================
+class WelcomeNewView extends StatefulWidget {
+  final VoidCallback onNext;
+  const WelcomeNewView({super.key, required this.onNext});
+
+  @override
+  State<WelcomeNewView> createState() => _WelcomeNewViewState();
+}
+
+class _WelcomeNewViewState extends State<WelcomeNewView> {
+  bool _showSubTracker = false;
+  bool _showButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Timing Animasi yang Sangat Halus dan Berurutan:
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      if (mounted) setState(() => _showSubTracker = true);
+    });
+    
+    Future.delayed(const Duration(milliseconds: 6500), () {
+      if (mounted) setState(() => _showButton = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color(0xFF09090B),
+      width: double.infinity,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.35,
+            child: Container(
+              width: 250, height: 250,
+              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.06), blurRadius: 100, spreadRadius: 50)]),
+            ),
+          ),
+          
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 1. Ketikan "Welcome to" dari awal (Sangat Halus)
+              TypewriterText(
+                'Welcome to',
+                delay: const Duration(milliseconds: 500),
+                speed: const Duration(milliseconds: 100),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24, fontStyle: FontStyle.italic, color: Colors.white70, letterSpacing: 1.5),
+              ),
+              const SizedBox(height: 8),
+
+              // 2. Teks SubTracker (Muncul Belakangan dengan Efek Mewah, Bukan Diketik)
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 800),
+                opacity: _showSubTracker ? 1.0 : 0.0,
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 800),
+                  scale: _showSubTracker ? 1.0 : 0.5,
+                  curve: Curves.easeOutBack,
+                  child: const Text(
+                    'SubTracker',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0, 
+                      shadows: [Shadow(color: Color(0xFFD4FF00), blurRadius: 25)]
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // 3. Deskripsi Diketik (Sangat Halus)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                child: TypewriterText(
+                  tr('Aplikasi cerdas pemantau dan pengingat tagihan langgananmu.', 'Smart subscription tracking and reminder application.'),
+                  delay: const Duration(milliseconds: 2800),
+                  speed: const Duration(milliseconds: 50),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white54, fontSize: 15, height: 1.5),
+                ),
+              ),
+
+              const SizedBox(height: 60),
+
+              // 4. Tombol Muncul Paling Terakhir
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 800),
+                opacity: _showButton ? 1.0 : 0.0,
+                child: _showButton ? Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
+                  ),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFD4FF00),
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      elevation: 0,
+                    ),
+                    onPressed: widget.onNext,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('MULAI SEKARANG', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1.0)),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward_rounded, color: Colors.black, size: 20),
+                      ],
+                    ),
+                  ),
+                ) : const SizedBox(height: 56), 
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ==========================================
+// WIDGET EFEK KETIK TEKS (DIJAMIN DARI AWAL & HALUS)
+// ==========================================
+class TypewriterText extends StatefulWidget {
+  final String text;
+  final TextStyle style;
+  final TextAlign textAlign;
+  final Duration speed;
+  final Duration delay;
+
+  const TypewriterText(this.text, {super.key, required this.style, this.textAlign = TextAlign.start, this.speed = const Duration(milliseconds: 50), this.delay = Duration.zero});
+
+  @override
+  State<TypewriterText> createState() => _TypewriterTextState();
+}
+
+class _TypewriterTextState extends State<TypewriterText> {
+  String _displayed = "";
+  Timer? _timer;
+  Timer? _delayTimer;
+  int _idx = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _delayTimer = Timer(widget.delay, () {
+      if (!mounted) return;
+      _startTyping();
+    });
+  }
+
+  void _startTyping() {
+    _timer = Timer.periodic(widget.speed, (t) {
+      if (_idx < widget.text.length) {
+        if (mounted) {
+          setState(() {
+            _displayed += widget.text[_idx];
+            _idx++;
+          });
+        }
+      } else {
+        t.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _delayTimer?.cancel();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(_displayed, style: widget.style, textAlign: widget.textAlign);
+  }
+}
+
+// ==========================================
+// WIDGET ALBUM BACKGROUND EKSKLUSIF (FORM PERKENALAN)
 // ==========================================
 class StaggeredAlbumBackground extends StatefulWidget {
   final String img1, img2, img3;
@@ -503,12 +849,15 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200));
 
+    // Gambar Kiri Belakang (welcome1)
     _zoom1 = Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.45, curve: Curves.easeOutBack)));
     _fade1 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.3, curve: Curves.easeIn)));
 
+    // Gambar Kanan Belakang (welcome3)
     _zoom3 = Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.25, 0.7, curve: Curves.easeOutBack)));
     _fade3 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.25, 0.55, curve: Curves.easeIn)));
 
+    // Gambar TENGAH HP Spotify (welcome2) - Muncul Paling Akhir Agar Menimpa Kiri & Kanan
     _zoom2 = Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.5, 1.0, curve: Curves.easeOutBack)));
     _fade2 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.5, 0.8, curve: Curves.easeIn)));
 
@@ -553,29 +902,51 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
     final sw = MediaQuery.of(context).size.width;
     return Stack(
       children: [
+        // 1. Gambar Kiri & Kanan (Diletakkan di Lapisan Belakang)
         Center(
           child: SizedBox(
-            height: 300, 
+            height: 330, 
             width: sw,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 Positioned(
-                  left: sw * 0.02,
-                  child: _buildAlbumItem(widget.img1, _zoom1, _fade1, -0.15, sw * 0.40, 220, Alignment.center),
+                  left: -sw * 0.01,
+                  child: _buildAlbumItem(widget.img1, _zoom1, _fade1, -0.20, sw * 0.42, 240, Alignment.center),
                 ),
                 Positioned(
-                  right: sw * 0.02,
-                  child: _buildAlbumItem(widget.img3, _zoom3, _fade3, 0.15, sw * 0.40, 220, Alignment.center),
-                ),
-                Positioned(
-                  child: _buildAlbumItem(widget.img2, _zoom2, _fade2, 0.0, sw * 0.48, 270, Alignment.center),
+                  right: -sw * 0.01,
+                  child: _buildAlbumItem(widget.img3, _zoom3, _fade3, 0.20, sw * 0.42, 240, Alignment.center),
                 ),
               ],
             ),
           ),
         ),
-        Container(color: const Color(0xFF09090B).withOpacity(0.70)),
+
+        // 2. Lapisan Meredupkan Gelap (Hanya meredupkan Gambar Kiri & Kanan di belakang)
+        Positioned.fill(
+          child: IgnorePointer(
+            child: Container(
+              color: const Color(0xFF09090B).withOpacity(0.70),
+            ),
+          ),
+        ),
+
+        // 3. GAMBAR HP SPOTIFY (Diletakkan paling depan, di atas lapisan gelap agar tetap cerah)
+        Center(
+          child: SizedBox(
+            height: 330, 
+            width: sw,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  child: _buildAlbumItem(widget.img2, _zoom2, _fade2, 0.0, sw * 0.58, 320, const Alignment(0.0, 0.4)),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -598,7 +969,10 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000))..repeat();
   }
   @override
-  void dispose() { _controller.dispose(); super.dispose(); }
+  void dispose() { 
+    _controller.dispose(); 
+    super.dispose(); 
+  }
   Widget _buildDot(int index) {
     return AnimatedBuilder(
       animation: _controller,
@@ -613,5 +987,7 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
     );
   }
   @override
-  Widget build(BuildContext context) { return Row(mainAxisAlignment: MainAxisAlignment.center, children: [_buildDot(0), _buildDot(1), _buildDot(2)]); }
+  Widget build(BuildContext context) { 
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [_buildDot(0), _buildDot(1), _buildDot(2)]); 
+  }
 }
