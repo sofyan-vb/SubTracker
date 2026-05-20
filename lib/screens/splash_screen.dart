@@ -545,7 +545,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
-                                side: Border.all(color: Colors.white.withOpacity(0.15)),
+                                side: BorderSide(color: Colors.white.withOpacity(0.15)),
                               ),
                             ),
                             onPressed: () => Navigator.pop(context),
@@ -1216,7 +1216,7 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
         double offset = sin(t + (index * 1.5)) * 4.0; 
         return Transform.translate(
           offset: Offset(0, offset),
-          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFD4FF00), shape: BoxShape.circle)),
+          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 8, height: 8, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
         );
       },
     );

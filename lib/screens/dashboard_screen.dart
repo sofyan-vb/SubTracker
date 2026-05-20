@@ -1506,7 +1506,7 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
         double offset = sin(t + (index * 1.5)) * 4.0; 
         return Transform.translate(
           offset: Offset(0, offset),
-          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 12, height: 12, decoration: const BoxDecoration(color: Color(0xFFD4FF00), shape: BoxShape.circle)),
+          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 12, height: 12, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
         );
       },
     );
