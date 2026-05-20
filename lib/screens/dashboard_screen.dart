@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/subscription_tile.dart';
 import 'add_screen.dart'; 
+import '../widgets/dashboard_tutorial.dart'; 
 
 // =========================================================
 // STATE GLOBAL UNTUK TEMA, PROFIL, DAN BAHASA (MULTILINGUAL)
@@ -31,8 +32,9 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   bool _isSearching = false;
-  bool _isLoadingAdd = false; 
   final TextEditingController _searchCtrl = TextEditingController();
+  bool _isLoadingAdd = false;
+  bool _showTutorial = false;
 
   @override
   void initState() {
@@ -51,6 +53,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     final savedLang = prefs.getString('app_lang');
     if (savedLang != null) languageNotifier.value = savedLang;
+
+    final hasSeenTutorial = prefs.getBool('has_seen_tutorial') ?? false;
+    if (!hasSeenTutorial) {
+      setState(() {
+        _showTutorial = true;
+      });
+    }
   }
 
   @override
@@ -192,7 +201,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 0: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
       case 1: return _CalendarView(key: const ValueKey('calendar'), theme: currentTheme);
       case 2: return _StatsView(key: const ValueKey('stats'), theme: currentTheme);
-      case 3: return _SettingsView(key: const ValueKey('settings'), theme: currentTheme);
+      case 3: return _SettingsView(
+        key: const ValueKey('settings'), 
+        theme: currentTheme,
+        onRestartTutorial: () {
+          setState(() {
+            _currentIndex = 0;
+            _showTutorial = true;
+          });
+        },
+      );
       default: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
     }
   }
@@ -295,37 +313,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 backgroundColor: const Color(0xFFD4FF00), 
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 child: const Icon(Icons.add, size: 32, color: Colors.black), 
-                
-                onPressed: _isLoadingAdd ? null : () async {
-                  setState(() => _isLoadingAdd = true); 
-                  bool hasInternet = false;
-                  try {
-                    final result = await InternetAddress.lookup('google.com').timeout(const Duration(seconds: 5));
-                    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) hasInternet = true; 
-                  } catch (_) { hasInternet = false; }
-
-                  if (!mounted) return;
-                  if (hasInternet) {
-                    await Future.delayed(const Duration(milliseconds: 600));
-                    setState(() => _isLoadingAdd = false); 
-                    if (mounted) Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
-                  } else {
-                    setState(() => _isLoadingAdd = false); 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Row(
-                          children: [
-                            const Icon(Icons.wifi_off_rounded, color: Colors.white), const SizedBox(width: 12),
-                            Expanded(child: Text(tr('Gagal tersambung! Pastikan internet aktif.', 'Connection failed! Make sure internet is active.'), style: const TextStyle(fontWeight: FontWeight.bold))),
-                          ],
-                        ),
-                        backgroundColor: Colors.redAccent, behavior: SnackBarBehavior.floating,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        margin: const EdgeInsets.all(20),
-                      ),
-                    );
-                  }
-                },
+                onPressed: _isLoadingAdd
+                    ? null
+                    : () async {
+                        setState(() {
+                          _isLoadingAdd = true;
+                        });
+                        
+                        // Jeda 1.2 detik untuk animasi loading titik gelombang putih premium
+                        await Future.delayed(const Duration(milliseconds: 1200));
+                        
+                        if (mounted) {
+                          setState(() {
+                            _isLoadingAdd = false;
+                          });
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
+                        }
+                      },
               ),
 
               bottomNavigationBar: BottomAppBar(
@@ -360,10 +364,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-
             if (_isLoadingAdd)
               Positioned.fill(
-                child: Container(color: Colors.black87, child: const Center(child: WaveDotLoading())),
+                child: Container(
+                  color: Colors.black87,
+                  child: const Center(
+                    child: WaveDotLoading(),
+                  ),
+                ),
+              ),
+            if (_showTutorial && _currentIndex == 0)
+              Positioned.fill(
+                child: DashboardTutorial(
+                  onClose: () async {
+                    setState(() {
+                      _showTutorial = false;
+                    });
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('has_seen_tutorial', true);
+                  },
+                ),
               ),
           ],
         );
@@ -428,223 +448,465 @@ class _HomeView extends StatelessWidget {
       upcomingDateStr = '${date.day} ${namaBulanSingkat[date.month - 1]}';
     }
 
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FadeInSlide(
-            delay: const Duration(milliseconds: 50),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
-              child: BlinkingWidget(
-                child: ValueListenableBuilder<String>(
-                  valueListenable: userNameNotifier,
-                  builder: (context, userName, child) {
-                    final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
-                    return Text(
-                      displayText, 
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
-                    );
-                  },
-                ),
-              ),
-            ),
-          ),
-
-          FadeInSlide(
-            delay: const Duration(milliseconds: 150),
-            child: Container(
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: const Color(0xFFD4FF00), 
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                        child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isSmallScreen = constraints.maxHeight < 600;
+        if (isSmallScreen) {
+          return SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: FadeInSlide(
+                    delay: const Duration(milliseconds: 50),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
+                      child: BlinkingWidget(
+                        child: ValueListenableBuilder<String>(
+                          valueListenable: userNameNotifier,
+                          builder: (context, userName, child) {
+                            final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
+                            return Text(
+                              displayText, 
+                              style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                            );
+                          },
+                        ),
                       ),
-                      const SizedBox(width: 12),
-                      Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  FittedBox(
-                    fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-                    child: Text(
-                      currencyFormat.format(provider.totalMonthly),
-                      style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-
-          if (provider.subs.isNotEmpty)
-            FadeInSlide(
-              delay: const Duration(milliseconds: 200),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.widgets_rounded, color: Colors.cyanAccent, size: 20),
-                            const SizedBox(width: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 11)),
-                                Text('${provider.subs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
-                              ],
-                            )
-                          ],
-                        ),
-                      )
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.analytics_rounded, color: Colors.orangeAccent, size: 20),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                // PERBAIKAN: Menambahkan array children yang benar
-                                children: [
-                                  Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 11)),
-                                  FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                      )
-                    ),
-                  ],
                 ),
-              ),
-            ),
 
-          if (provider.subs.isNotEmpty)
-            FadeInSlide(
-              delay: const Duration(milliseconds: 250),
-              child: Container(
-                margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: cardBg, 
-                  borderRadius: BorderRadius.circular(16), 
-                  border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: upcomingSub != null ? Colors.orange.withOpacity(0.15) : Colors.green.withOpacity(0.15), shape: BoxShape.circle),
-                      child: Icon(upcomingSub != null ? Icons.notification_important_rounded : Icons.check_circle_rounded, color: upcomingSub != null ? Colors.orange : Colors.green, size: 24),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
+                SliverToBoxAdapter(
+                  child: FadeInSlide(
+                    delay: const Duration(milliseconds: 150),
+                    child: Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      padding: const EdgeInsets.all(28),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4FF00), 
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
-                          Text(
-                            upcomingSub != null 
-                                ? '${upcomingSub.name} • $upcomingDateStr' 
-                                : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
-                            style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                                child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          FittedBox(
+                            fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+                            child: Text(
+                              currencyFormat.format(provider.totalMonthly),
+                              style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          
-          FadeInSlide(
-            delay: const Duration(milliseconds: 350),
-            child: Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(tr('Semua Layanan', 'All Services'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w800)),
-                ],
-              ),
-            ),
-          ),
 
-          Expanded(
-            child: provider.subs.isEmpty
-                ? FadeInSlide(
-                    delay: const Duration(milliseconds: 400),
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                if (provider.subs.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: FadeInSlide(
+                      delay: const Duration(milliseconds: 200),
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.widgets_rounded, color: Colors.cyanAccent, size: 20),
+                                    const SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                                        Text('${provider.subs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              )
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.analytics_rounded, color: Colors.orangeAccent, size: 20),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                                          FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              )
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                if (provider.subs.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: FadeInSlide(
+                      delay: const Duration(milliseconds: 250),
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: cardBg, 
+                          borderRadius: BorderRadius.circular(16), 
+                          border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(color: upcomingSub != null ? Colors.orange.withOpacity(0.15) : Colors.green.withOpacity(0.15), shape: BoxShape.circle),
+                              child: Icon(upcomingSub != null ? Icons.notification_important_rounded : Icons.check_circle_rounded, color: upcomingSub != null ? Colors.orange : Colors.green, size: 24),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    upcomingSub != null 
+                                        ? '${upcomingSub.name} • $upcomingDateStr' 
+                                        : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
+                                    style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                
+                SliverToBoxAdapter(
+                  child: FadeInSlide(
+                    delay: const Duration(milliseconds: 350),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(28),
-                            decoration: BoxDecoration(
-                              color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.account_balance_wallet_outlined, 
-                              size: 72, 
-                              color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            tr('Belum Ada Tagihan', 'No Bills Yet'), 
-                            style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
-                          ),
-                          const SizedBox(height: 40),
-                          BlinkingWidget(
-                            child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
-                          ),
+                          Text(tr('Semua Layanan', 'All Services'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w800)),
                         ],
+                      ),
+                    ),
+                  ),
+                ),
+
+                if (provider.subs.isEmpty)
+                  SliverToBoxAdapter(
+                    child: FadeInSlide(
+                      delay: const Duration(milliseconds: 400),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.account_balance_wallet_outlined, 
+                                size: 48, 
+                                color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              tr('Belum Ada Tagihan', 'No Bills Yet'), 
+                              style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: subTextColor, fontSize: 13, height: 1.4)
+                            ),
+                            const SizedBox(height: 16),
+                            BlinkingWidget(
+                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 100), 
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: provider.subs.length,
-                    itemBuilder: (context, index) {
-                      return FadeInSlide(delay: Duration(milliseconds: 450 + (index * 100)), child: SubTile(sub: provider.subs[index]));
-                    },
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          return FadeInSlide(
+                            delay: Duration(milliseconds: 450 + (index * 100)),
+                            child: SubTile(sub: provider.subs[index]),
+                          );
+                        },
+                        childCount: provider.subs.length,
+                      ),
+                    ),
                   ),
-          ),
-        ],
-      ),
+              ],
+            ),
+          );
+        } else {
+          return SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FadeInSlide(
+                  delay: const Duration(milliseconds: 50),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
+                    child: BlinkingWidget(
+                      child: ValueListenableBuilder<String>(
+                        valueListenable: userNameNotifier,
+                        builder: (context, userName, child) {
+                          final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
+                          return Text(
+                            displayText, 
+                            style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+
+                FadeInSlide(
+                  delay: const Duration(milliseconds: 150),
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                    padding: const EdgeInsets.all(28),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4FF00), 
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                              child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        FittedBox(
+                          fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+                          child: Text(
+                            currencyFormat.format(provider.totalMonthly),
+                            style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                if (provider.subs.isNotEmpty)
+                  FadeInSlide(
+                    delay: const Duration(milliseconds: 200),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.widgets_rounded, color: Colors.cyanAccent, size: 20),
+                                  const SizedBox(width: 10),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                                      Text('${provider.subs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.analytics_rounded, color: Colors.orangeAccent, size: 20),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                                        FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                if (provider.subs.isNotEmpty)
+                  FadeInSlide(
+                    delay: const Duration(milliseconds: 250),
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cardBg, 
+                        borderRadius: BorderRadius.circular(16), 
+                        border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(color: upcomingSub != null ? Colors.orange.withOpacity(0.15) : Colors.green.withOpacity(0.15), shape: BoxShape.circle),
+                            child: Icon(upcomingSub != null ? Icons.notification_important_rounded : Icons.check_circle_rounded, color: upcomingSub != null ? Colors.orange : Colors.green, size: 24),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  upcomingSub != null 
+                                      ? '${upcomingSub.name} • $upcomingDateStr' 
+                                      : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
+                                  style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                
+                FadeInSlide(
+                  delay: const Duration(milliseconds: 350),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 24, right: 24, top: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(tr('Semua Layanan', 'All Services'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w800)),
+                      ],
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: provider.subs.isEmpty
+                      ? FadeInSlide(
+                          delay: const Duration(milliseconds: 400),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(28),
+                                  decoration: BoxDecoration(
+                                    color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.account_balance_wallet_outlined, 
+                                    size: 72, 
+                                    color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
+                                  ),
+                                ),
+                                const SizedBox(height: 24),
+                                Text(
+                                  tr('Belum Ada Tagihan', 'No Bills Yet'), 
+                                  style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
+                                ),
+                                const SizedBox(height: 40),
+                                BlinkingWidget(
+                                  child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 100), 
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: provider.subs.length,
+                          itemBuilder: (context, index) {
+                            return FadeInSlide(delay: Duration(milliseconds: 450 + (index * 100)), child: SubTile(sub: provider.subs[index]));
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        }
+      }
     );
   }
 }
@@ -734,138 +996,298 @@ class _CalendarViewState extends State<_CalendarView> {
     final List<String> daysID = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
     final List<String> daysEN = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FadeInSlide(
-            delay: const Duration(milliseconds: 100),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
-                  Row(
-                    children: [
-                      IconButton(icon: Icon(Icons.chevron_left, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month - 1))),
-                      IconButton(icon: Icon(Icons.chevron_right, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month + 1))),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          
-          FadeInSlide(
-            delay: const Duration(milliseconds: 200),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardBg, 
-                borderRadius: BorderRadius.circular(20), 
-                border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade200 : Colors.white10),
-                boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: (isID ? daysID : daysEN).map((d) => 
-                      SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
-                    ).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: daysInMonth + firstDayOffset,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 1.0),
-                    itemBuilder: (context, index) {
-                      if (index < firstDayOffset) return const SizedBox(); 
-                      
-                      final day = index - firstDayOffset + 1;
-                      final thisDate = DateTime(_currentDate.year, _currentDate.month, day);
-                      
-                      final isSelected = DateUtils.isSameDay(thisDate, _selectedDate);
-                      final isToday = DateUtils.isSameDay(thisDate, DateTime.now());
-                      final isHoliday = _getHolidayName(thisDate) != null; 
-                      
-                      bool hasBill = provider.subs.any((sub) {
-                        final date = _extractDateSafely(sub);
-                        return date != null && DateUtils.isSameDay(date, thisDate);
-                      });
-
-                      Color circleColor = Colors.transparent;
-                      Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
-
-                      if (isSelected) {
-                        circleColor = isHoliday ? Colors.redAccent : const Color(0xFFD4FF00);
-                        dayTextColor = isHoliday ? Colors.white : Colors.black; 
-                      } else if (isToday) {
-                        circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
-                      }
-
-                      return GestureDetector(
-                        onTap: () => setState(() => _selectedDate = thisDate),
-                        child: Container(
-                          margin: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(color: circleColor, shape: BoxShape.circle),
-                          child: Stack(
-                            alignment: Alignment.center,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isSmallScreen = constraints.maxHeight < 600;
+        if (isSmallScreen) {
+          return SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: FadeInSlide(
+                    delay: const Duration(milliseconds: 100),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+                          Row(
                             children: [
-                              Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
-                              if (hasBill) 
-                                Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFFD4FF00), shape: BoxShape.circle))),
+                              IconButton(icon: Icon(Icons.chevron_left, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month - 1))),
+                              IconButton(icon: Icon(Icons.chevron_right, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month + 1))),
                             ],
                           ),
-                        ),
-                      );
-                    },
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-          ),
-          
-          if (selectedHoliday != null)
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 8),
-              child: Row(
-                children: [
-                  const Icon(Icons.event_available_rounded, color: Colors.redAccent, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      selectedHoliday, 
-                      style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)
-                    )
-                  ),
-                ],
-              ),
-            ),
-
-          const SizedBox(height: 12),
-          
-          Expanded(
-            child: subsOnSelectedDate.isEmpty 
-              ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
-              : ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  itemCount: subsOnSelectedDate.length,
-                  itemBuilder: (context, i) => SubTile(sub: subsOnSelectedDate[i]),
                 ),
-          )
-        ],
-      ),
+                
+                SliverToBoxAdapter(
+                  child: FadeInSlide(
+                    delay: const Duration(milliseconds: 200),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cardBg, 
+                        borderRadius: BorderRadius.circular(20), 
+                        border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade200 : Colors.white10),
+                        boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: (isID ? daysID : daysEN).map((d) => 
+                              SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
+                            ).toList(),
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: daysInMonth + firstDayOffset,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 1.0),
+                            itemBuilder: (context, index) {
+                              if (index < firstDayOffset) return const SizedBox(); 
+                              
+                              final day = index - firstDayOffset + 1;
+                              final thisDate = DateTime(_currentDate.year, _currentDate.month, day);
+                              
+                              final isSelected = DateUtils.isSameDay(thisDate, _selectedDate);
+                              final isToday = DateUtils.isSameDay(thisDate, DateTime.now());
+                              final isHoliday = _getHolidayName(thisDate) != null; 
+                              
+                              bool hasBill = provider.subs.any((sub) {
+                                final date = _extractDateSafely(sub);
+                                return date != null && DateUtils.isSameDay(date, thisDate);
+                              });
+
+                              Color circleColor = Colors.transparent;
+                              Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
+
+                              if (isSelected) {
+                                circleColor = isHoliday ? Colors.redAccent : const Color(0xFFD4FF00);
+                                dayTextColor = isHoliday ? Colors.white : Colors.black; 
+                              } else if (isToday) {
+                                circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
+                              }
+
+                              return GestureDetector(
+                                onTap: () => setState(() => _selectedDate = thisDate),
+                                child: Container(
+                                  margin: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(color: circleColor, shape: BoxShape.circle),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
+                                      if (hasBill) 
+                                        Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFFD4FF00), shape: BoxShape.circle))),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                
+                if (selectedHoliday != null)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 24, right: 24, top: 8),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.event_available_rounded, color: Colors.redAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              selectedHoliday, 
+                              style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)
+                            )
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 12)),
+                
+                if (subsOnSelectedDate.isEmpty) 
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold))),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, i) => SubTile(sub: subsOnSelectedDate[i]),
+                        childCount: subsOnSelectedDate.length,
+                      ),
+                    ),
+                  )
+              ],
+            ),
+          );
+        } else {
+          return SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FadeInSlide(
+                  delay: const Duration(milliseconds: 100),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+                        Row(
+                          children: [
+                            IconButton(icon: Icon(Icons.chevron_left, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month - 1))),
+                            IconButton(icon: Icon(Icons.chevron_right, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month + 1))),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                FadeInSlide(
+                  delay: const Duration(milliseconds: 200),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: cardBg, 
+                      borderRadius: BorderRadius.circular(20), 
+                      border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade200 : Colors.white10),
+                      boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: (isID ? daysID : daysEN).map((d) => 
+                            SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
+                          ).toList(),
+                        ),
+                        const SizedBox(height: 16),
+                        
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: daysInMonth + firstDayOffset,
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 1.0),
+                          itemBuilder: (context, index) {
+                            if (index < firstDayOffset) return const SizedBox(); 
+                            
+                            final day = index - firstDayOffset + 1;
+                            final thisDate = DateTime(_currentDate.year, _currentDate.month, day);
+                            
+                            final isSelected = DateUtils.isSameDay(thisDate, _selectedDate);
+                            final isToday = DateUtils.isSameDay(thisDate, DateTime.now());
+                            final isHoliday = _getHolidayName(thisDate) != null; 
+                            
+                            bool hasBill = provider.subs.any((sub) {
+                              final date = _extractDateSafely(sub);
+                              return date != null && DateUtils.isSameDay(date, thisDate);
+                            });
+
+                            Color circleColor = Colors.transparent;
+                            Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
+
+                            if (isSelected) {
+                              circleColor = isHoliday ? Colors.redAccent : const Color(0xFFD4FF00);
+                              dayTextColor = isHoliday ? Colors.white : Colors.black; 
+                            } else if (isToday) {
+                              circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
+                            }
+
+                            return GestureDetector(
+                              onTap: () => setState(() => _selectedDate = thisDate),
+                              child: Container(
+                                margin: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(color: circleColor, shape: BoxShape.circle),
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
+                                    if (hasBill) 
+                                      Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFFD4FF00), shape: BoxShape.circle))),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+                
+                if (selectedHoliday != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 24, right: 24, top: 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.event_available_rounded, color: Colors.redAccent, size: 18),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            selectedHoliday, 
+                            style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)
+                          )
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 12),
+                
+                Expanded(
+                  child: subsOnSelectedDate.isEmpty
+                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
+                      : ListView.builder(
+                          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100), 
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: subsOnSelectedDate.length,
+                          itemBuilder: (context, i) {
+                            return SubTile(sub: subsOnSelectedDate[i]);
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        }
+      }
     );
   }
 }
@@ -1074,7 +1496,8 @@ class _StatsView extends StatelessWidget {
 
 class _SettingsView extends StatefulWidget {
   final String theme;
-  const _SettingsView({super.key, required this.theme});
+  final VoidCallback onRestartTutorial;
+  const _SettingsView({super.key, required this.theme, required this.onRestartTutorial});
 
   @override
   State<_SettingsView> createState() => _SettingsViewState();
@@ -1390,6 +1813,17 @@ class _SettingsViewState extends State<_SettingsView> {
             FadeInSlide(
               delay: const Duration(milliseconds: 300),
               child: _buildSettingTile(Icons.dark_mode_rounded, tr('Tema Aplikasi', 'App Theme'), widget.theme, _showThemeSelector, cardBg, textColor, subTextColor, widget.theme),
+            ),
+
+            FadeInSlide(
+              delay: const Duration(milliseconds: 350),
+              child: _buildSettingTile(
+                Icons.menu_book_rounded, 
+                tr('Panduan Dashboard', 'Dashboard Tour'), 
+                tr('Mulai ulang petunjuk fitur', 'Restart feature tutorial'), 
+                widget.onRestartTutorial, 
+                cardBg, textColor, subTextColor, widget.theme
+              ),
             ),
 
             FadeInSlide(

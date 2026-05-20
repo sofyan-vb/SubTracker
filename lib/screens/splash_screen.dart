@@ -719,30 +719,11 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                   _isLoading = true;
                                                 });
                                                 
-                                                // Cek koneksi internet riil ke google.com
-                                                bool hasConnection = false;
-                                                try {
-                                                  final result = await InternetAddress.lookup('google.com')
-                                                      .timeout(const Duration(seconds: 4));
-                                                  if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-                                                    hasConnection = true;
-                                                  }
-                                                } catch (_) {
-                                                  hasConnection = false;
-                                                }
-
                                                 // Jeda 1.2 detik untuk animasi loading yang mulus
                                                 await Future.delayed(const Duration(milliseconds: 1200));
                                                 
                                                 if (mounted) {
-                                                  if (hasConnection) {
-                                                    widget.onEnter();
-                                                  } else {
-                                                    setState(() {
-                                                      _isLoading = false;
-                                                    });
-                                                    _showNoInternetDialog(context);
-                                                  }
+                                                  widget.onEnter();
                                                 }
                                               },
                                         child: _isLoading
