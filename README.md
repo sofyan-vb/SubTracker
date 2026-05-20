@@ -11,7 +11,7 @@ Aplikasi ini dikembangkan untuk memenuhi standar UI/UX yang elegan—tidak terla
 
 ### 1. Layar Animasi Sambutan (Welcome Screen)
 <div align="center">
-  <img src="screenshots/welcome_text.png" width="250" alt="Layar Welcome">
+  <img src="screenshots/welcome.png" width="250" alt="Layar Welcome">
 </div>
 
 > **Penjelasan Tampilan:** Gambar ini menangkap momen transisi animasi selamat datang bagi pengguna. Teks sapaan ditampilkan secara dinamis menggunakan efek mesin ketik (*typewriter effect*) huruf demi huruf, lengkap dengan kursor yang berkedip. Perpaduan gaya huruf miring/kursif yang elegan (putih) dengan nama aplikasi yang tebal (kuning neon) pada latar belakang gelap memberikan kesan antarmuka yang sangat modern, eksklusif, dan premium.
