@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:math'; 
 import 'dart:async'; 
 import 'dart:ui'; // Diperlukan untuk ImageFilter (efek kaca/blur asli)
+import 'dart:io'; // Diperlukan untuk cek koneksi internet
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_screen.dart';
 
@@ -472,6 +473,100 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
   late Animation<Offset> _textSlide;
   late Animation<double> _arrowSlide;
 
+  bool _isLoading = false; // State untuk loading memuat
+
+  // Dialog kaca jika koneksi internet terputus
+  void _showNoInternetDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
+                child: Container(
+                  padding: const EdgeInsets.all(28),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF3B30).withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.wifi_off_rounded,
+                            color: Color(0xFFFF3B30),
+                            size: 40,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          tr('Koneksi Gagal', 'Connection Failed'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          tr(
+                            'Koneksi internet aktif diperlukan untuk masuk ke dashboard. Silakan periksa jaringan Anda.',
+                            'An active internet connection is required to enter the dashboard. Please check your network connection.'
+                          ),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white.withOpacity(0.1),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: Border.all(color: Colors.white.withOpacity(0.15)),
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              tr('COBA LAGI', 'TRY AGAIN'),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -506,138 +601,278 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFF09090B),
-      width: double.infinity,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return ValueListenableBuilder<String>(
+      valueListenable: languageNotifier,
+      builder: (context, lang, child) {
+        return Scaffold(
+          backgroundColor: const Color(0xFF09090B),
+          body: Stack(
+            alignment: Alignment.center,
             children: [
-              // Logo S Box dengan Efek Kaca Minimalis (Tanpa Cahaya/Neon/Shadow)
-              ScaleTransition(
-                scale: _logoScale,
-                child: Container(
-                  width: 110, height: 110,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'S',
-                      style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        height: 1.05,
-                      ),
-                    ),
-                  ),
+              // 1. Gambar Background Estetis (welcome3.jpg)
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/welcome3.jpg',
+                  fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 45),
               
-              // Kartu Frosted Glass Asli (Glassmorphism Premium Tanpa Shadow/Glow)
-              SlideTransition(
-                position: _textSlide,
-                child: FadeTransition(
-                  opacity: _textOpacity,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(28),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(28),
-                            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                tr('Selamat Datang Kembali,', 'Welcome Back,'),
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                widget.userName.isEmpty ? 'SubTracker' : widget.userName,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                              const SizedBox(height: 36),
+              // 2. Lapisan Gelap Transparan agar kartu kaca tetap mudah dibaca
+              Positioned.fill(
+                child: Container(
+                  color: const Color(0xFF09090B).withOpacity(0.68),
+                ),
+              ),
 
-                              // Tombol Glassmorphism Kaca Elegan (Tanpa Shadow/Cahaya)
-                              Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.08),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.white.withOpacity(0.15), width: 1.5),
-                                ),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.transparent,
-                                    shadowColor: Colors.transparent,
-                                    padding: const EdgeInsets.symmetric(vertical: 20),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                    elevation: 0,
-                                  ),
-                                  onPressed: widget.onEnter,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        tr('MASUK KE DASHBOARD', 'ENTER DASHBOARD'),
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          letterSpacing: 1.2,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      AnimatedBuilder(
-                                        animation: _arrowSlide,
-                                        builder: (context, child) {
-                                          return Transform.translate(
-                                            offset: Offset(_arrowSlide.value, 0),
-                                            child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+              // 3. Konten Utama
+              SafeArea(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo S Box dengan Warna Logo Aplikasi Orisinal (Kuning Neon & Hitam)
+                    ScaleTransition(
+                      scale: _logoScale,
+                      child: Container(
+                        width: 110, height: 110,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4FF00), // Kuning Neon Aplikasi
+                          borderRadius: BorderRadius.circular(32),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'S',
+                            style: TextStyle(
+                              fontSize: 60,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black, // Huruf Hitam
+                              height: 1.05,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 45),
+                    
+                    // Kartu Frosted Glass Asli (Glassmorphism Premium Tanpa Shadow/Glow)
+                    SlideTransition(
+                      position: _textSlide,
+                      child: FadeTransition(
+                        opacity: _textOpacity,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 24),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(28),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.06),
+                                  borderRadius: BorderRadius.circular(28),
+                                  border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      tr('Selamat Datang Kembali,', 'Welcome Back,'),
+                                      style: const TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      widget.userName.isEmpty ? 'SubTracker' : widget.userName,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 34,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 36),
+
+                                    // Tombol Glassmorphism Kaca Elegan (Tanpa Shadow/Cahaya)
+                                    Container(
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                                      ),
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          padding: const EdgeInsets.symmetric(vertical: 20),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                          elevation: 0,
+                                        ),
+                                        onPressed: _isLoading
+                                            ? null
+                                            : () async {
+                                                setState(() {
+                                                  _isLoading = true;
+                                                });
+                                                
+                                                // Cek koneksi internet riil ke google.com
+                                                bool hasConnection = false;
+                                                try {
+                                                  final result = await InternetAddress.lookup('google.com')
+                                                      .timeout(const Duration(seconds: 4));
+                                                  if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                                                    hasConnection = true;
+                                                  }
+                                                } catch (_) {
+                                                  hasConnection = false;
+                                                }
+
+                                                // Jeda 1.2 detik untuk animasi loading yang mulus
+                                                await Future.delayed(const Duration(milliseconds: 1200));
+                                                
+                                                if (mounted) {
+                                                  if (hasConnection) {
+                                                    widget.onEnter();
+                                                  } else {
+                                                    setState(() {
+                                                      _isLoading = false;
+                                                    });
+                                                    _showNoInternetDialog(context);
+                                                  }
+                                                }
+                                              },
+                                        child: _isLoading
+                                            ? Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    tr('Memuat', 'Loading'),
+                                                    style: const TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                      letterSpacing: 1.2,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  const Padding(
+                                                    padding: EdgeInsets.only(top: 4.0),
+                                                    child: WavyDotsProgressIndicator(
+                                                      color: Colors.white,
+                                                      dotSize: 5.0,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            : Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(
+                                                    tr('MASUK KE DASHBOARD', 'ENTER DASHBOARD'),
+                                                    style: const TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.white,
+                                                      letterSpacing: 1.2,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  AnimatedBuilder(
+                                                    animation: _arrowSlide,
+                                                    builder: (context, child) {
+                                                      return Transform.translate(
+                                                        offset: Offset(_arrowSlide.value, 0),
+                                                        child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                                      );
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+}
+
+// ==========================================
+// WIDGET ANIMASI TITIK GELOMBANG (WAVY DOTS PROGRESS INDICATOR)
+// ==========================================
+class WavyDotsProgressIndicator extends StatefulWidget {
+  final Color color;
+  final double dotSize;
+
+  const WavyDotsProgressIndicator({
+    super.key,
+    this.color = Colors.white,
+    this.dotSize = 5.0,
+  });
+
+  @override
+  State<WavyDotsProgressIndicator> createState() => _WavyDotsProgressIndicatorState();
+}
+
+class _WavyDotsProgressIndicatorState extends State<WavyDotsProgressIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(3, (index) {
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            // Formula gelombang sinus yang bergeser secara mulus di setiap titik
+            final double offset = sin((_controller.value * 2 * pi) - (index * pi / 3));
+            return Transform.translate(
+              offset: Offset(0, offset * 4.5),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 2.0),
+                width: widget.dotSize,
+                height: widget.dotSize,
+                decoration: BoxDecoration(
+                  color: widget.color,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }
