@@ -11,7 +11,7 @@ Aplikasi ini dikembangkan untuk memenuhi standar UI/UX yang elegan—tidak terla
 
 ### 1. Layar Sapaan (Welcome & Onboarding)
 ![Layar Welcome](screenshots/welcome.png)
-> **Penjelasan Tampilan:** Layar ini adalah impresi pertama pengguna. Menampilkan logo roket dengan efek *glowing neon* yang elegan. Teks sapaan "Welcome to SubTracker" dan deskripsi aplikasi muncul menggunakan animasi efek ketik (*typewriter*) yang sangat halus. Tombol "Mulai Sekarang" baru akan muncul setelah pengguna selesai membaca seluruh teks. Jika pengguna sudah pernah login, layar ini akan diganti dengan tampilan *Glassmorphism* "Selamat Datang Kembali".
+> **Penjelasan Tampilan:** Layar ini adalah impresi pertama pengguna. Menampilkan Teks sapaan "Welcome to SubTracker" dan deskripsi aplikasi muncul menggunakan animasi efek ketik (*typewriter*) yang sangat halus. Tombol "Mulai Sekarang" baru akan muncul setelah pengguna selesai membaca seluruh teks. Jika pengguna sudah pernah login, layar ini akan diganti dengan tampilan *Glassmorphism* "Selamat Datang Kembali".
 
 ### 2. Dashboard Utama (Home)
 ![Layar Dashboard](screenshots/dashboard.png)
