@@ -9,16 +9,19 @@ Aplikasi ini dikembangkan untuk memenuhi standar UI/UX yang elegan—tidak terla
 ## 📸 Cuplikan Layar & Penjelasan UI (Screenshots)
 *Bukti implementasi antarmuka (UI) yang elegan, modern, dan tidak terlalu ramai.*
 
-### 1. Layar Sapaan (Welcome & Onboarding)
-![Layar Welcome](screenshots/welcome.png)
-> **Penjelasan Tampilan:** Gambar ini menangkap momen transisi animasi selamat datang bagi pengguna. Teks sapaan ditampilkan secara dinamis menggunakan efek mesin ketik (*typewriter effect*) huruf demi huruf, lengkap dengan kursor yang berkedip di ujung teks. Perpaduan gaya huruf miring/kursif yang elegan (putih) dengan nama aplikasi yang tebal dan mencolok (kuning neon) pada latar belakang gelap memberikan kesan antarmuka yang sangat modern, eksklusif, dan premium sejak detik pertama aplikasi dibuka.
+### 1. Layar Animasi Sambutan (Welcome Screen)
+<img src="screenshots/welcome_text.png" width="250" alt="Layar Welcome">
+
+> **Penjelasan Tampilan:** Gambar ini menangkap momen transisi animasi selamat datang bagi pengguna. Teks sapaan ditampilkan secara dinamis menggunakan efek mesin ketik (*typewriter effect*) huruf demi huruf, lengkap dengan kursor yang berkedip. Perpaduan gaya huruf miring/kursif yang elegan (putih) dengan nama aplikasi yang tebal (kuning neon) pada latar belakang gelap memberikan kesan antarmuka yang sangat modern, eksklusif, dan premium.
 
 ### 2. Dashboard Utama (Home)
-![Layar Dashboard](screenshots/dashboard.png)
+<img src="screenshots/dashboard.png" width="250" alt="Layar Dashboard">
+
 > **Penjelasan Tampilan:** Mengusung perpaduan warna *Dark Mode* (Hitam pekat) dan aksen kuning neon. Bagian atas menampilkan sapaan pengguna dan total akumulasi tagihan bulanan. Bagian tengah menampilkan kartu peringatan "Segera Jatuh Tempo", disusul dengan daftar *list* langganan yang aktif. Dilengkapi *Bottom Navigation Bar* untuk perpindahan menu yang mulus.
 
 ### 3. Formulir Tambah Langganan (Add Subscription)
-![Layar Tambah Langganan](screenshots/add_sub.png)
+<img src="screenshots/add_sub.png" width="250" alt="Layar Tambah Langganan">
+
 > **Penjelasan Tampilan:** Layar ini dirancang anti-berantakan saat *keyboard* muncul. Input data disusun rapi ke dalam kotak-kotak bersudut melengkung (*rounded corners*). Pengguna dapat memilih layanan, memasukkan nominal harga, mengatur kalender jatuh tempo, hingga memilih jenis peringatan (Notifikasi Biasa atau Alarm Berdering).
 
 ---
