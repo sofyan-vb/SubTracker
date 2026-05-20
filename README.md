@@ -1,6 +1,6 @@
 # 🚀 SubTracker - Smart Subscription Manager
 
-**SubTracker** adalah aplikasi pintar berbasis *Online-First* yang dirancang untuk membantu pengguna mencatat, memantau, dan mengingatkan jadwal pembayaran tagihan langganan bulanan (seperti Netflix, Spotify, Internet, dll) secara terorganisir dan tepat waktu.
+**SubTracker** adalah aplikasi pintar berbasis *Offline-First* yang dirancang untuk membantu pengguna mencatat, memantau, dan mengingatkan jadwal pembayaran tagihan langganan bulanan (seperti Netflix, Spotify, Internet, dll) secara terorganisir dan tepat waktu.
 
 Aplikasi ini dikembangkan untuk memenuhi standar UI/UX yang elegan—tidak terlalu sederhana, namun tidak terlalu ramai—dengan fungsionalitas pengingat lokal (Alarm/Notifikasi) tanpa mengorbankan privasi pengguna.
 
