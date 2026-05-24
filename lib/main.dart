@@ -66,7 +66,7 @@ class _GateKeeperState extends State<GateKeeper> {
     final name = prefs.getString('user_name');
     final hasAccepted = prefs.getBool('hasAcceptedTerms') ?? false;
 
-    // LOGIKA PENGGUNA LAMA: Langsung Lewati Semua Layar Awal!
+  
     if (name != null && name.trim().isNotEmpty) {
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -74,8 +74,8 @@ class _GateKeeperState extends State<GateKeeper> {
         );
       }
     } else {
-      // LOGIKA PENGGUNA BARU
-      await Future.delayed(const Duration(milliseconds: 4500));
+      
+      await Future.delayed(const Duration(milliseconds: 8500));
       if (mounted) {
         if (hasAccepted) {
           Navigator.of(context).pushReplacement(
@@ -176,92 +176,106 @@ class HandwritingWelcomeText extends StatefulWidget {
   State<HandwritingWelcomeText> createState() => _HandwritingWelcomeTextState();
 }
 
-class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> {
+class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> with SingleTickerProviderStateMixin {
   String _currentText = "";
-  late String _fullText; 
+  late String _typingPart; 
+  late String _staticPart; 
   int _charIndex = 0;
   Timer? _timer;
-  bool _showCursor = true;
-  Timer? _cursorTimer;
+  bool _showStaticPart = false;
+  late AnimationController _paintController;
+  late Animation<double> _paintAnimation;
 
   @override
   void initState() {
     super.initState();
-    // PERBAIKAN: Menambahkan kata "di" pada teks animasi bahasa Indonesia
-    _fullText = tr('Selamat datang di\nSubTracker', 'Welcome to\nSubTracker');
-    _startAnimation();
-    _cursorTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (mounted) setState(() => _showCursor = !_showCursor);
+    
+    _typingPart = tr('Selamat datang di', 'Welcome to');
+    _staticPart = 'SubTracker';
+    _paintController = AnimationController(vsync: this, duration: const Duration(milliseconds: 2500));
+    _paintAnimation = Tween<double>(begin: -0.2, end: 1.2).animate(CurvedAnimation(parent: _paintController, curve: Curves.easeInOutCubic));
+    Future.delayed(const Duration(milliseconds: 600), () {
+      if (mounted) _startAnimation();
     });
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    _cursorTimer?.cancel();
+    _paintController.dispose();
     super.dispose();
   }
 
   void _startAnimation() {
-    _timer = Timer.periodic(const Duration(milliseconds: 150), (timer) {
-      if (_charIndex < _fullText.length) {
+    _timer = Timer.periodic(const Duration(milliseconds: 180), (timer) {
+      if (_charIndex < _typingPart.length) {
         if (mounted) {
           setState(() {
-            _currentText += _fullText[_charIndex];
+            _currentText += _typingPart[_charIndex];
             _charIndex++;
           });
         }
       } else {
         _timer?.cancel();
+        if (mounted && !_showStaticPart) {
+          setState(() {
+            _showStaticPart = true;
+          });
+          _paintController.forward();
+        }
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    String cursivePart = "";
-    String boldPart = "";
-
-    // Logika Pemotongan Teks Otomatis berdasarkan Enter (\n)
-    int splitIndex = _fullText.indexOf('\n') + 1;
-
-    if (_currentText.length <= splitIndex) { 
-      cursivePart = _currentText;
-    } else {
-      cursivePart = _fullText.substring(0, splitIndex);
-      boldPart = _currentText.substring(splitIndex); 
-    }
-
-    return RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: cursivePart,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 32, 
-              fontStyle: FontStyle.italic,
-              fontFamily: 'cursive', 
-              height: 1.2,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: _currentText,
+                style: const TextStyle(color: Colors.white, fontSize: 32, fontStyle: FontStyle.italic, fontFamily: 'cursive', height: 1.2),
+              ),
+            ],
+          ),
+        ),
+        if (_showStaticPart)
+          AnimatedBuilder(
+            animation: _paintAnimation,
+            builder: (context, child) {
+              return ShaderMask(
+                shaderCallback: (bounds) {
+                  return LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: const [Colors.white, Colors.white, Colors.transparent, Colors.transparent],
+                    stops: [
+                      0.0,
+                      (_paintAnimation.value).clamp(0.0, 1.0),
+                      (_paintAnimation.value + 0.2).clamp(0.0, 1.0),
+                      1.0,
+                    ],
+                  ).createShader(bounds);
+                },
+                blendMode: BlendMode.dstIn,
+                child: child,
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _staticPart,
+                  style: const TextStyle(color: Color(0xFFD4FF00), fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 1.5, height: 1.5),
+                ),
+              ],
             ),
           ),
-          TextSpan(
-            text: boldPart,
-            style: const TextStyle(
-              color: Color(0xFFD4FF00), 
-              fontSize: 42,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.5,
-              height: 1.5, 
-            ),
-          ),
-          TextSpan(
-            text: _showCursor ? "|" : " ",
-            style: const TextStyle(color: Colors.white70, fontSize: 32, fontWeight: FontWeight.w200),
-          ),
-        ],
-      ),
+      ],
     );
   }
 }

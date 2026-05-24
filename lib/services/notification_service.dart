@@ -41,7 +41,7 @@ class NotificationService {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final Int32List additionalFlags = isAlarm ? Int32List.fromList(<int>[4]) : Int32List(0);
     final AndroidNotificationSound? customSound = isAlarm ? const RawResourceAndroidNotificationSound('alarm_lagu') : null;
-    final String channelId = isAlarm ? 'channel_alarm_lagu_khusus_final' : 'channel_notif_biasa_standar_final';
+    final String channelId = isAlarm ? 'channel_alarm_lagu_v3' : 'channel_notif_biasa_v3';
     final String channelName = isAlarm ? 'Alarm Tagihan' : 'Notifikasi Tagihan';
 
     final NotificationDetails notifDetails = NotificationDetails(
@@ -52,7 +52,7 @@ class NotificationService {
         importance: Importance.max, 
         priority: Priority.high,    
         playSound: true,     
-        sound: customSound, // <-- Lagu disisipkan di sini       
+        sound: customSound,      
         enableVibration: true,      
         visibility: NotificationVisibility.public, 
         category: isAlarm ? AndroidNotificationCategory.alarm : AndroidNotificationCategory.reminder, 

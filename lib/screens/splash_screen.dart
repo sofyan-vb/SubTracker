@@ -1,9 +1,8 @@
-// lib/screens/splash_screen.dart
 import 'package:flutter/material.dart';
 import 'dart:math'; 
 import 'dart:async'; 
-import 'dart:ui'; // Diperlukan untuk ImageFilter (efek kaca/blur asli)
-import 'dart:io'; // Diperlukan untuk cek koneksi internet
+import 'dart:ui'; 
+import 'dart:io'; 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_screen.dart';
 
@@ -23,9 +22,6 @@ class _SplashScreenState extends State<SplashScreen> {
   int _onboardingPageIndex = 0;
 
   final TextEditingController _nameCtrl = TextEditingController();
-  final TextEditingController _budgetCtrl = TextEditingController();
-  String _selectedGoal = '';
-  
   String _savedName = ''; 
 
   @override
@@ -33,9 +29,9 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     _pageController = PageController(initialPage: 0);
     
-    // PEMISAHAN LOGIKA: Baru vs Sudah Pernah Install
+    
     if (widget.isNewUser) {
-      _state = SplashState.onboarding; // Langsung masuk ke onboarding slide untuk pengguna baru
+      _state = SplashState.onboarding; 
       _onboardingPageIndex = 0;
     } else {
       _state = SplashState.welcomeReturning;
@@ -54,7 +50,6 @@ class _SplashScreenState extends State<SplashScreen> {
   void dispose() {
     _pageController.dispose();
     _nameCtrl.dispose();
-    _budgetCtrl.dispose();
     super.dispose();
   }
 
@@ -82,14 +77,12 @@ class _SplashScreenState extends State<SplashScreen> {
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_name', _nameCtrl.text.trim());
-      await prefs.setString('monthly_budget', _budgetCtrl.text.trim());
-      await prefs.setString('financial_goal', _selectedGoal);
       userNameNotifier.value = _nameCtrl.text.trim();
     }
 
     setState(() => _state = SplashState.loading); 
 
-    await Future.delayed(const Duration(milliseconds: 300)); 
+    await Future.delayed(const Duration(milliseconds: 1800)); 
     _goToDashboard();
   }
 
@@ -103,14 +96,14 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     bool showTopExitButton = _state == SplashState.form;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
-      resizeToAvoidBottomInset: false, 
-      body: Stack(
-        children: [
-          // ==========================================
-          // 1. LAYAR PENGGUNA LAMA (SUDAH PERNAH INSTALL)
-          // ==========================================
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: const Color(0xFF09090B),
+          resizeToAvoidBottomInset: true, 
+          body: Stack(
+            children: [
+          
           if (_state == SplashState.welcomeReturning)
             Positioned.fill(
               child: WelcomeReturningView(
@@ -119,9 +112,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-          // ==========================================
-          // 2. LAYAR WELCOME (PENGGUNA BARU) - TANPA ROKET
-          // ==========================================
+          
           if (_state == SplashState.welcomeNew)
             Positioned.fill(
               child: WelcomeNewView(
@@ -134,22 +125,18 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-          // ==========================================
-          // 3. BACKGROUND ALBUM FORM (GAMBAR TANGAN PEGANG HP PALING DEPAN)
-          // ==========================================
-          if (_state == SplashState.form)
+          
+          if (_state == SplashState.form || _state == SplashState.loading)
             const Positioned.fill(
               child: StaggeredAlbumBackground(
-                img1: 'assets/welcome1.jpg', // Gambar orang
-                img2: 'assets/welcome3.jpg', // Gambar Tangan Pegang HP (Paling Depan)
-                img3: 'assets/welcome2.jpg', // Gambar cewe cowo
+                img1: 'assets/welcome1.jpg', 
+                img2: 'assets/welcome3.jpg', 
+                img3: 'assets/welcome2.jpg', 
               ),
             ),
 
-          // ==========================================
-          // 4. LAYER KONTEN UTAMA (ONBOARDING & FORM)
-          // ==========================================
-          if (_state == SplashState.onboarding || _state == SplashState.form)
+        
+          if (_state == SplashState.onboarding || _state == SplashState.form || _state == SplashState.loading)
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -186,20 +173,20 @@ class _SplashScreenState extends State<SplashScreen> {
                               
                               const Spacer(),
                               
-                              // --- TAMPILAN FORM PERKENALAN ---
-                              if (_state == SplashState.form) ...[
+                              
+                              if (_state == SplashState.form || _state == SplashState.loading) ...[
                                 const Icon(Icons.face_retouching_natural_rounded, size: 65, color: Color(0xFFD4FF00)), 
                                 const SizedBox(height: 16),
                                 Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
                                 const SizedBox(height: 8),
-                                Text(tr('Atur profil dan target anggaran bulananmu.', 'Set your profile and monthly budget.'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                Text(tr('Masukkan nama pengguna', 'Enter username'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
                                 const SizedBox(height: 32),
                                 
                                 TextField(
                                   controller: _nameCtrl,
                                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                   decoration: InputDecoration(
-                                    labelText: tr('Nama Panggilan *', 'Nickname *'),
+                                    labelText: tr('Nama Panggilan', 'Nickname'),
                                     labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
                                     prefixIcon: const Icon(Icons.person, color: Color(0xFFD4FF00), size: 22),
                                     filled: true, fillColor: const Color(0xFF1A1A1C).withOpacity(0.85),
@@ -209,51 +196,10 @@ class _SplashScreenState extends State<SplashScreen> {
                                     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFD4FF00), width: 1.5)),
                                   ),
                                 ),
-                                const SizedBox(height: 20), 
-                                
-                                TextField(
-                                  controller: _budgetCtrl,
-                                  keyboardType: TextInputType.number,
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                  decoration: InputDecoration(
-                                    labelText: tr('Batas Anggaran Bulanan (Opsional)', 'Monthly Budget Limit (Optional)'),
-                                    labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                    prefixIcon: const Icon(Icons.account_balance_wallet, color: Color(0xFFD4FF00), size: 22),
-                                    prefixText: tr('Rp ', '\$ '),
-                                    prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                    filled: true, fillColor: const Color(0xFF1A1A1C).withOpacity(0.85),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFD4FF00), width: 1.5)),
-                                  ),
-                                ),
-                                const SizedBox(height: 20), 
-                                
-                                DropdownButtonFormField<String>(
-                                  value: _selectedGoal.isEmpty ? tr('Pantau Pengeluaran', 'Track Expenses') : _selectedGoal,
-                                  dropdownColor: const Color(0xFF1A1A1C),
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                  decoration: InputDecoration(
-                                    labelText: tr('Tujuan Keuangan', 'Financial Goal'),
-                                    labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                    prefixIcon: const Icon(Icons.flag_circle_rounded, color: Color(0xFFD4FF00), size: 22),
-                                    filled: true, fillColor: const Color(0xFF1A1A1C).withOpacity(0.85),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFD4FF00), width: 1.5)),
-                                  ),
-                                  items: [tr('Pantau Pengeluaran', 'Track Expenses'), tr('Lebih Hemat', 'Save More'), tr('Stop Langganan Boros', 'Stop Wasting Subs')]
-                                      .map((goal) => DropdownMenuItem(value: goal, child: Text(goal)))
-                                      .toList(),
-                                  onChanged: (val) {
-                                    if (val != null) setState(() => _selectedGoal = val);
-                                  },
-                                ),
+
                               ] 
                               
-                              // --- TAMPILAN SLIDE GAMBAR LAYANAN (ONBOARDING) ---
+                             
                               else if (_state == SplashState.onboarding) ...[
                                 SizedBox(
                                   height: screenHeight * 0.58, 
@@ -305,7 +251,7 @@ class _SplashScreenState extends State<SplashScreen> {
                               
                               const Spacer(),
                               
-                              // --- AREA TOMBOL NAVIGASI BAWAH ---
+                           
                               Builder(
                                 builder: (context) {
                                   if (_state == SplashState.onboarding && _onboardingPageIndex > 0) {
@@ -367,7 +313,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                         backgroundColor: const Color(0xFFD4FF00), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                         elevation: 0,
                                       ),
-                                      onPressed: () {
+                                      onPressed: _state == SplashState.loading ? null : () {
                                         if (_state == SplashState.onboarding) {
                                           _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
                                         } else if (_state == SplashState.form) {
@@ -390,42 +336,44 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
 
-          // ==========================================
-          // 5. LAYER LOADING SAAT MENYIMPAN DATA
-          // ==========================================
-          if (_state == SplashState.loading)
-            Positioned.fill(
-              child: Container(
-                color: const Color(0xFF09090B),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 80, height: 80,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFD4FF00), borderRadius: BorderRadius.circular(24),
-                          boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.3), blurRadius: 30, spreadRadius: 5)],
-                        ),
-                        child: const Center(child: Text('S', style: TextStyle(fontSize: 45, fontWeight: FontWeight.w900, color: Colors.black, height: 1.1))),
-                      ),
-                      const SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(tr('Memuat', 'Loading'), style: const TextStyle(color: Color(0xFFD4FF00), fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
-                          const SizedBox(width: 8),
-                          const WaveDotLoading(), 
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
-    );
+    ),
+    if (_state == SplashState.loading)
+      Positioned.fill(
+        child: Container(
+          color: Colors.black.withOpacity(0.7),
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                  tr('Memuat', 'Loading'),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Padding(
+                  padding: EdgeInsets.only(top: 4.0),
+                  child: WavyDotsProgressIndicator(
+                    color: Colors.white,
+                    dotSize: 5.0,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  ],
+);
   }
 
   Widget _buildOnboardingSlide({required String imagePath, required String title, required String desc, required Alignment alignment}) {
@@ -450,9 +398,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 }
 
-// ==========================================
-// WIDGET KHUSUS PENGGUNA LAMA (TAMPILAN MEWAH GLASSMORPHISM KACA)
-// ==========================================
+
 class WelcomeReturningView extends StatefulWidget {
   final String userName;
   final VoidCallback onEnter;
@@ -473,9 +419,9 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
   late Animation<Offset> _textSlide;
   late Animation<double> _arrowSlide;
 
-  bool _isLoading = false; // State untuk loading memuat
+  bool _isLoading = false; 
 
-  // Dialog kaca jika koneksi internet terputus
+
   void _showNoInternetDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -617,25 +563,25 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                 ),
               ),
               
-              // 2. Lapisan Gelap Transparan agar kartu kaca tetap mudah dibaca
+             
               Positioned.fill(
                 child: Container(
                   color: const Color(0xFF09090B).withOpacity(0.68),
                 ),
               ),
 
-              // 3. Konten Utama
+            
               SafeArea(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo S Box dengan Warna Logo Aplikasi Orisinal (Kuning Neon & Hitam)
+                    
                     ScaleTransition(
                       scale: _logoScale,
                       child: Container(
                         width: 110, height: 110,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4FF00), // Kuning Neon Aplikasi
+                          color: const Color(0xFFD4FF00), 
                           borderRadius: BorderRadius.circular(32),
                         ),
                         child: const Center(
@@ -653,7 +599,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                     ),
                     const SizedBox(height: 45),
                     
-                    // Kartu Frosted Glass Asli (Glassmorphism Premium Tanpa Shadow/Glow)
+                    
                     SlideTransition(
                       position: _textSlide,
                       child: FadeTransition(
@@ -696,18 +642,16 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                     ),
                                     const SizedBox(height: 36),
 
-                                    // Tombol Glassmorphism Kaca Elegan (Tanpa Shadow/Cahaya)
+                                  
                                     Container(
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.1),
                                         borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(color: Colors.white.withOpacity(0.2), width: 1.5),
+                                        boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
                                       ),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          shadowColor: Colors.transparent,
+                                          backgroundColor: const Color(0xFFD4FF00),
                                           padding: const EdgeInsets.symmetric(vertical: 20),
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                           elevation: 0,
@@ -719,7 +663,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                   _isLoading = true;
                                                 });
                                                 
-                                                // Jeda 1.2 detik untuk animasi loading yang mulus
+                                                
                                                 await Future.delayed(const Duration(milliseconds: 1200));
                                                 
                                                 if (mounted) {
@@ -735,7 +679,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                     style: const TextStyle(
                                                       fontSize: 15,
                                                       fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
+                                                      color: Colors.black,
                                                       letterSpacing: 1.2,
                                                     ),
                                                   ),
@@ -743,7 +687,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                   const Padding(
                                                     padding: EdgeInsets.only(top: 4.0),
                                                     child: WavyDotsProgressIndicator(
-                                                      color: Colors.white,
+                                                      color: Colors.black,
                                                       dotSize: 5.0,
                                                     ),
                                                   ),
@@ -753,11 +697,11 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
                                                   Text(
-                                                    tr('MASUK KE DASHBOARD', 'ENTER DASHBOARD'),
+                                                    'MASUK',
                                                     style: const TextStyle(
                                                       fontSize: 15,
                                                       fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
+                                                      color: Colors.black,
                                                       letterSpacing: 1.2,
                                                     ),
                                                   ),
@@ -767,7 +711,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                     builder: (context, child) {
                                                       return Transform.translate(
                                                         offset: Offset(_arrowSlide.value, 0),
-                                                        child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                                        child: const Icon(Icons.arrow_forward_rounded, color: Colors.black, size: 20),
                                                       );
                                                     },
                                                   ),
@@ -794,9 +738,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
   }
 }
 
-// ==========================================
-// WIDGET ANIMASI TITIK GELOMBANG (WAVY DOTS PROGRESS INDICATOR)
-// ==========================================
+
 class WavyDotsProgressIndicator extends StatefulWidget {
   final Color color;
   final double dotSize;
@@ -837,7 +779,7 @@ class _WavyDotsProgressIndicatorState extends State<WavyDotsProgressIndicator> w
         return AnimatedBuilder(
           animation: _controller,
           builder: (context, child) {
-            // Formula gelombang sinus yang bergeser secara mulus di setiap titik
+           
             final double offset = sin((_controller.value * 2 * pi) - (index * pi / 3));
             return Transform.translate(
               offset: Offset(0, offset * 4.5),
@@ -858,9 +800,7 @@ class _WavyDotsProgressIndicatorState extends State<WavyDotsProgressIndicator> w
   }
 }
 
-// ==========================================
-// WIDGET KHUSUS PENGGUNA BARU (ANIMASI KETIK TANPA ROKET)
-// ==========================================
+
 class WelcomeNewView extends StatefulWidget {
   final VoidCallback onNext;
   const WelcomeNewView({super.key, required this.onNext});
@@ -876,7 +816,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
   @override
   void initState() {
     super.initState();
-    // Timing Animasi yang Sangat Halus dan Berurutan:
+   
     Future.delayed(const Duration(milliseconds: 1800), () {
       if (mounted) setState(() => _showSubTracker = true);
     });
@@ -905,7 +845,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 1. Ketikan "Welcome to" dari awal (Sangat Halus)
+             
               TypewriterText(
                 'Welcome to',
                 delay: const Duration(milliseconds: 500),
@@ -915,7 +855,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
               ),
               const SizedBox(height: 8),
 
-              // 2. Teks SubTracker (Muncul Belakangan dengan Efek Mewah, Bukan Diketik)
+        
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 800),
                 opacity: _showSubTracker ? 1.0 : 0.0,
@@ -935,7 +875,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
               ),
               const SizedBox(height: 24),
 
-              // 3. Deskripsi Diketik (Sangat Halus)
+         
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32.0),
                 child: TypewriterText(
@@ -949,7 +889,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
 
               const SizedBox(height: 60),
 
-              // 4. Tombol Muncul Paling Terakhir
+              
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 800),
                 opacity: _showButton ? 1.0 : 0.0,
@@ -969,9 +909,9 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text('MULAI SEKARANG', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1.0)),
+                        const Text('MULAI SEKARANG', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
                         const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward_rounded, color: Colors.black, size: 20),
+                        const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
                       ],
                     ),
                   ),
@@ -985,9 +925,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
   }
 }
 
-// ==========================================
-// WIDGET EFEK KETIK TEKS (DIJAMIN DARI AWAL & HALUS)
-// ==========================================
+
 class TypewriterText extends StatefulWidget {
   final String text;
   final TextStyle style;
@@ -1044,9 +982,7 @@ class _TypewriterTextState extends State<TypewriterText> {
   }
 }
 
-// ==========================================
-// WIDGET ALBUM BACKGROUND EKSKLUSIF (FORM PERKENALAN)
-// ==========================================
+
 class StaggeredAlbumBackground extends StatefulWidget {
   final String img1, img2, img3;
   const StaggeredAlbumBackground({super.key, required this.img1, required this.img2, required this.img3});
@@ -1065,15 +1001,10 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
     super.initState();
     _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 2200));
 
-    // Gambar Kiri Belakang (welcome1)
     _zoom1 = Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.45, curve: Curves.easeOutBack)));
     _fade1 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.3, curve: Curves.easeIn)));
-
-    // Gambar Kanan Belakang (welcome3)
     _zoom3 = Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.25, 0.7, curve: Curves.easeOutBack)));
     _fade3 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.25, 0.55, curve: Curves.easeIn)));
-
-    // Gambar TENGAH HP Spotify (welcome2) - Muncul Paling Akhir Agar Menimpa Kiri & Kanan
     _zoom2 = Tween<double>(begin: 0.4, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.5, 1.0, curve: Curves.easeOutBack)));
     _fade2 = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.5, 0.8, curve: Curves.easeIn)));
 
@@ -1118,7 +1049,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
     final sw = MediaQuery.of(context).size.width;
     return Stack(
       children: [
-        // 1. Gambar Kiri & Kanan (Diletakkan di Lapisan Belakang)
+        
         Center(
           child: SizedBox(
             height: 330, 
@@ -1139,7 +1070,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
           ),
         ),
 
-        // 2. Lapisan Meredupkan Gelap (Hanya meredupkan Gambar Kiri & Kanan di belakang)
+       
         Positioned.fill(
           child: IgnorePointer(
             child: Container(
@@ -1148,7 +1079,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
           ),
         ),
 
-        // 3. GAMBAR HP SPOTIFY (Diletakkan paling depan, di atas lapisan gelap agar tetap cerah)
+        
         Center(
           child: SizedBox(
             height: 330, 
@@ -1168,9 +1099,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
   }
 }
 
-// ==========================================
-// WIDGET ANIMASI LOADING GELOMBANG DOT
-// ==========================================
+
 class WaveDotLoading extends StatefulWidget {
   const WaveDotLoading({super.key});
   @override

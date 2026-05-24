@@ -1,4 +1,3 @@
-// lib/screens/dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -9,14 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/subscription_tile.dart';
 import 'add_screen.dart'; 
-import '../widgets/dashboard_tutorial.dart'; 
 
-// =========================================================
-// STATE GLOBAL UNTUK TEMA, PROFIL, DAN BAHASA (MULTILINGUAL)
-// =========================================================
+
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Hitam');
 final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); 
-final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); // Default English
+final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); 
 
 String tr(String idText, String enText) {
   return languageNotifier.value == 'ID' ? idText : enText;
@@ -34,7 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isSearching = false;
   final TextEditingController _searchCtrl = TextEditingController();
   bool _isLoadingAdd = false;
-  bool _showTutorial = false;
+
 
   @override
   void initState() {
@@ -54,12 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final savedLang = prefs.getString('app_lang');
     if (savedLang != null) languageNotifier.value = savedLang;
 
-    final hasSeenTutorial = prefs.getBool('has_seen_tutorial') ?? false;
-    if (!hasSeenTutorial) {
-      setState(() {
-        _showTutorial = true;
-      });
-    }
+
   }
 
   @override
@@ -106,11 +97,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  upcomingSubs.isEmpty 
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        child: Center(child: Text(tr('Tidak ada tagihan mendesak (7 hari ke depan).', 'No urgent bills (next 7 days).'), style: TextStyle(color: textColor.withOpacity(0.5)))),
-                      )
+                    upcomingSubs.isEmpty 
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(child: Text(tr('Tidak ada tagihan saat ini', 'No bills currently'), style: TextStyle(color: textColor.withOpacity(0.5)))),
+                        )
                     : ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -129,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 20),
                             ),
                             title: Text(sub.name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                            subtitle: Text(tr('Segera jatuh tempo', 'Due soon'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12)),
+                            subtitle: Text(tr('Sekarang waktunya tagihan', 'Now its bill time'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12)),
                             trailing: Text(daysLeftStr, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                           );
                         }
@@ -204,12 +195,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 3: return _SettingsView(
         key: const ValueKey('settings'), 
         theme: currentTheme,
-        onRestartTutorial: () {
-          setState(() {
-            _currentIndex = 0;
-            _showTutorial = true;
-          });
-        },
       );
       default: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
     }
@@ -277,17 +262,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   
                   if (!_isSearching)
-                    IconButton(
-                      icon: Stack(
-                        children: [
-                          Icon(Icons.notifications_none_rounded, color: appBarIcons),
-                          Positioned(
-                            right: 2, top: 2,
-                            child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
-                          )
-                        ]
-                      ),
-                      onPressed: () => _showNotificationsSheet(context, bottomNavBg, textColor),
+                    Consumer<SubProvider>(
+                      builder: (context, provider, child) {
+                        final now = DateTime.now();
+                        final hasUrgent = provider.subs.any((sub) {
+                          final date = _extractDateSafely(sub);
+                          if (date == null) return false;
+                          return date.isAfter(now.subtract(const Duration(days: 1))) && date.isBefore(now.add(const Duration(days: 7)));
+                        });
+                        return IconButton(
+                          icon: Stack(
+                            children: [
+                              Icon(Icons.notifications_none_rounded, color: appBarIcons),
+                              if (hasUrgent)
+                                Positioned(
+                                  right: 2, top: 2,
+                                  child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
+                                )
+                            ]
+                          ),
+                          onPressed: () => _showNotificationsSheet(context, bottomNavBg, textColor),
+                        );
+                      },
                     ),
 
                   if (!_isSearching)
@@ -320,7 +316,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           _isLoadingAdd = true;
                         });
                         
-                        // Jeda 1.2 detik untuk animasi loading titik gelombang putih premium
+                        
                         await Future.delayed(const Duration(milliseconds: 1200));
                         
                         if (mounted) {
@@ -373,18 +369,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
               ),
-            if (_showTutorial && _currentIndex == 0)
-              Positioned.fill(
-                child: DashboardTutorial(
-                  onClose: () async {
-                    setState(() {
-                      _showTutorial = false;
-                    });
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('has_seen_tutorial', true);
-                  },
-                ),
-              ),
+
           ],
         );
       }
@@ -1496,8 +1481,7 @@ class _StatsView extends StatelessWidget {
 
 class _SettingsView extends StatefulWidget {
   final String theme;
-  final VoidCallback onRestartTutorial;
-  const _SettingsView({super.key, required this.theme, required this.onRestartTutorial});
+  const _SettingsView({super.key, required this.theme});
 
   @override
   State<_SettingsView> createState() => _SettingsViewState();
@@ -1506,23 +1490,7 @@ class _SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<_SettingsView> {
   bool _notifEnabled = true; 
 
-  void _showSecuritySnackbar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.lock_outline_rounded, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(child: Text(tr('Fitur Keamanan Biometrik / PIN akan segera tersedia!', 'Biometric / PIN Security feature coming soon!'), style: const TextStyle(fontWeight: FontWeight.bold))),
-          ],
-        ),
-        backgroundColor: Colors.blueAccent,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(20),
-      ),
-    );
-  }
+
 
   void _showThemeSelector() {
     final isLight = widget.theme == 'Putih';
@@ -1653,7 +1621,10 @@ class _SettingsViewState extends State<_SettingsView> {
                         const SizedBox(height: 20),
                         
                         _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubTracker tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubTracker does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
-                        _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage'), tr('Semua data yang Anda input disimpan secara lokal dan dienkripsi di dalam memori internal HP Anda. Tidak ada Cloud.', 'All your inputted data is saved locally and encrypted in your phone. No Cloud storage.'), textColor, subTextColor),
+                        _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage'), tr('Semua data tagihan dan nama Anda murni disimpan dan dienkripsi di dalam memori internal HP Anda. Tidak ada data yang dikirim ke Cloud.', 'All your bills and name are purely saved and encrypted locally in your phone. No data is sent to the Cloud.'), textColor, subTextColor),
+                        _buildPrivacyPoint('3', tr('Sistem Notifikasi Pintar', 'Smart Notification System'), tr('Pengingat tagihan berjalan langsung di latar belakang sistem HP Anda tanpa perlu menghubungi server eksternal.', 'Bill reminders run locally on your phone background without needing to contact external servers.'), textColor, subTextColor),
+                        _buildPrivacyPoint('4', tr('Akses Pihak Ketiga', 'Third-Party Access'), tr('Kami menjamin 100% bahwa data finansial Anda tidak akan pernah dijual atau dibagikan ke pihak ketiga manapun untuk tujuan iklan.', 'We 100% guarantee that your financial data will never be sold or shared to any third parties for advertising.'), textColor, subTextColor),
+                        _buildPrivacyPoint('5', tr('Kendali Penuh Pengguna', 'Full User Control'), tr('Anda memegang kendali mutlak. Anda bebas mengatur, mengubah, hingga memusnahkan seluruh catatan Anda kapan saja menggunakan zona merah di bawah ini.', 'You hold absolute control. You are free to manage, edit, or destroy all your records anytime using the red zone below.'), textColor, subTextColor),
                         
                         const SizedBox(height: 30),
                         Container(
@@ -1694,7 +1665,7 @@ class _SettingsViewState extends State<_SettingsView> {
                                             
                                             themeNotifier.value = 'Hitam';
                                             userNameNotifier.value = ''; 
-                                            // Jangan reset bahasa agar user tidak kaget
+                                            
                                             
                                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Sistem berhasil di-reboot. Semua data telah dikosongkan.', 'System rebooted. All data cleared.'), style: const TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
                                           }, 
@@ -1723,18 +1694,32 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   Widget _buildPrivacyPoint(String number, String title, String desc, Color textColor, Color subTextColor) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: textColor.withOpacity(0.02),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: textColor.withOpacity(0.15)),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$number.', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
-          const SizedBox(width: 12),
+          Container(
+            width: 28, height: 28,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xFFD4FF00).withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: Text(number, style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold, fontSize: 13)),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
                 const SizedBox(height: 6),
                 Text(desc, style: TextStyle(color: subTextColor, fontSize: 13, height: 1.5)),
               ],
@@ -1772,10 +1757,7 @@ class _SettingsViewState extends State<_SettingsView> {
             ),
             const SizedBox(height: 24),
             
-            FadeInSlide(
-              delay: const Duration(milliseconds: 150),
-              child: _buildSettingTile(Icons.fingerprint_rounded, tr('Kunci Aplikasi', 'App Lock'), tr('Gunakan PIN atau Sidik Jari', 'Use PIN or Fingerprint'), _showSecuritySnackbar, cardBg, textColor, subTextColor, widget.theme),
-            ),
+
 
             FadeInSlide(
               delay: const Duration(milliseconds: 200),
@@ -1815,16 +1797,7 @@ class _SettingsViewState extends State<_SettingsView> {
               child: _buildSettingTile(Icons.dark_mode_rounded, tr('Tema Aplikasi', 'App Theme'), widget.theme, _showThemeSelector, cardBg, textColor, subTextColor, widget.theme),
             ),
 
-            FadeInSlide(
-              delay: const Duration(milliseconds: 350),
-              child: _buildSettingTile(
-                Icons.menu_book_rounded, 
-                tr('Panduan Dashboard', 'Dashboard Tour'), 
-                tr('Mulai ulang petunjuk fitur', 'Restart feature tutorial'), 
-                widget.onRestartTutorial, 
-                cardBg, textColor, subTextColor, widget.theme
-              ),
-            ),
+
 
             FadeInSlide(
               delay: const Duration(milliseconds: 400),

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'splash_screen.dart'; 
-import 'dashboard_screen.dart'; // import tr() untuk terjemahan
+import 'dashboard_screen.dart'; 
 
 class TermsScreen extends StatefulWidget {
   const TermsScreen({super.key});
