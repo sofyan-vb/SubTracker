@@ -56,7 +56,7 @@ class _DetailScreenState extends State<DetailScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF121214),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
         content: Text(tr('Apakah kamu yakin? Catatan yang dihapus tidak bisa dikembalikan.', 'Are you sure? Deleted records cannot be recovered.'), style: const TextStyle(color: Colors.white54)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Colors.white))),
@@ -78,12 +78,12 @@ class _DetailScreenState extends State<DetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF121214), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(tr('Opsi Catatan', 'Record Options'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(tr('Opsi Catatan', 'Record Options'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(leading: const Icon(Icons.update, color: Color(0xFFD4FF00)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
-            ListTile(leading: const Icon(Icons.task_alt, color: Colors.white), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
+            ListTile(leading: const Icon(Icons.update, color: Color(0xFF0D9488)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
+            ListTile(leading: const Icon(Icons.task_alt, color: Colors.white), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
           ],
         ),
       )
@@ -104,7 +104,7 @@ class _DetailScreenState extends State<DetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         scrollable: true, backgroundColor: const Color(0xFF121214), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -112,7 +112,7 @@ class _DetailScreenState extends State<DetailScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold, fontSize: 16), filled: true, fillColor: Colors.black, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
+              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16), filled: true, fillColor: Colors.grey.shade200, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
             ),
           ],
         ),
@@ -124,7 +124,7 @@ class _DetailScreenState extends State<DetailScreen> {
               if (m != null && m > 0) { Navigator.pop(ctx); _processRenewal(m); } 
               else { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Masukkan angka valid!', 'Enter valid number!')), backgroundColor: Colors.redAccent)); }
             }, 
-            child: Text(tr('Simpan', 'Save'), style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold))
+            child: Text(tr('Simpan', 'Save'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold))
           ),
         ],
       )
@@ -150,9 +150,9 @@ class _DetailScreenState extends State<DetailScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF09090B), elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-        title: Text(tr('Detail Langganan', 'Subscription Detail'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(tr('Detail Langganan', 'Subscription Detail'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
         actions: [
-          IconButton(icon: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFFD4FF00), size: 28), onPressed: _showCheckOptions),
+          IconButton(icon: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF0D9488), size: 28), onPressed: _showCheckOptions),
           IconButton(icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 28), onPressed: _deleteSub),
           const SizedBox(width: 8),
         ],
@@ -164,11 +164,11 @@ class _DetailScreenState extends State<DetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
-              Container(padding: const EdgeInsets.all(30), decoration: BoxDecoration(color: const Color(0xFFD4FF00).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.edit_document, size: 60, color: Color(0xFFD4FF00))),
+              Container(padding: const EdgeInsets.all(30), decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.edit_document, size: 60, color: Color(0xFF0D9488))),
               const SizedBox(height: 24),
               Text(currentSub.name, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
-              Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Color(0xFFD4FF00), fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Color(0xFF0D9488), fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 40),
               Container(
                 width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(20)),

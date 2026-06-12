@@ -42,6 +42,14 @@ dependencies:
   timezone: ^0.9.2
   flutter_timezone: ^5.0.2
   shared_preferences: ^2.5.5
+  share_plus: ^13.1.0
+  file_picker: ^11.0.2
+  fl_chart: ^1.2.0
+
+dependency_overrides:
+  win32: ^6.0.1
+  web: ^1.1.0
+
 
 dev_dependencies:
   flutter_test:
@@ -109,8 +117,8 @@ flutter_launcher_icons:
 
 
 flutter_native_splash:
-  color: "#09090B"
-  image: assets/splash.png
+  color: "#0B101E"
+  image: assets/icon.png
   android_12:
-    color: "#09090B"
-    image: assets/splash.png
+    color: "#0B101E"
+    image: assets/icon.png

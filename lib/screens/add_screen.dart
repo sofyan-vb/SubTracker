@@ -44,7 +44,7 @@ class _AddScreenState extends State<AddScreen> {
     final DateTime? picked = await showDatePicker(
       context: context, initialDate: _selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2101),
       builder: (context, child) {
-        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.dark(primary: const Color(0xFFD4FF00), onPrimary: Colors.black, surface: surfaceColor, onSurface: onSurfaceColor)), child: child!);
+        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.dark(primary: const Color(0xFF0D9488), onPrimary: Colors.white, surface: surfaceColor, onSurface: onSurfaceColor)), child: child!);
       },
     );
     if (picked != null) setState(() => _selectedDate = picked);
@@ -60,7 +60,7 @@ class _AddScreenState extends State<AddScreen> {
     final TimeOfDay? picked = await showGeneralDialog<TimeOfDay>(
       context: context, barrierDismissible: true, barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel, barrierColor: Colors.black87, transitionDuration: const Duration(milliseconds: 350),
       pageBuilder: (context, anim, secAnim) {
-        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.dark(primary: const Color(0xFFD4FF00), onPrimary: Colors.black, surface: surfaceColor, onSurface: onSurfaceColor)), child: TimePickerDialog(initialTime: _selectedTime));
+        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.dark(primary: const Color(0xFF0D9488), onPrimary: Colors.white, surface: surfaceColor, onSurface: onSurfaceColor)), child: TimePickerDialog(initialTime: _selectedTime));
       },
       transitionBuilder: (context, anim, secAnim, child) {
         return FadeTransition(opacity: anim, child: ScaleTransition(scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack), child: child));
@@ -118,7 +118,7 @@ class _AddScreenState extends State<AddScreen> {
                 Container(
                   padding: const EdgeInsets.all(24), width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFD4FF00), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
                     onPressed: () async { 
                       if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
                         DateTime exactDateTime = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day, _selectedTime.hour, _selectedTime.minute);
@@ -162,5 +162,5 @@ class _AddScreenState extends State<AddScreen> {
   Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), decoration: InputDecoration(hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(18)))); }
   Widget _buildDropdown(String value, List<String> items, Function(String?) onChanged, Color bg, Color textColor) { return Container(padding: const EdgeInsets.symmetric(horizontal: 16), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: DropdownButtonHideUnderline(child: DropdownButton<String>(value: value, isExpanded: true, dropdownColor: bg, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(), onChanged: onChanged))); }
   Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])); }
-  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFFD4FF00), inactiveTrackColor: hintColor)]); }
+  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFF0D9488), inactiveTrackColor: hintColor)]); }
 }

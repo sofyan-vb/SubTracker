@@ -153,7 +153,7 @@ class _TermsScreenState extends State<TermsScreen> {
                     flex: 2,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFD4FF00), padding: const EdgeInsets.symmetric(vertical: 18),
+                        backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 18),
                         elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: _isLoading ? null : () => _acceptTerms(context),

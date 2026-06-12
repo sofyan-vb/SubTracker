@@ -99,7 +99,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: const Color(0xFF09090B),
+          backgroundColor: const Color(0xFF0B101E),
           resizeToAvoidBottomInset: true, 
           body: Stack(
             children: [
@@ -175,7 +175,7 @@ class _SplashScreenState extends State<SplashScreen> {
                               
                               
                               if (_state == SplashState.form || _state == SplashState.loading) ...[
-                                const Icon(Icons.face_retouching_natural_rounded, size: 65, color: Color(0xFFD4FF00)), 
+                                Image.asset('assets/icon.png', width: 80, height: 80), 
                                 const SizedBox(height: 16),
                                 Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
                                 const SizedBox(height: 8),
@@ -188,12 +188,12 @@ class _SplashScreenState extends State<SplashScreen> {
                                   decoration: InputDecoration(
                                     labelText: tr('Nama Panggilan', 'Nickname'),
                                     labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                    prefixIcon: const Icon(Icons.person, color: Color(0xFFD4FF00), size: 22),
-                                    filled: true, fillColor: const Color(0xFF1A1A1C).withOpacity(0.85),
+                                    prefixIcon: const Icon(Icons.person, color: Color(0xFF0D9488), size: 22),
+                                    filled: true, fillColor: const Color(0xFF151B2B),
                                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                                     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFFD4FF00), width: 1.5)),
+                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
                                   ),
                                 ),
 
@@ -242,7 +242,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                     height: 8,
                                     width: _onboardingPageIndex == index ? 24 : 8,
                                     decoration: BoxDecoration(
-                                      color: _onboardingPageIndex == index ? const Color(0xFFD4FF00) : Colors.white24,
+                                      color: _onboardingPageIndex == index ? const Color(0xFF0D9488) : Colors.white24,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   )),
@@ -284,7 +284,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                             height: 60,
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: const Color(0xFFD4FF00),
+                                                backgroundColor: const Color(0xFF0D9488),
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                                 elevation: 0,
                                               ),
@@ -310,7 +310,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                     width: double.infinity, height: 60,
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFD4FF00), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                        backgroundColor: const Color(0xFF0D9488), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                         elevation: 0,
                                       ),
                                       onPressed: _state == SplashState.loading ? null : () {
@@ -551,7 +551,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
       valueListenable: languageNotifier,
       builder: (context, lang, child) {
         return Scaffold(
-          backgroundColor: const Color(0xFF09090B),
+          backgroundColor: const Color(0xFF0B101E),
           body: Stack(
             alignment: Alignment.center,
             children: [
@@ -566,7 +566,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
              
               Positioned.fill(
                 child: Container(
-                  color: const Color(0xFF09090B).withOpacity(0.68),
+                  color: const Color(0xFF0B101E).withOpacity(0.90),
                 ),
               ),
 
@@ -581,7 +581,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                       child: Container(
                         width: 110, height: 110,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4FF00), 
+                          color: const Color(0xFF0D9488), 
                           borderRadius: BorderRadius.circular(32),
                         ),
                         child: const Center(
@@ -623,7 +623,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                     Text(
                                       tr('Selamat Datang Kembali,', 'Welcome Back,'),
                                       style: const TextStyle(
-                                        color: Colors.white60,
+                                        color: Colors.white54,
                                         fontSize: 15,
                                         fontWeight: FontWeight.w500,
                                         letterSpacing: 0.5,
@@ -647,11 +647,11 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
+                                        boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
                                       ),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFFD4FF00),
+                                          backgroundColor: const Color(0xFF0D9488),
                                           padding: const EdgeInsets.symmetric(vertical: 20),
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                           elevation: 0,
@@ -829,7 +829,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF09090B),
+      color: const Color(0xFF0B101E),
       width: double.infinity,
       child: Stack(
         alignment: Alignment.center,
@@ -838,7 +838,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
             top: MediaQuery.of(context).size.height * 0.35,
             child: Container(
               width: 250, height: 250,
-              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.06), blurRadius: 100, spreadRadius: 50)]),
+              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withOpacity(0.06), blurRadius: 100, spreadRadius: 50)]),
             ),
           ),
           
@@ -868,7 +868,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0, 
-                      shadows: [Shadow(color: Color(0xFFD4FF00), blurRadius: 25)]
+                      shadows: [Shadow(color: Color(0xFF0D9488), blurRadius: 25)]
                     ),
                   ),
                 ),
@@ -896,11 +896,11 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                 child: _showButton ? Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: const Color(0xFFD4FF00).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
+                    boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
                   ),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD4FF00),
+                      backgroundColor: const Color(0xFF0D9488),
                       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                       elevation: 0,
@@ -1074,7 +1074,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
         Positioned.fill(
           child: IgnorePointer(
             child: Container(
-              color: const Color(0xFF09090B).withOpacity(0.70),
+              color: const Color(0xFF0B101E).withOpacity(0.90),
             ),
           ),
         ),

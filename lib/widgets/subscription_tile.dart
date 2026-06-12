@@ -62,7 +62,7 @@ class _SubTileState extends State<SubTile> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFD4FF00).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.edit_document, color: Color(0xFFD4FF00))),
+                Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.edit_document, color: Color(0xFF0D9488))),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -78,7 +78,7 @@ class _SubTileState extends State<SubTile> {
                     ],
                   ),
                 ),
-                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Color(0xFFD4FF00), fontSize: 16, fontWeight: FontWeight.w900)),
+                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Color(0xFF0D9488), fontSize: 16, fontWeight: FontWeight.w900)),
               ],
             ),
           ),

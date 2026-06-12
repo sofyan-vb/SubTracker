@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -10,7 +15,7 @@ import '../widgets/subscription_tile.dart';
 import 'add_screen.dart'; 
 
 
-final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Hitam');
+final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Putih');
 final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); 
 final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); 
 
@@ -91,7 +96,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.notifications_active_rounded, color: Color(0xFFD4FF00)),
+                      const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488)),
                       const SizedBox(width: 12),
                       Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
                     ],
@@ -173,9 +178,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: isActive ? const Color(0xFFD4FF00) : defaultTextColor.withOpacity(0.6)),
-      title: Text(title, style: TextStyle(color: isActive ? const Color(0xFFD4FF00) : defaultTextColor, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
-      trailing: isActive ? const Icon(Icons.check_circle, color: Color(0xFFD4FF00)) : null,
+      leading: Icon(icon, color: isActive ? const Color(0xFF0D9488) : defaultTextColor.withOpacity(0.6)),
+      title: Text(title, style: TextStyle(color: isActive ? const Color(0xFF0D9488) : defaultTextColor, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
+      trailing: isActive ? const Icon(Icons.check_circle, color: Color(0xFF0D9488)) : null,
       onTap: () {
         if (title == 'Closest' || title == 'Terdekat') provider.setSortBy('Terdekat');
         else if (title == 'Highest Price' || title == 'Termahal') provider.setSortBy('Termahal');
@@ -206,20 +211,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       valueListenable: themeNotifier,
       builder: (context, currentTheme, child) {
         
-        Color scaffoldBg = const Color(0xFF09090B); 
-        Color bottomNavBg = const Color(0xFF121214);
-        Color textColor = Colors.white;
-        Color appBarIcons = Colors.white;
-        
-        if (currentTheme == 'Putih') {
-          scaffoldBg = const Color(0xFFF5F5F5); 
-          bottomNavBg = Colors.white;
-          textColor = Colors.black87;
-          appBarIcons = Colors.black87;
-        } else if (currentTheme == 'Biru') {
-          scaffoldBg = const Color(0xFF0B101E); 
-          bottomNavBg = const Color(0xFF151B2B); 
-        }
+        // Tema Opsi A: Fintech Light Mode (Aktif Permanen)
+        Color scaffoldBg = const Color(0xFFF8F9FA); 
+        Color bottomNavBg = Colors.white;
+        Color textColor = const Color(0xFF1E293B); 
+        Color appBarIcons = const Color(0xFF0F172A);
 
         return Stack(
           children: [
@@ -306,7 +302,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
               floatingActionButton: FloatingActionButton(
                 elevation: 0, hoverElevation: 0, highlightElevation: 0,
-                backgroundColor: const Color(0xFFD4FF00), 
+                backgroundColor: const Color(0xFF0D9488), 
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 child: const Icon(Icons.add, size: 32, color: Colors.black), 
                 onPressed: _isLoadingAdd
@@ -339,20 +335,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround, 
                     children: [
                       IconButton(
-                        icon: Icon(Icons.dashboard_rounded, color: _currentIndex == 0 ? const Color(0xFFD4FF00) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
+                        icon: Icon(Icons.space_dashboard_outlined, color: _currentIndex == 0 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
                         onPressed: () => setState(() => _currentIndex = 0),
                       ),
                       IconButton(
-                        icon: Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFFD4FF00) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
+                        icon: Icon(Icons.calendar_month_outlined, color: _currentIndex == 1 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
                         onPressed: () => setState(() => _currentIndex = 1),
                       ),
                       const SizedBox(width: 48),
                       IconButton(
-                        icon: Icon(Icons.insert_chart_rounded, color: _currentIndex == 2 ? const Color(0xFFD4FF00) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
+                        icon: Icon(Icons.insert_chart_outlined, color: _currentIndex == 2 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
                         onPressed: () => setState(() => _currentIndex = 2),
                       ),
                       IconButton(
-                        icon: Icon(Icons.settings_rounded, color: _currentIndex == 3 ? const Color(0xFFD4FF00) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
+                        icon: Icon(Icons.settings_outlined, color: _currentIndex == 3 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
                         onPressed: () => setState(() => _currentIndex = 3),
                       ),
                     ],
@@ -470,7 +466,7 @@ class _HomeView extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                       padding: const EdgeInsets.all(28),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFD4FF00), 
+                        color: const Color(0xFF0D9488), 
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                       ),
@@ -481,11 +477,11 @@ class _HomeView extends StatelessWidget {
                             children: [
                               Container(
                                 padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                                child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
+                                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                                child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 20),
                               ),
                               const SizedBox(width: 12),
-                              Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                              Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
                             ],
                           ),
                           const SizedBox(height: 24),
@@ -493,7 +489,7 @@ class _HomeView extends StatelessWidget {
                             fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
                             child: Text(
                               currencyFormat.format(provider.totalMonthly),
-                              style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                              style: const TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                             ),
                           ),
                         ],
@@ -513,7 +509,7 @@ class _HomeView extends StatelessWidget {
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                                 child: Row(
                                   children: [
                                     const Icon(Icons.widgets_rounded, color: Colors.cyanAccent, size: 20),
@@ -533,7 +529,7 @@ class _HomeView extends StatelessWidget {
                             Expanded(
                               child: Container(
                                 padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                                 child: Row(
                                   children: [
                                     const Icon(Icons.analytics_rounded, color: Colors.orangeAccent, size: 20),
@@ -567,7 +563,7 @@ class _HomeView extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: cardBg, 
                           borderRadius: BorderRadius.circular(16), 
-                          border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)
+                          border: Border.all(color: Colors.white10)
                         ),
                         child: Row(
                           children: [
@@ -647,7 +643,7 @@ class _HomeView extends StatelessWidget {
                             ),
                             const SizedBox(height: 16),
                             BlinkingWidget(
-                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
+                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withOpacity(0.5), size: 32)
                             ),
                           ],
                         ),
@@ -703,7 +699,7 @@ class _HomeView extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                     padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD4FF00), 
+                      color: const Color(0xFF0D9488), 
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                     ),
@@ -714,11 +710,11 @@ class _HomeView extends StatelessWidget {
                           children: [
                             Container(
                               padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: Colors.black.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                              child: const Icon(Icons.account_balance_wallet, color: Colors.black, size: 20),
+                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                              child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 20),
                             ),
                             const SizedBox(width: 12),
-                            Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.bold)),
+                            Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         const SizedBox(height: 24),
@@ -726,7 +722,7 @@ class _HomeView extends StatelessWidget {
                           fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
                           child: Text(
                             currencyFormat.format(provider.totalMonthly),
-                            style: const TextStyle(color: Colors.black, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                            style: const TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                           ),
                         ),
                       ],
@@ -744,7 +740,7 @@ class _HomeView extends StatelessWidget {
                           Expanded(
                             child: Container(
                               padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                               child: Row(
                                 children: [
                                   const Icon(Icons.widgets_rounded, color: Colors.cyanAccent, size: 20),
@@ -764,7 +760,7 @@ class _HomeView extends StatelessWidget {
                           Expanded(
                             child: Container(
                               padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)),
+                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                               child: Row(
                                 children: [
                                   const Icon(Icons.analytics_rounded, color: Colors.orangeAccent, size: 20),
@@ -796,7 +792,7 @@ class _HomeView extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: cardBg, 
                         borderRadius: BorderRadius.circular(16), 
-                        border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10)
+                        border: Border.all(color: Colors.white10)
                       ),
                       child: Row(
                         children: [
@@ -872,7 +868,7 @@ class _HomeView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 40),
                                 BlinkingWidget(
-                                  child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFFD4FF00).withOpacity(0.5), size: 32)
+                                  child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withOpacity(0.5), size: 32)
                                 ),
                               ],
                             ),
@@ -1019,7 +1015,7 @@ class _CalendarViewState extends State<_CalendarView> {
                       decoration: BoxDecoration(
                         color: cardBg, 
                         borderRadius: BorderRadius.circular(20), 
-                        border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade200 : Colors.white10),
+                        border: Border.all(color: widget.Colors.white10),
                         boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                       ),
                       child: Column(
@@ -1056,7 +1052,7 @@ class _CalendarViewState extends State<_CalendarView> {
                               Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
 
                               if (isSelected) {
-                                circleColor = isHoliday ? Colors.redAccent : const Color(0xFFD4FF00);
+                                circleColor = isHoliday ? Colors.redAccent : const Color(0xFF0D9488);
                                 dayTextColor = isHoliday ? Colors.white : Colors.black; 
                               } else if (isToday) {
                                 circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
@@ -1072,7 +1068,7 @@ class _CalendarViewState extends State<_CalendarView> {
                                     children: [
                                       Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
                                       if (hasBill) 
-                                        Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFFD4FF00), shape: BoxShape.circle))),
+                                        Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFF0D9488), shape: BoxShape.circle))),
                                     ],
                                   ),
                                 ),
@@ -1166,7 +1162,7 @@ class _CalendarViewState extends State<_CalendarView> {
                     decoration: BoxDecoration(
                       color: cardBg, 
                       borderRadius: BorderRadius.circular(20), 
-                      border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade200 : Colors.white10),
+                      border: Border.all(color: widget.Colors.white10),
                       boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                     ),
                     child: Column(
@@ -1203,7 +1199,7 @@ class _CalendarViewState extends State<_CalendarView> {
                             Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
 
                             if (isSelected) {
-                              circleColor = isHoliday ? Colors.redAccent : const Color(0xFFD4FF00);
+                              circleColor = isHoliday ? Colors.redAccent : const Color(0xFF0D9488);
                               dayTextColor = isHoliday ? Colors.white : Colors.black; 
                             } else if (isToday) {
                               circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
@@ -1219,7 +1215,7 @@ class _CalendarViewState extends State<_CalendarView> {
                                   children: [
                                     Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
                                     if (hasBill) 
-                                      Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFFD4FF00), shape: BoxShape.circle))),
+                                      Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFF0D9488), shape: BoxShape.circle))),
                                   ],
                                 ),
                               ),
@@ -1347,7 +1343,83 @@ class _StatsView extends StatelessWidget {
             FadeInSlide(delay: const Duration(milliseconds: 400), child: Text(tr('Analisis Kategori', 'Category Analysis'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
             const SizedBox(height: 16),
 
+                        if (breakdown.isNotEmpty)
+              FadeInSlide(
+                delay: const Duration(milliseconds: 450),
+                child: Container(
+                  height: 240,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: cardBg,
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: PieChart(
+                          PieChartData(
+                            sectionsSpace: 4,
+                            centerSpaceRadius: 40,
+                            sections: breakdown.entries.toList().asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final amount = entry.value.value;
+                              
+                              final colors = [
+                                const Color(0xFF0D9488), 
+                                const Color(0xFF14B8A6), 
+                                const Color(0xFF2DD4BF), 
+                                const Color(0xFF5EEAD4), 
+                                const Color(0xFF99F6E4),
+                                const Color(0xFFCCFBF1)
+                              ];
+                              
+                              return PieChartSectionData(
+                                color: colors[index % colors.length],
+                                value: amount,
+                                title: '',
+                                radius: 25 + (index == 0 ? 5.0 : 0.0), // highlight the biggest
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 2,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: breakdown.entries.take(4).toList().asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final name = entry.value.key;
+                            final colors = [
+                                const Color(0xFF0D9488), 
+                                const Color(0xFF14B8A6), 
+                                const Color(0xFF2DD4BF), 
+                                const Color(0xFF5EEAD4)
+                            ];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Row(
+                                children: [
+                                  Container(width: 12, height: 12, decoration: BoxDecoration(color: colors[index], shape: BoxShape.circle)),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: Text(name, style: TextStyle(color: textColor, fontSize: 12), overflow: TextOverflow.ellipsis)),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
             if (breakdown.isEmpty)
+  
               FadeInSlide(
                 delay: const Duration(milliseconds: 500),
                 child: Container(
@@ -1385,7 +1457,7 @@ class _StatsView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(category, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text(currencyFormat.format(amount), style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.w900, fontSize: 16)),
+                          Text(currencyFormat.format(amount), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.w900, fontSize: 16)),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -1395,7 +1467,7 @@ class _StatsView extends StatelessWidget {
                         child: LinearProgressIndicator(
                           value: percentage,
                           backgroundColor: theme == 'Putih' ? Colors.grey.shade200 : Colors.white.withOpacity(0.05),
-                          color: const Color(0xFFD4FF00),
+                          color: const Color(0xFF0D9488),
                           minHeight: 12, 
                         ),
                       ),
@@ -1488,47 +1560,51 @@ class _SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<_SettingsView> {
-  bool _notifEnabled = true; 
+  bool _notifEnabled = true;
 
+  Future<void> _backupData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final data = prefs.getString('saved_subs') ?? '[]';
+      
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/subtracker_backup.json');
+      await file.writeAsString(data);
+      
+      final result = await Share.shareXFiles(
+        [XFile(file.path)], 
+        text: 'Ini adalah backup data langganan SubTracker Anda. Simpan file ini di tempat yang aman.'
+      );
+    } catch(e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup Gagal: $e')));
+    }
+  }
 
+  Future<void> _restoreData() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
 
-  void _showThemeSelector() {
-    final isLight = widget.theme == 'Putih';
-    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
-    final textColor = isLight ? Colors.black87 : Colors.white;
-    final unselectedRadioColor = isLight ? Colors.black54 : Colors.white54; 
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.palette, color: Color(0xFFD4FF00)), const SizedBox(width: 10), Text(tr('Pilih Tema', 'Choose Theme'), style: TextStyle(color: textColor))]),
+      if (result != null) {
+        File file = File(result.files.single.path!);
+        String data = await file.readAsString();
         
-        content: Theme(
-          data: Theme.of(context).copyWith(
-            unselectedWidgetColor: unselectedRadioColor,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: ['Hitam', 'Putih', 'Biru'].map((themeName) {
-              return RadioListTile<String>(
-                title: Text(themeName, style: TextStyle(color: textColor)),
-                value: themeName,
-                groupValue: themeNotifier.value, 
-                activeColor: const Color(0xFFD4FF00),
-                onChanged: (val) async {
-                  themeNotifier.value = val!; 
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setString('saved_app_theme', val); 
-                  if (mounted) Navigator.pop(ctx);
-                },
-              );
-            }).toList(),
-          ),
-        ),
-      ),
-    );
+        if (data.startsWith('[') && data.endsWith(']')) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('saved_subs', data);
+          
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data berhasil dipulihkan! Tutup dan buka ulang aplikasi.')));
+          }
+        } else {
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Format file backup tidak valid!')));
+        }
+      }
+    } catch(e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore Gagal: $e')));
+    }
   }
 
   void _showLanguageSelector() {
@@ -1542,7 +1618,7 @@ class _SettingsViewState extends State<_SettingsView> {
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.language, color: Color(0xFFD4FF00)), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
+        title: Row(children: [const Icon(Icons.language, color: Color(0xFF0D9488)), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
         
         content: Theme(
           data: Theme.of(context).copyWith(
@@ -1555,7 +1631,7 @@ class _SettingsViewState extends State<_SettingsView> {
                 title: Text('English', style: TextStyle(color: textColor)),
                 value: 'EN',
                 groupValue: languageNotifier.value, 
-                activeColor: const Color(0xFFD4FF00),
+                activeColor: const Color(0xFF0D9488),
                 onChanged: (val) async {
                   languageNotifier.value = val!; 
                   final prefs = await SharedPreferences.getInstance();
@@ -1567,7 +1643,7 @@ class _SettingsViewState extends State<_SettingsView> {
                 title: Text('Bahasa Indonesia', style: TextStyle(color: textColor)),
                 value: 'ID',
                 groupValue: languageNotifier.value, 
-                activeColor: const Color(0xFFD4FF00),
+                activeColor: const Color(0xFF0D9488),
                 onChanged: (val) async {
                   languageNotifier.value = val!; 
                   final prefs = await SharedPreferences.getInstance();
@@ -1615,7 +1691,7 @@ class _SettingsViewState extends State<_SettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16)),
                         const SizedBox(height: 8),
                         Text(tr('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTracker, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
@@ -1666,7 +1742,6 @@ class _SettingsViewState extends State<_SettingsView> {
                                             themeNotifier.value = 'Hitam';
                                             userNameNotifier.value = ''; 
                                             
-                                            
                                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Sistem berhasil di-reboot. Semua data telah dikosongkan.', 'System rebooted. All data cleared.'), style: const TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
                                           }, 
                                           child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
@@ -1709,10 +1784,10 @@ class _SettingsViewState extends State<_SettingsView> {
             width: 28, height: 28,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: const Color(0xFFD4FF00).withOpacity(0.15),
+              color: const Color(0xFF0D9488).withOpacity(0.15),
               shape: BoxShape.circle,
             ),
-            child: Text(number, style: const TextStyle(color: Color(0xFFD4FF00), fontWeight: FontWeight.bold, fontSize: 13)),
+            child: Text(number, style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 13)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -1771,11 +1846,11 @@ class _SettingsViewState extends State<_SettingsView> {
                 ),
                 child: SwitchListTile(
                   activeColor: Colors.black,
-                  activeTrackColor: const Color(0xFFD4FF00),
+                  activeTrackColor: const Color(0xFF0D9488),
                   inactiveThumbColor: Colors.grey,
                   inactiveTrackColor: Colors.black26,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  secondary: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.notifications_active_rounded, color: Color(0xFFD4FF00), size: 24)),
+                  secondary: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488), size: 24)),
                   title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
                   subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 12)),
                   value: _notifEnabled,
@@ -1794,10 +1869,13 @@ class _SettingsViewState extends State<_SettingsView> {
 
             FadeInSlide(
               delay: const Duration(milliseconds: 300),
-              child: _buildSettingTile(Icons.dark_mode_rounded, tr('Tema Aplikasi', 'App Theme'), widget.theme, _showThemeSelector, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.save_rounded, tr('Cadangkan Data', 'Backup Data'), tr('Ekspor ke File', 'Export to File'), _backupData, cardBg, textColor, subTextColor, widget.theme),
             ),
-
-
+            const SizedBox(height: 12),
+            FadeInSlide(
+              delay: const Duration(milliseconds: 350),
+              child: _buildSettingTile(Icons.restore_rounded, tr('Pulihkan Data', 'Restore Data'), tr('Impor dari File', 'Import from File'), _restoreData, cardBg, textColor, subTextColor, widget.theme),
+            ),
 
             FadeInSlide(
               delay: const Duration(milliseconds: 400),
@@ -1813,7 +1891,7 @@ class _SettingsViewState extends State<_SettingsView> {
                   applicationName: 'SubTracker',
                   applicationVersion: '1.0.0',
                   applicationLegalese: 'Developed carefully.\n© 2026 Copyright.',
-                  applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFFD4FF00), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.black)),
+                  applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF0D9488), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.black)),
                 ),
                 cardBg, textColor, subTextColor, widget.theme
               ),
@@ -1835,7 +1913,7 @@ class _SettingsViewState extends State<_SettingsView> {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: const Color(0xFFD4FF00), size: 24)),
+        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: const Color(0xFF0D9488), size: 24)),
         title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
         subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 12))),
         trailing: Icon(Icons.chevron_right_rounded, color: subTextColor),

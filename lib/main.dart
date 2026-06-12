@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF09090B),
         appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF09090B), elevation: 0),
-        colorScheme: const ColorScheme.dark(primary: Color(0xFFD4FF00), secondary: Color(0xFFD4FF00)),
+        colorScheme: const ColorScheme.dark(primary: Color(0xFF0D9488), secondary: Color(0xFF0D9488)),
         useMaterial3: true,
       ),
       home: const GateKeeper(), 
@@ -101,7 +101,7 @@ class _GateKeeperState extends State<GateKeeper> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.language_rounded, size: 80, color: Color(0xFFD4FF00)),
+                const Icon(Icons.language_rounded, size: 80, color: Color(0xFF0D9488)),
                 const SizedBox(height: 24),
                 const Text('Choose Language', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white)),
                 const Text('Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white54)),
@@ -114,7 +114,7 @@ class _GateKeeperState extends State<GateKeeper> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1A1A1C),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      side: const BorderSide(color: Color(0xFFD4FF00), width: 1.5),
+                      side: const BorderSide(color: Color(0xFF0D9488), width: 1.5),
                       elevation: 0,
                     ),
                     onPressed: () async {
@@ -138,7 +138,7 @@ class _GateKeeperState extends State<GateKeeper> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF1A1A1C),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      side: const BorderSide(color: Color(0xFFD4FF00), width: 1.5),
+                      side: const BorderSide(color: Color(0xFF0D9488), width: 1.5),
                       elevation: 0,
                     ),
                     onPressed: () async {
@@ -270,7 +270,7 @@ class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> with Si
               children: [
                 Text(
                   _staticPart,
-                  style: const TextStyle(color: Color(0xFFD4FF00), fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 1.5, height: 1.5),
+                  style: const TextStyle(color: Color(0xFF0D9488), fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 1.5, height: 1.5),
                 ),
               ],
             ),
