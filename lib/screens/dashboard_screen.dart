@@ -308,13 +308,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
               floatingActionButton: Container(
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF2DD4BF), Color(0xFF0D9488)],
+                    colors: [Color(0xFF64FFDA), Color(0xFF004D40)],
                     begin: Alignment.topLeft, end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.4), blurRadius: 15, offset: const Offset(0, 6))
-                  ],
                 ),
                 child: FloatingActionButton(
                   elevation: 0, hoverElevation: 0, highlightElevation: 0, focusElevation: 0,
@@ -1395,23 +1392,42 @@ class _StatsView extends StatelessWidget {
                     children: [
                       Expanded(
                         flex: 3,
-                        child: PieChart(
-                          PieChartData(
-                            sectionsSpace: 4,
-                            centerSpaceRadius: 40,
-                            sections: breakdown.entries.toList().asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final amount = entry.value.value;
-                              
-                              final percentage = totalMonthly > 0 ? (amount / totalMonthly * 100) : 0;
-                              return PieChartSectionData(
-                                color: CategoryUtils.getColor(entry.value.key),
-                                value: amount,
-                                title: '${percentage.toStringAsFixed(1)}%',
-                                titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-                                radius: 45 + (index == 0 ? 5.0 : 0.0), 
-                              );
-                            }).toList(),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              PieChart(
+                                PieChartData(
+                                  sectionsSpace: 4,
+                                  centerSpaceRadius: 50,
+                                  sections: breakdown.entries.toList().asMap().entries.map((entry) {
+                                    final index = entry.key;
+                                    final amount = entry.value.value;
+                                    
+                                    final percentage = totalMonthly > 0 ? (amount / totalMonthly * 100) : 0;
+                                    return PieChartSectionData(
+                                      color: CategoryUtils.getColor(entry.value.key),
+                                      value: amount,
+                                      title: '${percentage.toStringAsFixed(1)}%',
+                                      titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                                      radius: 25 + (index == 0 ? 5.0 : 0.0), 
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(tr('Total', 'Total'), style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                                  Text(
+                                    currencyFormat.format(totalMonthly),
+                                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -1619,7 +1635,7 @@ class _SettingsViewState extends State<_SettingsView> {
         text: 'Ini adalah backup data langganan SubTracker Anda. Simpan file ini di tempat yang aman.'
       );
     } catch(e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup Gagal: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup Gagal: $e', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
     }
   }
 
@@ -1639,14 +1655,14 @@ class _SettingsViewState extends State<_SettingsView> {
           await prefs.setString('saved_subs', data);
           
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data berhasil dipulihkan! Tutup dan buka ulang aplikasi.')));
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data berhasil dipulihkan Tutup dan buka ulang aplikasi', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
           }
         } else {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Format file backup tidak valid!')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Format file backup tidak valid', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
         }
       }
     } catch(e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore Gagal: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore Gagal: $e', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
     }
   }
 
@@ -1662,21 +1678,23 @@ class _SettingsViewState extends State<_SettingsView> {
       builder: (sheetContext) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: CurrencyUtils.data.keys.map((code) {
-              return ListTile(
-                title: Text('${CurrencyUtils.data[code]!['name']} ($code)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                trailing: currencyNotifier.value == code ? const Icon(Icons.check_circle_rounded, color: Color(0xFF0D9488)) : null,
-                onTap: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setString('app_currency', code);
-                  currencyNotifier.value = code;
-                  setState(() {});
-                  Navigator.pop(sheetContext);
-                },
-              );
-            }).toList(),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: CurrencyUtils.data.keys.map((code) {
+                return ListTile(
+                  title: Text('${CurrencyUtils.data[code]!['name']} ($code)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                  trailing: currencyNotifier.value == code ? const Icon(Icons.check_circle_rounded, color: Color(0xFF0D9488)) : null,
+                  onTap: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('app_currency', code);
+                    currencyNotifier.value = code;
+                    setState(() {});
+                    Navigator.pop(sheetContext);
+                  },
+                );
+              }).toList(),
+            ),
           ),
         );
       },
@@ -1818,7 +1836,7 @@ class _SettingsViewState extends State<_SettingsView> {
                                             themeNotifier.value = 'Hitam';
                                             userNameNotifier.value = ''; 
                                             
-                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Sistem berhasil di-reboot. Semua data telah dikosongkan.', 'System rebooted. All data cleared.'), style: const TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
                                           }, 
                                           child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
                                         ),
@@ -1932,7 +1950,7 @@ class _SettingsViewState extends State<_SettingsView> {
                   value: _notifEnabled,
                   onChanged: (val) {
                     setState(() => _notifEnabled = val);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(val ? tr('Notifikasi Diaktifkan', 'Notifications Enabled') : tr('Notifikasi Dimatikan', 'Notifications Disabled'))));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(val ? tr('Notifikasi Diaktifkan', 'Notifications Enabled') : tr('Notifikasi Dimatikan', 'Notifications Disabled'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
                   },
                 ),
               ),

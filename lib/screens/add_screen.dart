@@ -101,7 +101,7 @@ class _AddScreenState extends State<AddScreen> {
       valueListenable: themeNotifier,
       builder: (context, _, child) {
         const currentTheme = 'Biru';
-        Color scaffoldBg = const Color(0xFF0B101E); Color cardBg = const Color(0xFF151B2B); Color textColor = Colors.white; Color subTextColor = Colors.white54; Color hintColor = Colors.white24; Color iconColor = Colors.white;
+        Color scaffoldBg = const Color(0xFF0B101E); Color cardBg = const Color(0xFF151B2B); Color textColor = Colors.white; Color subTextColor = Colors.white; Color hintColor = Colors.white54; Color iconColor = Colors.white;
 
         return Scaffold(
           backgroundColor: scaffoldBg, 
@@ -153,7 +153,7 @@ class _AddScreenState extends State<AddScreen> {
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
                     onPressed: () async { 
                       if (_selectedCategory.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Pilih kategori terlebih dahulu!', 'Select a category first!'), style: const TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Pilih kategori terlebih dahulu', 'Select a category first'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
                         return;
                       }
                       if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
@@ -161,11 +161,11 @@ class _AddScreenState extends State<AddScreen> {
                         DateTime scheduledDateTime = exactDateTime.subtract(Duration(days: _reminderDays));
 
                         if (scheduledDateTime.isBefore(DateTime.now())) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Jadwal pengingat sudah terlewat!', 'Reminder schedule has passed!'), style: const TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.redAccent));
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Jadwal pengingat sudah terlewat', 'Reminder schedule has passed'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
                           return; 
                         }
 
-                        final newSub = Subscription(id: DateTime.now().millisecondsSinceEpoch.toString(), name: _nameCtrl.text, price: double.parse(_priceCtrl.text), dueDate: exactDateTime, category: _selectedCategory);
+                        final newSub = Subscription(id: DateTime.now().millisecondsSinceEpoch.toString(), name: _nameCtrl.text, price: double.tryParse(_priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0, dueDate: exactDateTime, category: _selectedCategory);
                         context.read<SubProvider>().addSub(newSub);
 
                         final prefs = await SharedPreferences.getInstance();
@@ -180,10 +180,23 @@ class _AddScreenState extends State<AddScreen> {
                         final bool isUsingAlarm = _selectedNotifType == tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)');
 
                         try { NotificationService.scheduleNotification(newSub.id.hashCode, notifTitle, notifBody, scheduledDateTime, isAlarm: isUsingAlarm); } catch (_) {}
-                        if (mounted) Navigator.pop(context); 
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(tr('Berhasil ditambahkan', 'Successfully added'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])),
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              behavior: SnackBarBehavior.floating,
+                              margin: const EdgeInsets.only(bottom: 130),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                          Navigator.pop(context); 
+                        }
                       }
                     },
-                    child: Text(tr('TAMBAHKAN', 'ADD NEW'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black)),
+                    child: Text(tr('TAMBAHKAN', 'ADD NEW'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
                   ),
                 ),
               ],

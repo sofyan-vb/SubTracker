@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart'; 
+import 'package:intl/date_symbol_data_local.dart';
 import 'dart:async';
 import 'providers/subscription_provider.dart';
 import 'services/notification_service.dart';
@@ -11,6 +12,7 @@ import 'screens/dashboard_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('id_ID', null);
   await NotificationService.init();
 
   final prefs = await SharedPreferences.getInstance();

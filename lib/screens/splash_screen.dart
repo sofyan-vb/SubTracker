@@ -188,15 +188,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
                                   child: Column(
                                     children: [
-                                      Center(
-                                        child: Container(
-                                          width: 90, height: 90,
-                                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.1)),
-                                          padding: const EdgeInsets.all(8),
-                                          child: ClipOval(child: Image.asset('assets/icon.png', fit: BoxFit.cover)),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
                                       Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
                                       const SizedBox(height: 8),
                                       Text(tr('Masukkan nama pengguna', 'Enter username'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
@@ -599,12 +590,12 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                     
                       ScaleTransition(
                         scale: _logoScale,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
+                        child: ClipOval(
                           child: Image.asset(
                             'assets/icon.png',
                             width: 110,
                             height: 110,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
@@ -640,65 +631,74 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                         letterSpacing: 0.5,
                                       ),
                                     ),
-                                    const SizedBox(height: 36),
-
-                                  
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: TextButton(
-                                        onPressed: _isLoading
-                                            ? null
-                                            : () async {
-                                                setState(() {
-                                                  _isLoading = true;
-                                                });
-                                                await Future.delayed(const Duration(milliseconds: 1200));
-                                                if (mounted) {
-                                                  widget.onEnter();
-                                                }
-                                              },
-                                        child: _isLoading
-                                            ? Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(
-                                                    tr('Memuat', 'Loading'),
-                                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  const Padding(
-                                                    padding: EdgeInsets.only(top: 4.0),
-                                                    child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0),
-                                                  ),
-                                                ],
-                                              )
-                                            : Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Text(
-                                                    'MASUK',
-                                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  AnimatedBuilder(
-                                                    animation: _arrowSlide,
-                                                    builder: (context, child) {
-                                                      return Transform.translate(
-                                                        offset: Offset(_arrowSlide.value, 0),
-                                                        child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                                                      );
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                      ),
-                                    ),
                                   ],
                                 ),
                               ),
                             ),
                           ),
                   ],
+                ),
+              ),
+
+              SafeArea(
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
+                    child: SlideTransition(
+                      position: _textSlide,
+                      child: FadeTransition(
+                        opacity: _textOpacity,
+                        child: TextButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  await Future.delayed(const Duration(milliseconds: 1200));
+                                  if (mounted) {
+                                    widget.onEnter();
+                                  }
+                                },
+                          child: _isLoading
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      tr('Memuat', 'Loading'),
+                                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Padding(
+                                      padding: EdgeInsets.only(top: 4.0),
+                                      child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0),
+                                    ),
+                                  ],
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'MASUK',
+                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    AnimatedBuilder(
+                                      animation: _arrowSlide,
+                                      builder: (context, child) {
+                                        return Transform.translate(
+                                          offset: Offset(_arrowSlide.value, 0),
+                                          child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -833,12 +833,18 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                   duration: const Duration(milliseconds: 800),
                   scale: _showSubTracker ? 1.0 : 0.5,
                   curve: Curves.easeOutBack,
-                  child: const Text(
-                    'SubTracker',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0, 
-                      shadows: [Shadow(color: Color(0xFF0D9488), blurRadius: 25)]
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [Color(0xFF64FFDA), Color(0xFF14B8A6), Color(0xFF0F766E)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(bounds),
+                    child: const Text(
+                      'SubTracker',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0, 
+                      ),
                     ),
                   ),
                 ),
