@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../models/subscription.dart';
 import '../screens/detail_screen.dart';
 import '../screens/dashboard_screen.dart'; 
+import '../utils/category_utils.dart';
+import '../utils/currency_utils.dart';
 
 class SubTile extends StatefulWidget {
   final Subscription sub;
@@ -46,18 +48,18 @@ class _SubTileState extends State<SubTile> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: languageNotifier.value == 'ID' ? 'id_ID' : 'en_US', symbol: languageNotifier.value == 'ID' ? 'Rp ' : '\$ ', decimalDigits: 0);
+    final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
     final bool isDue = widget.sub.dueDate.isBefore(DateTime.now());
     final bool isFinished = widget.sub.isFinished; 
     final String countdownText = _getCountdownText(widget.sub.dueDate);
+    final catColor = CategoryUtils.getColor(widget.sub.category);
+    final catIcon = CategoryUtils.getIcon(widget.sub.category);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF151B2B), 
+        gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white10, width: 1),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Material(
         color: Colors.transparent, borderRadius: BorderRadius.circular(20),
@@ -68,7 +70,7 @@ class _SubTileState extends State<SubTile> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.edit_document, color: Color(0xFF0D9488))),
+                Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle), child: Icon(catIcon, color: Colors.white)),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -84,7 +86,7 @@ class _SubTileState extends State<SubTile> {
                     ],
                   ),
                 ),
-                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Color(0xFF0D9488), fontSize: 16, fontWeight: FontWeight.w900)),
+                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w900)),
               ],
             ),
           ),

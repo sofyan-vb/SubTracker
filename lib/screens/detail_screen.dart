@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../models/subscription.dart';
 import '../providers/subscription_provider.dart'; 
 import 'dashboard_screen.dart';
+import '../utils/currency_utils.dart';
 
 class DetailScreen extends StatefulWidget {
   final Subscription sub;
@@ -74,19 +75,16 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void _showCheckOptions() {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF121214), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(tr('Opsi Catatan', 'Record Options'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(leading: const Icon(Icons.update, color: Color(0xFF0D9488)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
-            ListTile(leading: const Icon(Icons.task_alt, color: Colors.white), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
-          ],
-        ),
-      )
+      backgroundColor: const Color(0xFF151B2B), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(leading: const Icon(Icons.update, color: Color(0xFF0D9488)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
+          ListTile(leading: const Icon(Icons.task_alt, color: Colors.white), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
+        ],
+      ),
     );
   }
 
@@ -95,7 +93,7 @@ class _DetailScreenState extends State<DetailScreen> {
     final updatedSub = Subscription(id: currentSub.id, name: currentSub.name, price: currentSub.price, dueDate: currentSub.dueDate, category: currentSub.category, isFinished: true);
     provider.removeSub(currentSub.id); provider.addSub(updatedSub);
     setState(() { currentSub = updatedSub; });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Catatan ditandai selesai!', 'Record marked as completed!'), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), backgroundColor: Colors.white));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Catatan ditandai selesai!', 'Record marked as completed!'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), backgroundColor: const Color(0xFF0D9488)));
   }
 
   void _showRenewInput() {
@@ -103,8 +101,8 @@ class _DetailScreenState extends State<DetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        scrollable: true, backgroundColor: const Color(0xFF121214), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        scrollable: true, backgroundColor: const Color(0xFF151B2B), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -112,7 +110,7 @@ class _DetailScreenState extends State<DetailScreen> {
             const SizedBox(height: 16),
             TextField(
               controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16), filled: true, fillColor: Colors.grey.shade200, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
+              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16), filled: true, fillColor: const Color(0xFF0B101E), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
             ),
           ],
         ),
@@ -137,20 +135,20 @@ class _DetailScreenState extends State<DetailScreen> {
     final updatedSub = Subscription(id: currentSub.id, name: currentSub.name, price: currentSub.price, dueDate: newDate, category: currentSub.category, isFinished: false);
     provider.removeSub(currentSub.id); provider.addSub(updatedSub);
     setState(() { currentSub = updatedSub; });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Diperpanjang $monthsToAdd Bulan.', 'Renewed for $monthsToAdd Month(s).'), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)), backgroundColor: Colors.white));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Diperpanjang $monthsToAdd Bulan.', 'Renewed for $monthsToAdd Month(s).'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), backgroundColor: const Color(0xFF0D9488)));
   }
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: languageNotifier.value == 'ID' ? 'id_ID' : 'en_US', symbol: languageNotifier.value == 'ID' ? 'Rp ' : '\$ ', decimalDigits: 0);
+    final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
     final dateFormat = DateFormat('dd MMMM yyyy, HH:mm'); 
 
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: const Color(0xFF0B101E),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF09090B), elevation: 0,
+        backgroundColor: const Color(0xFF0B101E), elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-        title: Text(tr('Detail Langganan', 'Subscription Detail'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        title: Text(tr('Detail Langganan', 'Subscription Detail'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(icon: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF0D9488), size: 28), onPressed: _showCheckOptions),
           IconButton(icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 28), onPressed: _deleteSub),
@@ -171,7 +169,7 @@ class _DetailScreenState extends State<DetailScreen> {
               Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Color(0xFF0D9488), fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 40),
               Container(
-                width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF121214), borderRadius: BorderRadius.circular(20)),
+                width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF151B2B), borderRadius: BorderRadius.circular(20)),
                 child: Column(
                   children: [
                     Text(tr('Status Pembayaran:', 'Payment Status:'), style: const TextStyle(color: Colors.white54, fontSize: 14)),

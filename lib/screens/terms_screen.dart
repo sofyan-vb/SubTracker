@@ -38,9 +38,9 @@ class _TermsScreenState extends State<TermsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF09090B),
+      backgroundColor: const Color(0xFF0B101E),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF09090B),
+        backgroundColor: const Color(0xFF0B101E),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -64,7 +64,7 @@ class _TermsScreenState extends State<TermsScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(20), 
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A1C),
+                    color: const Color(0xFF151B2B),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.white10),
                   ),
@@ -157,7 +157,7 @@ class _TermsScreenState extends State<TermsScreen> {
                         elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       onPressed: _isLoading ? null : () => _acceptTerms(context),
-                      child: Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                      child: Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                     ),
                   ),
                 ],

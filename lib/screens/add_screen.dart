@@ -97,10 +97,9 @@ class _AddScreenState extends State<AddScreen> {
 
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
-      builder: (context, currentTheme, child) {
-        Color scaffoldBg = const Color(0xFF09090B); Color cardBg = const Color(0xFF121214); Color textColor = Colors.white; Color subTextColor = Colors.white54; Color hintColor = Colors.white24; Color iconColor = Colors.white;
-        if (currentTheme == 'Putih') { scaffoldBg = const Color(0xFFF5F5F5); cardBg = Colors.white; textColor = Colors.black87; subTextColor = Colors.black54; hintColor = Colors.black26; iconColor = Colors.black87; } 
-        else if (currentTheme == 'Biru') { scaffoldBg = const Color(0xFF0B101E); cardBg = const Color(0xFF151B2B); }
+      builder: (context, _, child) {
+        const currentTheme = 'Biru';
+        Color scaffoldBg = const Color(0xFF0B101E); Color cardBg = const Color(0xFF151B2B); Color textColor = Colors.white; Color subTextColor = Colors.white54; Color hintColor = Colors.white24; Color iconColor = Colors.white;
 
         return Scaffold(
           backgroundColor: scaffoldBg, 

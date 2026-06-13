@@ -21,9 +21,9 @@ void main() {
     int g = p.g.toInt();
     int b = p.b.toInt();
     
-    // Ignore near white or near black to find the true accent color
+    
     if ((r > 30 || g > 30 || b > 30) && (r < 240 || g < 240 || b < 240)) {
-        // Group colors slightly to reduce noise (by shifting bits)
+        
         int rG = (r ~/ 10) * 10;
         int gG = (g ~/ 10) * 10;
         int bG = (b ~/ 10) * 10;

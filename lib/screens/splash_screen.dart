@@ -126,7 +126,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
 
           
-          if (_state == SplashState.form || _state == SplashState.loading)
+          if (_state == SplashState.form || _state == SplashState.loading) ...[
             const Positioned.fill(
               child: StaggeredAlbumBackground(
                 img1: 'assets/welcome1.jpg', 
@@ -134,6 +134,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 img3: 'assets/welcome2.jpg', 
               ),
             ),
+          ],
 
         
           if (_state == SplashState.onboarding || _state == SplashState.form || _state == SplashState.loading)
@@ -175,35 +176,43 @@ class _SplashScreenState extends State<SplashScreen> {
                               
                               
                               if (_state == SplashState.form || _state == SplashState.loading) ...[
-                                Center(
-                                  child: Container(
-                                    width: 90, height: 90,
-                                    decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF151B2B)),
-                                    padding: const EdgeInsets.all(8),
-                                    child: ClipOval(child: Image.asset('assets/icon.png', fit: BoxFit.cover)),
+                              if (_state == SplashState.form || _state == SplashState.loading) ...[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+                                  child: Column(
+                                    children: [
+                                      Center(
+                                        child: Container(
+                                          width: 90, height: 90,
+                                          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.1)),
+                                          padding: const EdgeInsets.all(8),
+                                          child: ClipOval(child: Image.asset('assets/icon.png', fit: BoxFit.cover)),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
+                                      const SizedBox(height: 8),
+                                      Text(tr('Masukkan nama pengguna', 'Enter username'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                      const SizedBox(height: 32),
+                                      
+                                      TextField(
+                                        controller: _nameCtrl,
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        decoration: InputDecoration(
+                                          labelText: tr('Nama Pengguna', 'Username'),
+                                          labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
+                                          prefixIcon: const Icon(Icons.person, color: Color(0xFF0D9488), size: 22),
+                                          filled: true, fillColor: const Color(0xFF151B2B).withOpacity(0.5),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
-                                const SizedBox(height: 8),
-                                Text(tr('Masukkan nama pengguna', 'Enter username'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
-                                const SizedBox(height: 32),
-                                
-                                TextField(
-                                  controller: _nameCtrl,
-                                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                  decoration: InputDecoration(
-                                    labelText: tr('Nama Pengguna', 'Username'),
-                                    labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                    prefixIcon: const Icon(Icons.person, color: Color(0xFF0D9488), size: 22),
-                                    filled: true, fillColor: const Color(0xFF151B2B),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
-                                  ),
-                                ),
-
+                              ] 
                               ] 
                               
                              
@@ -292,8 +301,8 @@ class _SplashScreenState extends State<SplashScreen> {
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: const Color(0xFF0D9488),
+                                                foregroundColor: Colors.white,
                                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                                                elevation: 0,
                                               ),
                                               onPressed: () {
                                                 if (_onboardingPageIndex < 2) {
@@ -301,10 +310,10 @@ class _SplashScreenState extends State<SplashScreen> {
                                                 } else {
                                                   setState(() => _state = SplashState.form); 
                                                 }
-                                              }, 
+                                              },
                                               child: FittedBox(
                                                 fit: BoxFit.scaleDown,
-                                                child: Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1.0)),
+                                                child: Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
                                               ),
                                             ),
                                           ),
@@ -317,8 +326,9 @@ class _SplashScreenState extends State<SplashScreen> {
                                     width: double.infinity, height: 60,
                                     child: ElevatedButton(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF0D9488), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                                        elevation: 0,
+                                        backgroundColor: const Color(0xFF0D9488),
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                                       ),
                                       onPressed: _state == SplashState.loading ? null : () {
                                         if (_state == SplashState.onboarding) {
@@ -326,8 +336,8 @@ class _SplashScreenState extends State<SplashScreen> {
                                         } else if (_state == SplashState.form) {
                                           _processEntry(); 
                                         }
-                                      }, 
-                                      child: Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black, letterSpacing: 1.0)),
+                                      },
+                                      child: Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
                                     ),
                                   );
                                 },
@@ -601,20 +611,9 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                       position: _textSlide,
                       child: FadeTransition(
                         opacity: _textOpacity,
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 24),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(28),
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 18.0, sigmaY: 18.0),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.06),
-                                  borderRadius: BorderRadius.circular(28),
-                                  border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
-                                ),
-                                child: Column(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
@@ -640,17 +639,13 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                     const SizedBox(height: 36),
 
                                   
-                                    Container(
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
+                                    SizedBox(
+                                      width: double.infinity, height: 64,
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: const Color(0xFF0D9488),
-                                          padding: const EdgeInsets.symmetric(vertical: 20),
+                                          foregroundColor: Colors.white,
                                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                          elevation: 0,
                                         ),
                                         onPressed: _isLoading
                                             ? null
@@ -675,7 +670,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                     style: const TextStyle(
                                                       fontSize: 15,
                                                       fontWeight: FontWeight.bold,
-                                                      color: Colors.black,
+                                                      color: Colors.white,
                                                       letterSpacing: 1.2,
                                                     ),
                                                   ),
@@ -683,7 +678,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                   const Padding(
                                                     padding: EdgeInsets.only(top: 4.0),
                                                     child: WavyDotsProgressIndicator(
-                                                      color: Colors.black,
+                                                      color: Colors.white,
                                                       dotSize: 5.0,
                                                     ),
                                                   ),
@@ -692,12 +687,12 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                             : Row(
                                                 mainAxisAlignment: MainAxisAlignment.center,
                                                 children: [
-                                                  Text(
+                                                  const Text(
                                                     'MASUK',
-                                                    style: const TextStyle(
+                                                    style: TextStyle(
                                                       fontSize: 15,
                                                       fontWeight: FontWeight.bold,
-                                                      color: Colors.black,
+                                                      color: Colors.white,
                                                       letterSpacing: 1.2,
                                                     ),
                                                   ),
@@ -707,7 +702,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                                     builder: (context, child) {
                                                       return Transform.translate(
                                                         offset: Offset(_arrowSlide.value, 0),
-                                                        child: const Icon(Icons.arrow_forward_rounded, color: Colors.black, size: 20),
+                                                        child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
                                                       );
                                                     },
                                                   ),
@@ -720,9 +715,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -807,7 +799,6 @@ class WelcomeNewView extends StatefulWidget {
 
 class _WelcomeNewViewState extends State<WelcomeNewView> {
   bool _showSubTracker = false;
-  bool _showButton = false;
 
   @override
   void initState() {
@@ -817,7 +808,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
       if (mounted) setState(() => _showSubTracker = true);
     });
     
-    Future.delayed(const Duration(milliseconds: 2800), () {
+    Future.delayed(const Duration(milliseconds: 5800), () {
       if (mounted) widget.onNext();
     });
   }
@@ -884,35 +875,6 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
               ),
 
               const SizedBox(height: 60),
-
-              
-              AnimatedOpacity(
-                duration: const Duration(milliseconds: 800),
-                opacity: _showButton ? 1.0 : 0.0,
-                child: _showButton ? Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
-                  ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0D9488),
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      elevation: 0,
-                    ),
-                    onPressed: widget.onNext,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('MULAI SEKARANG', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                      ],
-                    ),
-                  ),
-                ) : const SizedBox(height: 56), 
-              ),
             ],
           ),
         ],
@@ -1043,54 +1005,48 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
   @override
   Widget build(BuildContext context) {
     final sw = MediaQuery.of(context).size.width;
-    return Stack(
-      children: [
-        
-        Center(
-          child: SizedBox(
-            height: 330, 
-            width: sw,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                  left: -sw * 0.01,
-                  child: _buildAlbumItem(widget.img1, _zoom1, _fade1, -0.20, sw * 0.42, 240, Alignment.center),
-                ),
-                Positioned(
-                  right: -sw * 0.01,
-                  child: _buildAlbumItem(widget.img3, _zoom3, _fade3, 0.20, sw * 0.42, 240, Alignment.center),
-                ),
-              ],
+    return Opacity(
+      opacity: 0.6,
+      child: Stack(
+        children: [
+          
+          Center(
+            child: SizedBox(
+              height: 330, 
+              width: sw,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    left: -sw * 0.01,
+                    child: _buildAlbumItem(widget.img1, _zoom1, _fade1, -0.20, sw * 0.42, 240, Alignment.center),
+                  ),
+                  Positioned(
+                    right: -sw * 0.01,
+                    child: _buildAlbumItem(widget.img3, _zoom3, _fade3, 0.20, sw * 0.42, 240, Alignment.center),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
-       
-        Positioned.fill(
-          child: IgnorePointer(
-            child: Container(
-              color: const Color(0xFF0B101E).withOpacity(0.90),
+          
+          Center(
+            child: SizedBox(
+              height: 330, 
+              width: sw,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Positioned(
+                    child: _buildAlbumItem(widget.img2, _zoom2, _fade2, 0.0, sw * 0.58, 320, const Alignment(0.0, 0.4)),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-
-        
-        Center(
-          child: SizedBox(
-            height: 330, 
-            width: sw,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Positioned(
-                  child: _buildAlbumItem(widget.img2, _zoom2, _fade2, 0.0, sw * 0.58, 320, const Alignment(0.0, 0.4)),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

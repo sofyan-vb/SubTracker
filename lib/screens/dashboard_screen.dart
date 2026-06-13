@@ -12,12 +12,16 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart'; 
 import '../providers/subscription_provider.dart';
 import '../widgets/subscription_tile.dart';
+import '../utils/category_utils.dart';
+import '../utils/currency_utils.dart';
+import '../widgets/currency_converter_sheet.dart';
 import 'add_screen.dart'; 
 
 
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Putih');
 final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); 
 final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); 
+final ValueNotifier<String> currencyNotifier = ValueNotifier<String>('IDR');
 
 String tr(String idText, String enText) {
   return languageNotifier.value == 'ID' ? idText : enText;
@@ -55,7 +59,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final savedLang = prefs.getString('app_lang');
     if (savedLang != null) languageNotifier.value = savedLang;
 
-
+    final savedCurrency = prefs.getString('app_currency');
+    if (savedCurrency != null) currencyNotifier.value = savedCurrency;
   }
 
   @override
@@ -209,13 +214,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
-      builder: (context, currentTheme, child) {
-        
-        // Tema Opsi A: Fintech Light Mode (Aktif Permanen)
-        Color scaffoldBg = const Color(0xFFF8F9FA); 
-        Color bottomNavBg = Colors.white;
-        Color textColor = const Color(0xFF1E293B); 
-        Color appBarIcons = const Color(0xFF0F172A);
+      builder: (context, _, child) {
+        const currentTheme = 'Biru';
+        // Tema: Navy Dark Mode (Sesuai Splash Screen)
+        Color scaffoldBg = const Color(0xFF0B101E); 
+        Color bottomNavBg = const Color(0xFF151B2B);
+        Color textColor = Colors.white; 
+        Color appBarIcons = Colors.white;
 
         return Stack(
           children: [
@@ -399,7 +404,7 @@ class _HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SubProvider>();
-    final currencyFormat = NumberFormat.currency(locale: languageNotifier.value == 'ID' ? 'id_ID' : 'en_US', symbol: languageNotifier.value == 'ID' ? 'Rp ' : '\$ ', decimalDigits: 0);
+    final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
     
     final List<String> namaBulanSingkatID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
     final List<String> namaBulanSingkatEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -479,7 +484,6 @@ class _HomeView extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
                         borderRadius: BorderRadius.circular(24),
-                        boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))],
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24),
@@ -723,7 +727,6 @@ class _HomeView extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
                       borderRadius: BorderRadius.circular(24),
-                      boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))],
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(24),
@@ -1314,7 +1317,7 @@ class _StatsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SubProvider>();
-    final currencyFormat = NumberFormat.currency(locale: languageNotifier.value == 'ID' ? 'id_ID' : 'en_US', symbol: languageNotifier.value == 'ID' ? 'Rp ' : '\$ ', decimalDigits: 0);
+    final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
 
     final totalMonthly = provider.totalMonthly;
     final breakdown = provider.categoryBreakdown;
@@ -1400,20 +1403,13 @@ class _StatsView extends StatelessWidget {
                               final index = entry.key;
                               final amount = entry.value.value;
                               
-                              final colors = [
-                                const Color(0xFF0D9488), 
-                                const Color(0xFF14B8A6), 
-                                const Color(0xFF2DD4BF), 
-                                const Color(0xFF5EEAD4), 
-                                const Color(0xFF99F6E4),
-                                const Color(0xFFCCFBF1)
-                              ];
-                              
+                              final percentage = totalMonthly > 0 ? (amount / totalMonthly * 100) : 0;
                               return PieChartSectionData(
-                                color: colors[index % colors.length],
+                                color: CategoryUtils.getColor(entry.value.key),
                                 value: amount,
-                                title: '',
-                                radius: 25 + (index == 0 ? 5.0 : 0.0), // highlight the biggest
+                                title: '${percentage.toStringAsFixed(1)}%',
+                                titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                                radius: 45 + (index == 0 ? 5.0 : 0.0), 
                               );
                             }).toList(),
                           ),
@@ -1426,19 +1422,12 @@ class _StatsView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: breakdown.entries.take(4).toList().asMap().entries.map((entry) {
-                            final index = entry.key;
                             final name = entry.value.key;
-                            final colors = [
-                                const Color(0xFF0D9488), 
-                                const Color(0xFF14B8A6), 
-                                const Color(0xFF2DD4BF), 
-                                const Color(0xFF5EEAD4)
-                            ];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 8.0),
                               child: Row(
                                 children: [
-                                  Container(width: 12, height: 12, decoration: BoxDecoration(color: colors[index], shape: BoxShape.circle)),
+                                  Container(width: 12, height: 12, decoration: BoxDecoration(color: CategoryUtils.getColor(name), shape: BoxShape.circle)),
                                   const SizedBox(width: 8),
                                   Expanded(child: Text(name, style: TextStyle(color: textColor, fontSize: 12), overflow: TextOverflow.ellipsis)),
                                 ],
@@ -1647,6 +1636,39 @@ class _SettingsViewState extends State<_SettingsView> {
     } catch(e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore Gagal: $e')));
     }
+  }
+
+  void _showCurrencySelector() {
+    final isLight = widget.theme == 'Putih';
+    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
+    final textColor = isLight ? Colors.black87 : Colors.white;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: dialogBg,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetContext) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: CurrencyUtils.data.keys.map((code) {
+              return ListTile(
+                title: Text('${CurrencyUtils.data[code]!['name']} ($code)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                trailing: currencyNotifier.value == code ? const Icon(Icons.check_circle_rounded, color: Color(0xFF0D9488)) : null,
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('app_currency', code);
+                  currencyNotifier.value = code;
+                  setState(() {});
+                  Navigator.pop(sheetContext);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
   }
 
   void _showLanguageSelector() {
@@ -1907,6 +1929,29 @@ class _SettingsViewState extends State<_SettingsView> {
             FadeInSlide(
               delay: const Duration(milliseconds: 250),
               child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, widget.theme),
+            ),
+
+            FadeInSlide(
+              delay: const Duration(milliseconds: 260),
+              child: ValueListenableBuilder<String>(
+                valueListenable: currencyNotifier,
+                builder: (context, currency, child) {
+                  return _buildSettingTile(Icons.attach_money_rounded, tr('Mata Uang', 'Currency'), '${CurrencyUtils.data[currency]!['name']} ($currency)', _showCurrencySelector, cardBg, textColor, subTextColor, widget.theme);
+                }
+              ),
+            ),
+
+            FadeInSlide(
+              delay: const Duration(milliseconds: 270),
+              child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Currency Converter'), tr('Perbandingan Mata Uang', 'Compare Currencies'), () {
+                showModalBottomSheet(
+                  context: context,
+                  backgroundColor: cardBg,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+                  builder: (_) => CurrencyConverterSheet(bgColor: cardBg, textColor: textColor),
+                );
+              }, cardBg, textColor, subTextColor, widget.theme),
             ),
 
             FadeInSlide(
