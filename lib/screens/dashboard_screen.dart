@@ -1415,7 +1415,7 @@ class _StatsView extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 32),
                       Expanded(
                         flex: 2,
                         child: Column(
@@ -1423,13 +1423,25 @@ class _StatsView extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: breakdown.entries.take(4).toList().asMap().entries.map((entry) {
                             final name = entry.value.key;
+                            final amount = entry.value.value;
+                            final percentage = totalMonthly > 0 ? (amount / totalMonthly * 100) : 0;
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
+                              padding: const EdgeInsets.only(bottom: 12.0),
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(width: 12, height: 12, decoration: BoxDecoration(color: CategoryUtils.getColor(name), shape: BoxShape.circle)),
+                                  Container(margin: const EdgeInsets.only(top: 4), width: 8, height: 8, decoration: BoxDecoration(color: CategoryUtils.getColor(name), shape: BoxShape.circle)),
                                   const SizedBox(width: 8),
-                                  Expanded(child: Text(name, style: TextStyle(color: textColor, fontSize: 12), overflow: TextOverflow.ellipsis)),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(name, style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                                        const SizedBox(height: 2),
+                                        Text('${percentage.toStringAsFixed(1)}% • ${currencyFormat.format(amount)}', style: TextStyle(color: subTextColor, fontSize: 10), overflow: TextOverflow.ellipsis),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             );

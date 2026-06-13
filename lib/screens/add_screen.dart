@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/subscription.dart';
 import '../providers/subscription_provider.dart';
 import '../services/notification_service.dart';
+import '../utils/currency_utils.dart';
 import 'dashboard_screen.dart'; 
+import 'package:flutter/services.dart';
 
 class AddScreen extends StatefulWidget {
   const AddScreen({super.key});
@@ -124,7 +126,16 @@ class _AddScreenState extends State<AddScreen> {
                         if (_selectedCategory.isNotEmpty) ...[
                           const SizedBox(height: 16),
                           FadeInSlide(delay: const Duration(milliseconds: 150), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Nama Layanan', 'Service Name'), subTextColor), _buildTextField(_nameCtrl, _getHintForCategory(_selectedCategory), cardBg, textColor, hintColor)])),
-                          FadeInSlide(delay: const Duration(milliseconds: 200), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Harga', 'Price'), subTextColor), _buildTextField(_priceCtrl, tr('Misal: 150000', 'E.g: 15'), cardBg, textColor, hintColor, isNumber: true)])),
+                          FadeInSlide(delay: const Duration(milliseconds: 200), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Harga', 'Price'), subTextColor), 
+                            ValueListenableBuilder<String>(
+                              valueListenable: currencyNotifier,
+                              builder: (context, currency, _) {
+                                final format = CurrencyUtils.getFormat(currency);
+                                final prefix = format.currencySymbol + ' ';
+                                return _buildTextField(_priceCtrl, tr('Misal: 150.000', 'E.g: 150,000'), cardBg, textColor, hintColor, isNumber: true, prefixText: prefix, formatters: [ThousandsSeparatorInputFormatter()]);
+                              }
+                            )
+                          ])),
                           FadeInSlide(delay: const Duration(milliseconds: 250), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Waktu Pengingat (Tanggal & Jam)', 'Reminder Time (Date & Time)'), subTextColor), Row(children: [Expanded(flex: 3, child: GestureDetector(onTap: () => _selectDate(context), child: _buildFakeInput(DateFormat('dd MMM yyyy').format(_selectedDate), Icons.calendar_month, cardBg, textColor, hintColor))), const SizedBox(width: 12), Expanded(flex: 2, child: GestureDetector(onTap: () => _selectTime(context), child: _buildFakeInput(_selectedTime.format(context), Icons.access_time_filled, cardBg, textColor, hintColor)))])])),
                           FadeInSlide(delay: const Duration(milliseconds: 300), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Ingatkan Saya Pada', 'Remind Me On'), subTextColor), _buildDropdown('H-$_reminderDays', ['H-0', 'H-1', 'H-3', 'H-7'], (val) { setState(() => _reminderDays = int.parse(val!.replaceAll('H-', ''))); }, cardBg, textColor)])),
                           FadeInSlide(delay: const Duration(milliseconds: 350), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Tipe Pengingat', 'Reminder Type'), subTextColor), _buildDropdown(_selectedNotifType, notifTypes, (val) => setState(() => _selectedNotifType = val!), cardBg, textColor)])),
@@ -303,7 +314,7 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Widget _buildLabel(String text, Color color) { return Padding(padding: const EdgeInsets.only(bottom: 8, left: 4, top: 16), child: Text(text, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold))); }
-  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), decoration: InputDecoration(hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(18)))); }
+  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), inputFormatters: formatters, decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(18)))); }
   Widget _buildDropdown(String? value, List<String> items, Function(String?) onChanged, Color bg, Color textColor, {bool disabled = false}) { 
     return IgnorePointer(
       ignoring: disabled,
@@ -329,4 +340,20 @@ class _AddScreenState extends State<AddScreen> {
   }
   Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])); }
   Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFF0D9488), inactiveTrackColor: hintColor)]); }
+}
+
+class ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+    String cleanText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return oldValue;
+    final intValue = int.tryParse(cleanText);
+    if (intValue == null) return oldValue;
+    final String newText = NumberFormat.decimalPattern('id').format(intValue);
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
+    );
+  }
 }

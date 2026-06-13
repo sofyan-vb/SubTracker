@@ -12,8 +12,23 @@ class TermsScreen extends StatefulWidget {
   State<TermsScreen> createState() => _TermsScreenState();
 }
 
-class _TermsScreenState extends State<TermsScreen> {
+class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin {
   bool _isLoading = false;
+  late AnimationController _arrowCtrl;
+  late Animation<double> _arrowSlide;
+
+  @override
+  void initState() {
+    super.initState();
+    _arrowCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+    _arrowSlide = Tween<double>(begin: 0.0, end: 6.0).animate(CurvedAnimation(parent: _arrowCtrl, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _arrowCtrl.dispose();
+    super.dispose();
+  }
 
   Future<void> _acceptTerms(BuildContext context) async {
     setState(() => _isLoading = true);
@@ -135,30 +150,32 @@ class _TermsScreenState extends State<TermsScreen> {
               const SizedBox(height: 20),
               
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    flex: 1,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        side: const BorderSide(color: Colors.white24),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      onPressed: _isLoading ? null : _declineTerms,
-                      child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.white54, fontWeight: FontWeight.bold)),
-                    ),
+                  TextButton(
+                    onPressed: _isLoading ? null : _declineTerms,
+                    child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 18),
-                        elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      onPressed: _isLoading ? null : () => _acceptTerms(context),
-                      child: Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
-                    ),
+                  TextButton(
+                    onPressed: _isLoading ? null : () => _acceptTerms(context),
+                    child: _isLoading 
+                        ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                              const SizedBox(width: 8),
+                              AnimatedBuilder(
+                                animation: _arrowSlide,
+                                builder: (context, child) {
+                                  return Transform.translate(
+                                    offset: Offset(_arrowSlide.value, 0),
+                                    child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                   ),
                 ],
               ),

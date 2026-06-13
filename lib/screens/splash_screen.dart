@@ -16,7 +16,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   late SplashState _state;
   late PageController _pageController;
   int _onboardingPageIndex = 0;
@@ -24,10 +24,16 @@ class _SplashScreenState extends State<SplashScreen> {
   final TextEditingController _nameCtrl = TextEditingController();
   String _savedName = ''; 
 
+  late AnimationController _arrowCtrl;
+  late Animation<double> _arrowSlide;
+
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
+
+    _arrowCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+    _arrowSlide = Tween<double>(begin: 0.0, end: 6.0).animate(CurvedAnimation(parent: _arrowCtrl, curve: Curves.easeInOut));
     
     
     if (widget.isNewUser) {
@@ -50,6 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void dispose() {
     _pageController.dispose();
     _nameCtrl.dispose();
+    _arrowCtrl.dispose();
     super.dispose();
   }
 
@@ -272,64 +279,46 @@ class _SplashScreenState extends State<SplashScreen> {
                                 builder: (context) {
                                   if (_state == SplashState.onboarding && _onboardingPageIndex > 0) {
                                     return Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Expanded(
-                                          flex: 3, 
-                                          child: SizedBox(
-                                            height: 60,
-                                            child: OutlinedButton(
-                                              style: OutlinedButton.styleFrom(
-                                                padding: const EdgeInsets.symmetric(horizontal: 4), 
-                                                side: const BorderSide(color: Colors.white24, width: 1.5),
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                                              ),
-                                              onPressed: () {
-                                                _pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
-                                              },
-                                              child: FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                child: Text(tr('KEMBALI', 'BACK'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70)),
-                                              ),
-                                            ),
-                                          ),
+                                        TextButton(
+                                          onPressed: () {
+                                            _pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+                                          },
+                                          child: Text(tr('KEMBALI', 'BACK'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70)),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          flex: 4, 
-                                          child: SizedBox(
-                                            height: 60,
-                                            child: ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: const Color(0xFF0D9488),
-                                                foregroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                        TextButton(
+                                          onPressed: () {
+                                            if (_onboardingPageIndex < 2) {
+                                              _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+                                            } else {
+                                              setState(() => _state = SplashState.form); 
+                                            }
+                                          },
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                              const SizedBox(width: 8),
+                                              AnimatedBuilder(
+                                                animation: _arrowSlide,
+                                                builder: (context, child) {
+                                                  return Transform.translate(
+                                                    offset: Offset(_arrowSlide.value, 0),
+                                                    child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                                  );
+                                                },
                                               ),
-                                              onPressed: () {
-                                                if (_onboardingPageIndex < 2) {
-                                                  _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
-                                                } else {
-                                                  setState(() => _state = SplashState.form); 
-                                                }
-                                              },
-                                              child: FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                child: Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
-                                              ),
-                                            ),
+                                            ],
                                           ),
                                         ),
                                       ],
                                     );
                                   }
                                   
-                                  return SizedBox(
-                                    width: double.infinity, height: 60,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF0D9488),
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                                      ),
+                                  return Align(
+                                    alignment: Alignment.centerRight,
+                                    child: TextButton(
                                       onPressed: _state == SplashState.loading ? null : () {
                                         if (_state == SplashState.onboarding) {
                                           _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
@@ -337,7 +326,22 @@ class _SplashScreenState extends State<SplashScreen> {
                                           _processEntry(); 
                                         }
                                       },
-                                      child: Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                          const SizedBox(width: 8),
+                                          AnimatedBuilder(
+                                            animation: _arrowSlide,
+                                            builder: (context, child) {
+                                              return Transform.translate(
+                                                offset: Offset(_arrowSlide.value, 0),
+                                                child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
@@ -639,62 +643,41 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                     const SizedBox(height: 36),
 
                                   
-                                    SizedBox(
-                                      width: double.infinity, height: 64,
-                                      child: ElevatedButton(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: const Color(0xFF0D9488),
-                                          foregroundColor: Colors.white,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                        ),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: TextButton(
                                         onPressed: _isLoading
                                             ? null
                                             : () async {
                                                 setState(() {
                                                   _isLoading = true;
                                                 });
-                                                
-                                                
                                                 await Future.delayed(const Duration(milliseconds: 1200));
-                                                
                                                 if (mounted) {
                                                   widget.onEnter();
                                                 }
                                               },
                                         child: _isLoading
                                             ? Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Text(
                                                     tr('Memuat', 'Loading'),
-                                                    style: const TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                      letterSpacing: 1.2,
-                                                    ),
+                                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
                                                   ),
                                                   const SizedBox(width: 8),
                                                   const Padding(
                                                     padding: EdgeInsets.only(top: 4.0),
-                                                    child: WavyDotsProgressIndicator(
-                                                      color: Colors.white,
-                                                      dotSize: 5.0,
-                                                    ),
+                                                    child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0),
                                                   ),
                                                 ],
                                               )
                                             : Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   const Text(
                                                     'MASUK',
-                                                    style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.white,
-                                                      letterSpacing: 1.2,
-                                                    ),
+                                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
                                                   ),
                                                   const SizedBox(width: 8),
                                                   AnimatedBuilder(
