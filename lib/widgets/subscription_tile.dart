@@ -53,8 +53,14 @@ class _SubTileState extends State<SubTile> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF151B2B), 
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white10, width: 1),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
       child: Material(
-        color: const Color(0xFF121214), borderRadius: BorderRadius.circular(20),
+        color: Colors.transparent, borderRadius: BorderRadius.circular(20),
         child: InkWell(
           borderRadius: BorderRadius.circular(20),
           onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(sub: widget.sub))); },

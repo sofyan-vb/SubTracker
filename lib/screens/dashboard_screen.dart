@@ -300,17 +300,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               
               floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-              floatingActionButton: FloatingActionButton(
-                elevation: 0, hoverElevation: 0, highlightElevation: 0,
-                backgroundColor: const Color(0xFF0D9488), 
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                child: const Icon(Icons.add, size: 32, color: Colors.black), 
-                onPressed: _isLoadingAdd
-                    ? null
-                    : () async {
-                        setState(() {
-                          _isLoadingAdd = true;
-                        });
+              floatingActionButton: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2DD4BF), Color(0xFF0D9488)],
+                    begin: Alignment.topLeft, end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.4), blurRadius: 15, offset: const Offset(0, 6))
+                  ],
+                ),
+                child: FloatingActionButton(
+                  elevation: 0, hoverElevation: 0, highlightElevation: 0, focusElevation: 0,
+                  backgroundColor: Colors.transparent, 
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                  child: const Icon(Icons.add_rounded, size: 36, color: Colors.white), 
+                  onPressed: _isLoadingAdd
+                      ? null
+                      : () async {
+                          setState(() {
+                            _isLoadingAdd = true;
+                          });
                         
                         
                         await Future.delayed(const Duration(milliseconds: 1200));
@@ -322,6 +333,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
                         }
                       },
+                ),
               ),
 
               bottomNavigationBar: BottomAppBar(
@@ -464,35 +476,46 @@ class _HomeView extends StatelessWidget {
                     child: Container(
                       width: double.infinity,
                       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                      padding: const EdgeInsets.all(28),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0D9488), 
+                        gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
                         borderRadius: BorderRadius.circular(24),
-                        boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                        boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-                                child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 20),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24),
+                        child: Stack(
+                          children: [
+                            Positioned(right: -30, top: -30, child: CircleAvatar(radius: 70, backgroundColor: Colors.white.withValues(alpha: 0.05))),
+                            Positioned(right: 60, bottom: -40, child: CircleAvatar(radius: 60, backgroundColor: Colors.white.withValues(alpha: 0.05))),
+                            Padding(
+                              padding: const EdgeInsets.all(28),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                                        child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 20),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 24),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      currencyFormat.format(provider.totalMonthly),
+                                      style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 12),
-                              Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          FittedBox(
-                            fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-                            child: Text(
-                              currencyFormat.format(provider.totalMonthly),
-                              style: const TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -697,35 +720,46 @@ class _HomeView extends StatelessWidget {
                   child: Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                    padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0D9488), 
+                      gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
                       borderRadius: BorderRadius.circular(24),
-                      boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                      boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))],
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
-                              child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 20),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: Stack(
+                        children: [
+                          Positioned(right: -30, top: -30, child: CircleAvatar(radius: 70, backgroundColor: Colors.white.withValues(alpha: 0.05))),
+                          Positioned(right: 60, bottom: -40, child: CircleAvatar(radius: 60, backgroundColor: Colors.white.withValues(alpha: 0.05))),
+                          Padding(
+                            padding: const EdgeInsets.all(28),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                                      child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 20),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                                const SizedBox(height: 24),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    currencyFormat.format(provider.totalMonthly),
+                                    style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 12),
-                            Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        FittedBox(
-                          fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-                          child: Text(
-                            currencyFormat.format(provider.totalMonthly),
-                            style: const TextStyle(color: Colors.white, fontSize: 38, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -1015,7 +1049,7 @@ class _CalendarViewState extends State<_CalendarView> {
                       decoration: BoxDecoration(
                         color: cardBg, 
                         borderRadius: BorderRadius.circular(20), 
-                        border: Border.all(color: widget.Colors.white10),
+                        border: Border.all(color: Colors.white10),
                         boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                       ),
                       child: Column(
@@ -1162,7 +1196,7 @@ class _CalendarViewState extends State<_CalendarView> {
                     decoration: BoxDecoration(
                       color: cardBg, 
                       borderRadius: BorderRadius.circular(20), 
-                      border: Border.all(color: widget.Colors.white10),
+                      border: Border.all(color: Colors.white10),
                       boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                     ),
                     child: Column(
@@ -1417,9 +1451,8 @@ class _StatsView extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
             if (breakdown.isEmpty)
-  
               FadeInSlide(
                 delay: const Duration(milliseconds: 500),
                 child: Container(
@@ -1427,7 +1460,7 @@ class _StatsView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: cardBg, 
                     borderRadius: BorderRadius.circular(16),
-                    border: theme == 'Putih' ? Border.all(color: Colors.grey.shade200) : null,
+                    border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1),
                   ),
                   child: Center(child: Text(tr('Belum ada data pengeluaran.', 'No expense data yet.'), style: TextStyle(color: subTextColor))),
                 ),
@@ -1445,10 +1478,13 @@ class _StatsView extends StatelessWidget {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: cardBg, 
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft, end: Alignment.bottomRight,
+                      colors: theme == 'Putih' ? [Colors.white, Colors.grey.shade50] : [cardBg, cardBg.withValues(alpha: 0.7)],
+                    ),
                     borderRadius: BorderRadius.circular(20),
-                    border: theme == 'Putih' ? Border.all(color: Colors.grey.shade200) : null,
-                    boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                    border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1),
+                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1466,7 +1502,7 @@ class _StatsView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         child: LinearProgressIndicator(
                           value: percentage,
-                          backgroundColor: theme == 'Putih' ? Colors.grey.shade200 : Colors.white.withOpacity(0.05),
+                          backgroundColor: theme == 'Putih' ? Colors.grey.shade200 : Colors.white.withValues(alpha: 0.05),
                           color: const Color(0xFF0D9488),
                           minHeight: 12, 
                         ),
@@ -1489,19 +1525,19 @@ class _StatsView extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: theme == 'Putih' ? Colors.blue.withOpacity(0.05) : Colors.blueAccent.withOpacity(0.1),
+                  color: theme == 'Putih' ? const Color(0xFF0D9488).withValues(alpha: 0.05) : const Color(0xFF0D9488).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.blueAccent.withOpacity(0.3)),
+                  border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.trending_up_rounded, color: Colors.blueAccent, size: 32),
+                    const Icon(Icons.trending_up_rounded, color: Color(0xFF0D9488), size: 32),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16)),
                           const SizedBox(height: 8),
                           Text(
                             activeSubs.isEmpty 
@@ -1528,17 +1564,23 @@ class _StatsView extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: cardBg, 
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: theme == 'Putih' 
+            ? [Colors.white, Colors.grey.shade50] 
+            : [cardBg, cardBg.withValues(alpha: 0.8)],
+        ),
         borderRadius: BorderRadius.circular(24),
-        border: theme == 'Putih' ? Border.all(color: Colors.grey.shade200) : null,
-        boxShadow: theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+        border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1.5),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 15, offset: const Offset(0, 8))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: iconColor.withOpacity(0.15), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.15), shape: BoxShape.circle),
             child: Icon(icon, color: iconColor, size: 28),
           ),
           const SizedBox(height: 20),

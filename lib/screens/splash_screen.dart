@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              tr('Nama panggilan tidak boleh kosong!', 'Nickname cannot be empty!'), 
+              tr('Nama pengguna tidak boleh kosong!', 'Username cannot be empty!'), 
               style: const TextStyle(fontWeight: FontWeight.bold)
             ), 
             backgroundColor: Colors.redAccent
@@ -175,7 +175,14 @@ class _SplashScreenState extends State<SplashScreen> {
                               
                               
                               if (_state == SplashState.form || _state == SplashState.loading) ...[
-                                Image.asset('assets/icon.png', width: 80, height: 80), 
+                                Center(
+                                  child: Container(
+                                    width: 90, height: 90,
+                                    decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF151B2B)),
+                                    padding: const EdgeInsets.all(8),
+                                    child: ClipOval(child: Image.asset('assets/icon.png', fit: BoxFit.cover)),
+                                  ),
+                                ),
                                 const SizedBox(height: 16),
                                 Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
                                 const SizedBox(height: 8),
@@ -186,7 +193,7 @@ class _SplashScreenState extends State<SplashScreen> {
                                   controller: _nameCtrl,
                                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                                   decoration: InputDecoration(
-                                    labelText: tr('Nama Panggilan', 'Nickname'),
+                                    labelText: tr('Nama Pengguna', 'Username'),
                                     labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
                                     prefixIcon: const Icon(Icons.person, color: Color(0xFF0D9488), size: 22),
                                     filled: true, fillColor: const Color(0xFF151B2B),
@@ -576,27 +583,17 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     
-                    ScaleTransition(
-                      scale: _logoScale,
-                      child: Container(
-                        width: 110, height: 110,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0D9488), 
-                          borderRadius: BorderRadius.circular(32),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'S',
-                            style: TextStyle(
-                              fontSize: 60,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.black, // Huruf Hitam
-                              height: 1.05,
-                            ),
+                      ScaleTransition(
+                        scale: _logoScale,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Image.asset(
+                            'assets/icon.png',
+                            width: 110,
+                            height: 110,
                           ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 45),
                     
                     
@@ -647,7 +644,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(20),
-                                        boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 5))],
                                       ),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
@@ -821,8 +817,8 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
       if (mounted) setState(() => _showSubTracker = true);
     });
     
-    Future.delayed(const Duration(milliseconds: 6500), () {
-      if (mounted) setState(() => _showButton = true);
+    Future.delayed(const Duration(milliseconds: 2800), () {
+      if (mounted) widget.onNext();
     });
   }
 
