@@ -601,8 +601,8 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       tr('Selamat Datang Kembali', 'Welcome Back'),
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
+                                        fontSize: 34,
+                                        fontWeight: FontWeight.w900,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
@@ -622,8 +622,8 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 34,
-                                        fontWeight: FontWeight.w900,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
                                         letterSpacing: 0.5,
                                       ),
                                     ),

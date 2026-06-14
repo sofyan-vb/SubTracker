@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:sub_tracker/utils/category_utils.dart';
 import '../utils/toast_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; 
@@ -58,7 +59,7 @@ class _DetailScreenState extends State<DetailScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF121214),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: Text(tr('Apakah kamu yakin? Catatan yang dihapus tidak bisa dikembalikan.', 'Are you sure? Deleted records cannot be recovered.'), style: const TextStyle(color: Colors.white54)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Colors.white))),
@@ -163,7 +164,7 @@ class _DetailScreenState extends State<DetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
-              Container(padding: const EdgeInsets.all(30), decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.edit_document, size: 60, color: Color(0xFF0D9488))),
+              Container(padding: const EdgeInsets.all(30), decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.1), shape: BoxShape.circle), child: Icon(CategoryUtils.getIcon(currentSub.category), size: 60, color: const Color(0xFF0D9488))),
               const SizedBox(height: 24),
               Text(currentSub.name, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import '../utils/toast_utils.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
@@ -119,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     upcomingSubs.isEmpty 
                       ? Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Center(child: Text(tr('Tidak ada tagihan saat ini', 'No bills currently'), style: TextStyle(color: textColor.withOpacity(0.5)))),
+                          child: Center(child: Text(tr('Tidak ada tagihan saat ini', 'No bills currently'), style: TextStyle(color: textColor.withValues(alpha: 0.5)))),
                         )
                     : ListView.builder(
                         shrinkWrap: true,
@@ -246,7 +247,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
                           hintText: tr('Cari langganan...', 'Search subscriptions...'),
-                          hintStyle: TextStyle(color: textColor.withOpacity(0.5)),
+                          hintStyle: TextStyle(color: textColor.withValues(alpha: 0.5)),
                           border: InputBorder.none,
                         ),
                         onChanged: (val) {
@@ -275,7 +276,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Consumer<SubProvider>(
                       builder: (context, provider, child) {
                         final now = DateTime.now();
-                        final hasUrgent = provider.subs.any((sub) => !sub.isFinished);
+                        final hasUrgent = provider.subs.any((sub) {
+                          if (sub.isFinished) return false;
+                          DateTime? date;
+                          try { date = sub.dueDate as DateTime; } catch (_) {
+                            try { date = sub.date as DateTime; } catch (_) {
+                              try { date = sub.tanggal as DateTime; } catch (_) {}
+                            }
+                          }
+                          if (date == null) return false;
+                          final today = DateTime(now.year, now.month, now.day);
+                          final subDate = DateTime(date.year, date.month, date.day);
+                          return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
+                        });
                         return IconButton(
                           icon: Stack(
                             children: [
@@ -296,6 +309,64 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     IconButton(
                       icon: Icon(Icons.tune, color: appBarIcons),
                       onPressed: () => _showFilterSheet(context, bottomNavBg, textColor),
+                    ),
+                  if (!_isSearching)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              backgroundColor: bottomNavBg,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                              contentPadding: const EdgeInsets.all(30),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white24, width: 2)),
+                                    child: ValueListenableBuilder<String?>(
+                                      valueListenable: userPhotoNotifier,
+                                      builder: (context, photo, child) {
+                                        return CircleAvatar(
+                                          radius: 50,
+                                          backgroundColor: bottomNavBg,
+                                          backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
+                                          child: photo == null ? Icon(Icons.account_circle, size: 70, color: textColor.withValues(alpha: 0.5)) : null,
+                                        );
+                                      }
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ValueListenableBuilder<String>(
+                                    valueListenable: userNameNotifier,
+                                    builder: (context, userName, child) {
+                                      return Text(userName.isEmpty ? 'SubTracker User' : userName, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold));
+                                    }
+                                  ),
+                                ],
+                              ),
+                            )
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white38, width: 1.5)),
+                          child: ValueListenableBuilder<String?>(
+                            valueListenable: userPhotoNotifier,
+                            builder: (context, photo, child) {
+                              return CircleAvatar(
+                                radius: 14,
+                                backgroundColor: bottomNavBg,
+                                backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
+                                child: photo == null ? Icon(Icons.account_circle, size: 24, color: textColor.withValues(alpha: 0.5)) : null,
+                              );
+                            }
+                          ),
+                        ),
+                      ),
                     ),
                   const SizedBox(width: 8),
                 ],
@@ -438,6 +509,7 @@ class _HomeView extends StatelessWidget {
     
     final List<String> namaBulanSingkatID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
     final List<String> namaBulanSingkatEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
     final namaBulanSingkat = languageNotifier.value == 'ID' ? namaBulanSingkatID : namaBulanSingkatEN;
 
     final hour = DateTime.now().hour;
@@ -457,6 +529,8 @@ class _HomeView extends StatelessWidget {
     } else if (theme == 'Biru') {
       cardBg = const Color(0xFF1A2235); 
     }
+
+    final Color scaffoldBg = theme == 'Putih' ? const Color(0xFFF1F5F9) : (theme == 'Biru' ? const Color(0xFF0F172A) : const Color(0xFF0B101E));
 
     final now = DateTime.now();
     final upcomingSubs = provider.subs.where((sub) {
@@ -489,17 +563,38 @@ class _HomeView extends StatelessWidget {
                     delay: const Duration(milliseconds: 50),
                     child: Padding(
                       padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
-                      child: BlinkingWidget(
-                        child: ValueListenableBuilder<String>(
-                          valueListenable: userNameNotifier,
-                          builder: (context, userName, child) {
-                            final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
-                            return Text(
-                              displayText, 
-                              style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
-                            );
-                          },
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          BlinkingWidget(
+                            child: ValueListenableBuilder<String>(
+                              valueListenable: userNameNotifier,
+                              builder: (context, userName, child) {
+                                final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
+                                return Text(
+                                  displayText, 
+                                  style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                                );
+                              },
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
+                            },
+                            child: ValueListenableBuilder<String?>(
+                              valueListenable: userPhotoNotifier,
+                              builder: (context, photo, child) {
+                                return CircleAvatar(
+                                  radius: 18,
+                                  backgroundColor: cardBg,
+                                  backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
+                                  child: photo == null ? Icon(Icons.account_circle, size: 28, color: textColor.withValues(alpha: 0.5)) : null,
+                                );
+                              }
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -531,7 +626,7 @@ class _HomeView extends StatelessWidget {
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                                        child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 20),
+                                        child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 20),
                                       ),
                                       const SizedBox(width: 12),
                                       Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
@@ -682,7 +777,7 @@ class _HomeView extends StatelessWidget {
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                Icons.account_balance_wallet_outlined, 
+                                Icons.wallet_rounded, 
                                 size: 48, 
                                 color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
                               ),
@@ -700,7 +795,7 @@ class _HomeView extends StatelessWidget {
                             ),
                             const SizedBox(height: 16),
                             BlinkingWidget(
-                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withOpacity(0.5), size: 32)
+                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withValues(alpha: 0.5), size: 32)
                             ),
                           ],
                         ),
@@ -734,17 +829,23 @@ class _HomeView extends StatelessWidget {
                   delay: const Duration(milliseconds: 50),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
-                    child: BlinkingWidget(
-                      child: ValueListenableBuilder<String>(
-                        valueListenable: userNameNotifier,
-                        builder: (context, userName, child) {
-                          final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
-                          return Text(
-                            displayText, 
-                            style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
-                          );
-                        },
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        BlinkingWidget(
+                          child: ValueListenableBuilder<String>(
+                            valueListenable: userNameNotifier,
+                            builder: (context, userName, child) {
+                              final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
+                              return Text(
+                                displayText, 
+                                style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                              );
+                            },
+                          ),
+                        ),
+
+                      ],
                     ),
                   ),
                 ),
@@ -774,7 +875,7 @@ class _HomeView extends StatelessWidget {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                                      child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 20),
+                                      child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 20),
                                     ),
                                     const SizedBox(width: 12),
                                     Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
@@ -917,7 +1018,7 @@ class _HomeView extends StatelessWidget {
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
-                                    Icons.account_balance_wallet_outlined, 
+                                    Icons.wallet_rounded, 
                                     size: 72, 
                                     color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
                                   ),
@@ -935,7 +1036,7 @@ class _HomeView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 40),
                                 BlinkingWidget(
-                                  child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withOpacity(0.5), size: 32)
+                                  child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withValues(alpha: 0.5), size: 32)
                                 ),
                               ],
                             ),
@@ -1371,6 +1472,10 @@ class _StatsView extends StatelessWidget {
     } else if (theme == 'Biru') {
       cardBg = const Color(0xFF151B2B); 
     }
+
+    Color scaffoldBg = const Color(0xFF0B101E); 
+    if (theme == 'Putih') scaffoldBg = const Color(0xFFF1F5F9);
+    else if (theme == 'Biru') scaffoldBg = const Color(0xFF0F172A);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -1946,6 +2051,10 @@ class _SettingsViewState extends State<_SettingsView> {
       cardBg = const Color(0xFF1A2235); 
     }
 
+    Color scaffoldBg = const Color(0xFF0B101E); 
+    if (widget.theme == 'Putih') scaffoldBg = const Color(0xFFF1F5F9);
+    else if (widget.theme == 'Biru') scaffoldBg = const Color(0xFF0F172A);
+
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -1992,13 +2101,13 @@ class _SettingsViewState extends State<_SettingsView> {
             FadeInSlide(
               delay: const Duration(milliseconds: 245),
               child: _buildSettingTile(Icons.account_circle, tr('Profil Saya', 'My Profile'), tr('Ubah Nama & Foto', 'Edit Name & Photo'), () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: themeNotifier.value == 'Putih' ? const Color(0xFFF1F5F9) : const Color(0xFF0B101E), textColor: textColor, cardBg: cardBg)));
-              }, cardBg, textColor, subTextColor, themeNotifier.value),
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
+              }, cardBg, textColor, subTextColor, widget.theme),
             ),
             
             FadeInSlide(
               delay: const Duration(milliseconds: 250),
-              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, themeNotifier.value),
+              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, widget.theme),
             ),
 
             FadeInSlide(

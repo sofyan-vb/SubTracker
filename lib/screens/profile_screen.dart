@@ -69,19 +69,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Override colors for dark theme directly to ensure it never turns white wrongly
-    final bool isLight = themeNotifier.value == 'Putih';
-    final Color actualBg = isLight ? const Color(0xFFF1F5F9) : const Color(0xFF0B101E);
-    final Color actualCardBg = isLight ? Colors.white : const Color(0xFF151B2B);
-    final Color actualText = isLight ? Colors.black87 : Colors.white;
-
     return Scaffold(
-      backgroundColor: actualBg,
+      backgroundColor: widget.bgColor,
       appBar: AppBar(
-        backgroundColor: actualBg,
+        backgroundColor: widget.bgColor,
         elevation: 0,
-        iconTheme: IconThemeData(color: actualText),
-        title: Text('Profil Saya', style: TextStyle(color: actualText, fontWeight: FontWeight.bold)),
+        iconTheme: IconThemeData(color: widget.textColor),
+        title: Text('Profil Saya', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -94,9 +88,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: actualCardBg,
+                    backgroundColor: widget.cardBg,
                     backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
-                    child: _base64Image == null ? Icon(Icons.account_circle, size: 80, color: actualText.withValues(alpha: 0.5)) : null,
+                    child: _base64Image == null ? Icon(Icons.account_circle, size: 80, color: widget.textColor.withValues(alpha: 0.5)) : null,
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
@@ -107,18 +101,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Ketuk foto untuk mengubah', style: TextStyle(color: actualText.withValues(alpha: 0.5), fontSize: 13)),
+            Text('Ketuk foto untuk mengubah', style: TextStyle(color: widget.textColor.withValues(alpha: 0.5), fontSize: 13)),
             const SizedBox(height: 40),
             TextField(
               controller: _nameCtrl,
-              style: TextStyle(color: actualText),
+              style: TextStyle(color: widget.textColor),
               decoration: InputDecoration(
                 labelText: 'Nama Pengguna',
-                labelStyle: TextStyle(color: actualText.withValues(alpha: 0.6)),
+                labelStyle: TextStyle(color: widget.textColor.withValues(alpha: 0.6)),
                 filled: true,
-                fillColor: actualCardBg,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: actualText.withValues(alpha: 0.1))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: actualText.withValues(alpha: 0.1))),
+                fillColor: widget.cardBg,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
                 focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D9488))),
               ),
             ),
