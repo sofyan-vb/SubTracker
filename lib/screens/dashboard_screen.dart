@@ -278,13 +278,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         final now = DateTime.now();
                         final hasUrgent = provider.subs.any((sub) {
                           if (sub.isFinished) return false;
-                          DateTime? date;
-                          try { date = sub.dueDate as DateTime; } catch (_) {
-                            try { date = sub.date as DateTime; } catch (_) {
-                              try { date = sub.tanggal as DateTime; } catch (_) {}
-                            }
-                          }
-                          if (date == null) return false;
+                          final date = sub.dueDate;
                           final today = DateTime(now.year, now.month, now.day);
                           final subDate = DateTime(date.year, date.month, date.day);
                           return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
