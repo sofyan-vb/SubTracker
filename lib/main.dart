@@ -17,6 +17,7 @@ Future<void> main() async {
 
   final prefs = await SharedPreferences.getInstance();
   languageNotifier.value = prefs.getString('app_lang') ?? 'EN';
+  ringtoneNotifier.value = prefs.getString('app_ringtone') ?? 'ringtone_default';
 
   runApp(
     MultiProvider(

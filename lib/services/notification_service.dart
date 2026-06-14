@@ -1,6 +1,7 @@
 import 'dart:typed_data'; 
 import 'package:flutter/foundation.dart'; 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart'; 
@@ -37,11 +38,14 @@ class NotificationService {
   static Future<void> scheduleNotification(int id, String title, String body, DateTime scheduledTime, {bool isAlarm = false}) async {
     if (kIsWeb) return;
 
+    final prefs = await SharedPreferences.getInstance();
+    final String ringtone = prefs.getString('app_ringtone') ?? 'ringtone_default';
+
     final tz.TZDateTime scheduledTzTime = tz.TZDateTime.from(scheduledTime, tz.local);
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final Int32List additionalFlags = isAlarm ? Int32List.fromList(<int>[4]) : Int32List(0);
-    final AndroidNotificationSound? customSound = isAlarm ? const RawResourceAndroidNotificationSound('alarm_lagu') : null;
-    final String channelId = isAlarm ? 'channel_alarm_lagu_v3' : 'channel_notif_biasa_v3';
+    final AndroidNotificationSound customSound = RawResourceAndroidNotificationSound(isAlarm ? 'alarm_lagu' : ringtone);
+    final String channelId = isAlarm ? 'channel_alarm_lagu_v3' : 'channel_notif_${ringtone}_v1';
     final String channelName = isAlarm ? 'Alarm Tagihan' : 'Notifikasi Tagihan';
 
     final NotificationDetails notifDetails = NotificationDetails(

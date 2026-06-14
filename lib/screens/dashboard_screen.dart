@@ -26,6 +26,7 @@ final ValueNotifier<String> userNameNotifier = ValueNotifier<String>('');
 final ValueNotifier<String?> userPhotoNotifier = ValueNotifier<String?>(null); 
 final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); 
 final ValueNotifier<String> currencyNotifier = ValueNotifier<String>('IDR');
+final ValueNotifier<String> ringtoneNotifier = ValueNotifier<String>('Default');
 
 String tr(String idText, String enText) {
   return languageNotifier.value == 'ID' ? idText : enText;
@@ -207,6 +208,145 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  void _showPremiumProfileDialog(BuildContext context, Color bottomNavBg, Color textColor, Color scaffoldBg) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Dismiss',
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.85,
+              padding: const EdgeInsets.all(0),
+              decoration: BoxDecoration(
+                color: bottomNavBg,
+                borderRadius: BorderRadius.circular(28),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, spreadRadius: 5)
+                ]
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: 100,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                      gradient: LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    ),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(
+                          right: 12, top: 12,
+                          child: IconButton(
+                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
+                            onPressed: () => Navigator.pop(context)
+                          )
+                        ),
+                        Positioned(
+                          bottom: -40,
+                          left: 0,
+                          right: 0,
+                          child: Center(
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(color: bottomNavBg, shape: BoxShape.circle),
+                              child: ValueListenableBuilder<String?>(
+                                valueListenable: userPhotoNotifier,
+                                builder: (context, photo, child) {
+                                  return CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor: scaffoldBg,
+                                    backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
+                                    child: photo == null ? Icon(Icons.account_circle, size: 60, color: textColor.withValues(alpha: 0.3)) : null,
+                                  );
+                                }
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 50),
+                  ValueListenableBuilder<String>(
+                    valueListenable: userNameNotifier,
+                    builder: (context, userName, child) {
+                      return Text(userName.isEmpty ? 'SubTracker User' : userName, style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold));
+                    }
+                  ),
+                  const SizedBox(height: 28),
+                  Consumer<SubProvider>(
+                    builder: (context, provider, child) {
+                      final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildProfileStat('Langganan', '${provider.subs.length}', textColor),
+                          Container(width: 1, height: 40, color: Colors.white10),
+                          _buildProfileStat('Pengeluaran', currencyFormat.format(provider.totalMonthly), textColor),
+                        ],
+                      );
+                    }
+                  ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16).copyWith(top: 0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: bottomNavBg)));
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0D9488).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.3))
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.edit_note_rounded, color: Color(0xFF0D9488), size: 20),
+                            SizedBox(width: 8),
+                            Text('Pengaturan Profil', style: TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      transitionBuilder: (context, anim, secondaryAnim, child) {
+        return SlideTransition(
+          position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+          child: FadeTransition(opacity: anim, child: child),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfileStat(String label, String value, Color textColor) {
+    return Column(
+      children: [
+        Text(value, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w900)),
+        const SizedBox(height: 4),
+        Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 12)),
+      ],
+    );
+  }
+
   Widget _buildBodyContent(String currentTheme) {
     switch (_currentIndex) {
       case 0: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
@@ -309,41 +449,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: GestureDetector(
                         onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              backgroundColor: bottomNavBg,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                              contentPadding: const EdgeInsets.all(30),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white24, width: 2)),
-                                    child: ValueListenableBuilder<String?>(
-                                      valueListenable: userPhotoNotifier,
-                                      builder: (context, photo, child) {
-                                        return CircleAvatar(
-                                          radius: 50,
-                                          backgroundColor: bottomNavBg,
-                                          backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
-                                          child: photo == null ? Icon(Icons.account_circle, size: 70, color: textColor.withValues(alpha: 0.5)) : null,
-                                        );
-                                      }
-                                    ),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  ValueListenableBuilder<String>(
-                                    valueListenable: userNameNotifier,
-                                    builder: (context, userName, child) {
-                                      return Text(userName.isEmpty ? 'SubTracker User' : userName, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold));
-                                    }
-                                  ),
-                                ],
-                              ),
-                            )
-                          );
+                          _showPremiumProfileDialog(context, bottomNavBg, textColor, scaffoldBg);
                         },
                         child: Container(
                           padding: const EdgeInsets.all(2),
@@ -2115,6 +2221,15 @@ class _SettingsViewState extends State<_SettingsView> {
             ),
 
             FadeInSlide(
+              delay: const Duration(milliseconds: 325),
+              child: ValueListenableBuilder<String>(
+                valueListenable: ringtoneNotifier,
+                builder: (context, ringtone, child) {
+                  return _buildSettingTile(Icons.notifications_active_rounded, tr('Nada Notifikasi', 'Notification Sound'), ringtone.replaceAll('ringtone_', '').toUpperCase(), _showRingtoneSelector, cardBg, textColor, subTextColor, widget.theme);
+                }
+              )
+            ),
+            FadeInSlide(
               delay: const Duration(milliseconds: 270),
               child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Currency Converter'), tr('Perbandingan Mata Uang', 'Compare Currencies'), () {
                 showModalBottomSheet(
@@ -2159,6 +2274,41 @@ class _SettingsViewState extends State<_SettingsView> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showRingtoneSelector() {
+    final isLight = widget.theme == 'Putih';
+    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
+    final textColor = isLight ? Colors.black87 : Colors.white;
+    final unselectedRadioColor = isLight ? Colors.black54 : Colors.white54; 
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: dialogBg,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488)), const SizedBox(width: 10), Text(tr('Nada Notifikasi', 'Notification Sound'), style: TextStyle(color: textColor))]),
+        
+        content: Theme(
+          data: Theme.of(context).copyWith(unselectedWidgetColor: unselectedRadioColor),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ['ringtone_default', 'ringtone_chime', 'ringtone_alert', 'ringtone_synth'].map((r) => RadioListTile<String>(
+              title: Text(r.replaceAll('ringtone_', '').toUpperCase(), style: TextStyle(color: textColor)),
+              value: r,
+              groupValue: ringtoneNotifier.value, 
+              activeColor: const Color(0xFF0D9488),
+              onChanged: (val) async {
+                ringtoneNotifier.value = val!; 
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString('app_ringtone', val); 
+                if (mounted) Navigator.pop(ctx); 
+              },
+            )).toList(),
+          ),
+        ),
+      )
     );
   }
 
