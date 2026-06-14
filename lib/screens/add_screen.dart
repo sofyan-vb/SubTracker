@@ -117,7 +117,7 @@ class _AddScreenState extends State<AddScreen> {
               children: [
                 Expanded(
                   child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(), padding: const EdgeInsets.all(24),
+                    physics: const BouncingScrollPhysics(), padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -150,7 +150,7 @@ class _AddScreenState extends State<AddScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.all(24), width: double.infinity,
+                  padding: const EdgeInsets.all(16), width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
                     onPressed: () async { 
@@ -188,7 +188,7 @@ class _AddScreenState extends State<AddScreen> {
                         }
                       }
                     },
-                    child: Text(tr('TAMBAHKAN', 'ADD NEW'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white)),
+                    child: Text(tr('TAMBAHKAN', 'ADD NEW'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white)),
                   ),
                 ),
               ],
@@ -223,7 +223,7 @@ class _AddScreenState extends State<AddScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardBg.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white10),
       ),
       child: Column(
@@ -310,7 +310,7 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Widget _buildLabel(String text, Color color) { return Padding(padding: const EdgeInsets.only(bottom: 8, left: 4, top: 16), child: Text(text, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold))); }
-  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), inputFormatters: formatters, decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(18)))); }
+  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), inputFormatters: formatters, decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(18)))); }
   Widget _buildDropdown(String? value, List<String> items, Function(String?) onChanged, Color bg, Color textColor, {bool disabled = false}) { 
     return IgnorePointer(
       ignoring: disabled,
@@ -318,7 +318,7 @@ class _AddScreenState extends State<AddScreen> {
         opacity: disabled ? 0.4 : 1.0,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16), 
-          decoration: BoxDecoration(color: disabled ? bg.withValues(alpha: 0.5) : bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), 
+          decoration: BoxDecoration(color: disabled ? bg.withValues(alpha: 0.5) : bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), 
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: (value == null || value.isEmpty) ? null : value, 
@@ -334,8 +334,8 @@ class _AddScreenState extends State<AddScreen> {
       )
     ); 
   }
-  Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(16), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])); }
-  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFF0D9488), inactiveTrackColor: hintColor)]); }
+  Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])); }
+  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFF0D9488), inactiveTrackColor: hintColor)]); }
 }
 
 class ThousandsSeparatorInputFormatter extends TextInputFormatter {

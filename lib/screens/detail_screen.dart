@@ -58,7 +58,7 @@ class _DetailScreenState extends State<DetailScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF121214),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: Text(tr('Apakah kamu yakin? Catatan yang dihapus tidak bisa dikembalikan.', 'Are you sure? Deleted records cannot be recovered.'), style: const TextStyle(color: Colors.white54)),
         actions: [
@@ -103,7 +103,7 @@ class _DetailScreenState extends State<DetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        scrollable: true, backgroundColor: const Color(0xFF151B2B), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        scrollable: true, backgroundColor: const Color(0xFF151B2B), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,8 +111,8 @@ class _DetailScreenState extends State<DetailScreen> {
             Text(tr('Berapa bulan kamu ingin memperpanjang?', 'How many months to renew?'), style: const TextStyle(color: Colors.white54, fontSize: 14)),
             const SizedBox(height: 16),
             TextField(
-              controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16), filled: true, fillColor: const Color(0xFF0B101E), border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
+              controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14), filled: true, fillColor: const Color(0xFF0B101E), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
             ),
           ],
         ),
@@ -159,7 +159,7 @@ class _DetailScreenState extends State<DetailScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -168,10 +168,10 @@ class _DetailScreenState extends State<DetailScreen> {
               const SizedBox(height: 24),
               Text(currentSub.name, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
-              Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 40),
               Container(
-                width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF151B2B), borderRadius: BorderRadius.circular(20)),
+                width: double.infinity, padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: const Color(0xFF151B2B), borderRadius: BorderRadius.circular(12)),
                 child: Column(
                   children: [
                     Text(tr('Status Pembayaran:', 'Payment Status:'), style: const TextStyle(color: Colors.white54, fontSize: 14)),

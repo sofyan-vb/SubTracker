@@ -5,6 +5,7 @@ class Subscription {
   final DateTime dueDate;
   final String category;
   final bool isFinished; 
+  final DateTime? dateAdded;
 
   Subscription({
     required this.id,
@@ -13,6 +14,7 @@ class Subscription {
     required this.dueDate,
     required this.category,
     this.isFinished = false, 
+    this.dateAdded,
   });
 
   Map<String, dynamic> toJson() => {
@@ -22,6 +24,7 @@ class Subscription {
     'dueDate': dueDate.toIso8601String(),
     'category': category,
     'isFinished': isFinished, 
+    'dateAdded': dateAdded?.toIso8601String() ?? DateTime.now().toIso8601String(),
   };
 
   factory Subscription.fromJson(Map<String, dynamic> json) => Subscription(
@@ -31,5 +34,6 @@ class Subscription {
     dueDate: DateTime.parse(json['dueDate']),
     category: json['category'],
     isFinished: json['isFinished'] ?? false, 
+    dateAdded: json['dateAdded'] != null ? DateTime.parse(json['dateAdded']) : DateTime.now(),
   );
 }

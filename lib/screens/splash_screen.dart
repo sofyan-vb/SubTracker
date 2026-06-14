@@ -7,8 +7,11 @@ import 'dart:ui';
 import 'dart:io'; 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dashboard_screen.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
+import '../providers/subscription_provider.dart';
 
-enum SplashState { welcomeNew, welcomeReturning, onboarding, form, loading } 
+enum SplashState { welcomeNew, welcomeReturning, onboarding, choice, form, loading } 
 
 class SplashScreen extends StatefulWidget {
   final bool isNewUser;
@@ -81,21 +84,18 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       userNameNotifier.value = _nameCtrl.text.trim();
     }
 
-    setState(() => _state = SplashState.loading); 
-
-    await Future.delayed(const Duration(milliseconds: 1800)); 
     _goToDashboard();
   }
 
   String _getButtonText() {
     if (_state == SplashState.form) return tr('SIMPAN & MASUK', 'SAVE & ENTER');
-    if (_onboardingPageIndex < 2) return tr('LANJUT', 'NEXT');
+    if (_state == SplashState.onboarding && _onboardingPageIndex < 2) return tr('LANJUT', 'NEXT');
     return tr('MASUK', 'ENTER');
   }
 
   @override
   Widget build(BuildContext context) {
-    bool showTopExitButton = _state == SplashState.form;
+    bool showTopExitButton = _state == SplashState.form || _state == SplashState.choice;
 
     return Stack(
       children: [
@@ -127,7 +127,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             ),
 
           
-          if (_state == SplashState.form || _state == SplashState.loading) ...[
+          if (_state == SplashState.form || _state == SplashState.choice || _state == SplashState.loading) ...[
             const Positioned.fill(
               child: StaggeredAlbumBackground(
                 img1: 'assets/welcome1.jpg', 
@@ -161,6 +161,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         onPressed: () {
                                           if (_state == SplashState.form) {
                                             setState(() {
+                                              _state = SplashState.choice;
+                                            });
+                                          } else if (_state == SplashState.choice) {
+                                            setState(() {
                                               _state = SplashState.onboarding;
                                               _onboardingPageIndex = 2; 
                                             });
@@ -176,7 +180,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                               const Spacer(),
                               
                               
-                              if (_state == SplashState.form || _state == SplashState.loading) ...[
                               if (_state == SplashState.form || _state == SplashState.loading) ...[
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
@@ -196,18 +199,75 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           prefixIcon: const Icon(Icons.person, color: Color(0xFF0D9488), size: 22),
                                           filled: true, fillColor: const Color(0xFF151B2B).withOpacity(0.5),
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
-                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
                                         ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ] 
-                              ] 
-                              
-                             
+                              else if (_state == SplashState.choice) ...[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+                                  child: Column(
+                                    children: [
+                                      Text(tr('Langkah Terakhir', 'Final Step'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
+                                      const SizedBox(height: 8),
+                                      Text(tr('Pilih bagaimana Anda ingin memulai', 'Choose how you want to start'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                      const SizedBox(height: 48),
+                                      
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton.icon(
+                                          icon: const Icon(Icons.person_add_rounded, size: 24),
+                                          label: Text(tr('PENGGUNA BARU', 'NEW USER'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF0D9488),
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                            elevation: 8,
+                                            shadowColor: const Color(0xFF0D9488).withOpacity(0.5)
+                                          ),
+                                          onPressed: () {
+                                            setState(() => _state = SplashState.form);
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton.icon(
+                                          icon: const Icon(Icons.restore_rounded, size: 24),
+                                          label: Text(tr('PULIHKAN DATA', 'RESTORE DATA'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white.withOpacity(0.1),
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.white.withOpacity(0.2))),
+                                            elevation: 0,
+                                          ),
+                                          onPressed: () async {
+                                            String res = await context.read<SubProvider>().importBackup();
+                                            if (res == 'success') {
+                                              final prefs = await SharedPreferences.getInstance();
+                                              await prefs.setString('user_name', 'SubTracker User');
+                                              if (context.mounted) {
+                                                ToastUtils.show(context, 'Data dipulihkan!');
+                                                _goToDashboard();
+                                              }
+                                            } else if (res != 'null' && res != '') {
+                                              if (context.mounted) ToastUtils.show(context, 'Gagal memulihkan data', icon: Icons.error, iconColor: Colors.red);
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ]
                               else if (_state == SplashState.onboarding) ...[
                                 SizedBox(
                                   height: screenHeight * 0.58, 
@@ -262,6 +322,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                            
                               Builder(
                                 builder: (context) {
+                                  if (_state == SplashState.choice) return const SizedBox.shrink();
                                   if (_state == SplashState.onboarding && _onboardingPageIndex > 0) {
                                     return Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -277,13 +338,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                             if (_onboardingPageIndex < 2) {
                                               _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
                                             } else {
-                                              setState(() => _state = SplashState.form); 
+                                              setState(() => _state = SplashState.choice); 
                                             }
                                           },
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                              Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
                                               const SizedBox(width: 8),
                                               AnimatedBuilder(
                                                 animation: _arrowSlide,
@@ -314,7 +375,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          Text(_getButtonText(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                          Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
                                           const SizedBox(width: 8),
                                           AnimatedBuilder(
                                             animation: _arrowSlide,
@@ -390,12 +451,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         children: [
           Expanded(
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(12),
               child: Image.asset(imagePath, width: double.infinity, fit: BoxFit.cover, alignment: alignment),
             ),
           ),
           const SizedBox(height: 20),
-          Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white)),
+          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
           const SizedBox(height: 8),
           Text(desc, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.5)),
         ],
@@ -438,14 +499,14 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
           child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 32),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(12),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
                 child: Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
                   ),
                   child: Material(
@@ -497,7 +558,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
+                                borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(color: Colors.white.withOpacity(0.15)),
                               ),
                             ),
@@ -593,7 +654,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                       child: FadeTransition(
                         opacity: _textOpacity,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -609,11 +670,15 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                     const SizedBox(height: 30),
                                     ScaleTransition(
                                       scale: _logoScale,
-                                      child: CircleAvatar(
-                                        radius: 55,
-                                        backgroundColor: Colors.white10,
-                                        backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
-                                        child: _base64Image == null ? const Icon(Icons.account_circle, size: 80, color: Colors.white54) : null,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white24, width: 2.5)),
+                                        child: CircleAvatar(
+                                          radius: 55,
+                                          backgroundColor: Colors.white10,
+                                          backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
+                                          child: _base64Image == null ? const Icon(Icons.account_circle, size: 80, color: Colors.white54) : null,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(height: 20),
@@ -622,7 +687,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         color: Colors.white,
-                                        fontSize: 24,
+                                        fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 0.5,
                                       ),
@@ -652,7 +717,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                   setState(() {
                                     _isLoading = true;
                                   });
-                                  await Future.delayed(const Duration(milliseconds: 1200));
                                   if (mounted) {
                                     widget.onEnter();
                                   }
@@ -663,7 +727,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                   children: [
                                     Text(
                                       tr('Memuat', 'Loading'),
-                                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
                                     ),
                                     const SizedBox(width: 8),
                                     const Padding(
@@ -677,7 +741,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                   children: [
                                     const Text(
                                       'MASUK',
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
                                     ),
                                     const SizedBox(width: 8),
                                     AnimatedBuilder(
@@ -782,12 +846,10 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
   @override
   void initState() {
     super.initState();
-   
-    Future.delayed(const Duration(milliseconds: 1800), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _showSubTracker = true);
     });
-    
-    Future.delayed(const Duration(milliseconds: 5800), () {
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) widget.onNext();
     });
   }
@@ -817,7 +879,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                 delay: const Duration(milliseconds: 500),
                 speed: const Duration(milliseconds: 100),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 24, fontStyle: FontStyle.italic, color: Colors.white70, letterSpacing: 1.5),
+                style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: Colors.white70, letterSpacing: 1.5),
               ),
               const SizedBox(height: 8),
 
@@ -855,7 +917,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                   delay: const Duration(milliseconds: 2800),
                   speed: const Duration(milliseconds: 50),
                   textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white54, fontSize: 15, height: 1.5),
+                  style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.5),
                 ),
               ),
 
@@ -974,7 +1036,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
                 width: width,
                 height: height,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   image: DecorationImage(image: AssetImage(path), fit: BoxFit.cover, alignment: alignment),
                   border: Border.all(color: Colors.white24, width: 2),
                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.8), blurRadius: 20, offset: const Offset(0, 10))],

@@ -56,37 +56,37 @@ class _SubTileState extends State<SubTile> {
     final catIcon = CategoryUtils.getIcon(widget.sub.category);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Material(
-        color: Colors.transparent, borderRadius: BorderRadius.circular(20),
+        color: Colors.transparent, borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(sub: widget.sub))); },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
-                Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle), child: Icon(catIcon, color: Colors.white, size: 20)),
+                Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle), child: Icon(catIcon, color: Colors.white, size: 18)),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.sub.name, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      Text(widget.sub.name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 4),
                       isFinished
-                          ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600))
+                          ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600))
                           : isDue 
-                              ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.w600))
-                              : Text(countdownText, style: const TextStyle(color: Colors.white54, fontSize: 12, fontWeight: FontWeight.w600)),
+                              ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
+                              : Text(countdownText, style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
-                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w900)),
+                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900)),
               ],
             ),
           ),

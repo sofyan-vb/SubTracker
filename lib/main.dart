@@ -6,7 +6,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'dart:async';
 import 'providers/subscription_provider.dart';
 import 'services/notification_service.dart';
-import 'screens/splash_screen.dart'; 
+import 'screens/splash_screen.dart';
+import 'screens/onboarding_choice_screen.dart'; 
 import 'screens/terms_screen.dart'; 
 import 'screens/dashboard_screen.dart'; 
 
@@ -18,6 +19,7 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   languageNotifier.value = prefs.getString('app_lang') ?? 'EN';
   ringtoneNotifier.value = prefs.getString('app_ringtone') ?? 'ringtone_default';
+  alarmNotifier.value = prefs.getString('app_alarm') ?? 'alarm_lagu';
 
   runApp(
     MultiProvider(
@@ -82,7 +84,7 @@ class _GateKeeperState extends State<GateKeeper> {
       if (mounted) {
         if (hasAccepted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: true)),
+            MaterialPageRoute(builder: (context) => const OnboardingChoiceScreen()),
           ); 
         } else {
           setState(() {

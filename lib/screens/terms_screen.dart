@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'splash_screen.dart'; 
+import 'splash_screen.dart';
+import 'onboarding_choice_screen.dart'; 
 import 'dashboard_screen.dart'; 
 
 class TermsScreen extends StatefulWidget {
@@ -40,7 +41,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
     
     if (context.mounted) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: true)),
+        MaterialPageRoute(builder: (context) => const OnboardingChoiceScreen()),
       );
       setState(() => _isLoading = false); 
     }

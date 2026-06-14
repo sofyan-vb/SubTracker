@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/subscription.dart';
@@ -25,6 +28,9 @@ class SubProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  List<Subscription> get activeSubs => subs.where((s) => !s.isFinished).toList();
+  List<Subscription> get historySubs => _subs.where((s) => s.isFinished).toList();
+
   List<Subscription> get subs {
     List<Subscription> filtered = _subs.where((sub) {
       return sub.name.toLowerCase().contains(_searchQuery.toLowerCase());
@@ -46,7 +52,7 @@ class SubProvider extends ChangeNotifier {
   
   
   double get totalMonthly {
-    return _subs.fold(0, (sum, item) => sum + item.price);
+    return _subs.where((s) => !s.isFinished).fold(0, (sum, item) => sum + item.price);
   }
 
 
@@ -54,7 +60,7 @@ class SubProvider extends ChangeNotifier {
 
   Map<String, double> get categoryBreakdown {
     Map<String, double> breakdown = {};
-    for (var sub in _subs) { 
+    for (var sub in _subs.where((s) => !s.isFinished)) { 
       if (breakdown.containsKey(sub.category)) {
         breakdown[sub.category] = breakdown[sub.category]! + sub.price;
       } else {
@@ -100,4 +106,44 @@ class SubProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<String> exportBackup() async {
+    try {
+      final String encodedData = jsonEncode(
+        _subs.map((sub) => sub.toJson()).toList(),
+      );
+      final Directory tempDir = Directory.systemTemp;
+      final File tempFile = File('${tempDir.path}/subtracker_backup.json');
+      await tempFile.writeAsString(encodedData);
+      
+      await Share.shareXFiles([XFile(tempFile.path)], text: 'Backup SubTracker Data');
+      return 'success';
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<String> importBackup() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+      
+      if (result != null && result.files.single.path != null) {
+        File file = File(result.files.single.path!);
+        String contents = await file.readAsString();
+        
+        final List<dynamic> decodedData = jsonDecode(contents);
+        _subs = decodedData.map((item) => Subscription.fromJson(item)).toList();
+        await _saveData();
+        notifyListeners();
+        return 'success';
+      }
+      return 'cancelled';
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
 }

@@ -40,12 +40,13 @@ class NotificationService {
 
     final prefs = await SharedPreferences.getInstance();
     final String ringtone = prefs.getString('app_ringtone') ?? 'ringtone_default';
+    final String alarm = prefs.getString('app_alarm') ?? 'alarm_lagu';
 
     final tz.TZDateTime scheduledTzTime = tz.TZDateTime.from(scheduledTime, tz.local);
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final Int32List additionalFlags = isAlarm ? Int32List.fromList(<int>[4]) : Int32List(0);
-    final AndroidNotificationSound customSound = RawResourceAndroidNotificationSound(isAlarm ? 'alarm_lagu' : ringtone);
-    final String channelId = isAlarm ? 'channel_alarm_lagu_v3' : 'channel_notif_${ringtone}_v1';
+    final AndroidNotificationSound customSound = RawResourceAndroidNotificationSound(isAlarm ? alarm : ringtone);
+    final String channelId = isAlarm ? 'channel_alarm_${alarm}_v3' : 'channel_notif_${ringtone}_v1';
     final String channelName = isAlarm ? 'Alarm Tagihan' : 'Notifikasi Tagihan';
 
     final NotificationDetails notifDetails = NotificationDetails(

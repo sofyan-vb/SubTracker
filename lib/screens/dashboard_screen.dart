@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:convert';
 import '../utils/toast_utils.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -8,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
 import 'profile_screen.dart';
+import 'history_screen.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:math';
@@ -27,6 +29,7 @@ final ValueNotifier<String?> userPhotoNotifier = ValueNotifier<String?>(null);
 final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); 
 final ValueNotifier<String> currencyNotifier = ValueNotifier<String>('IDR');
 final ValueNotifier<String> ringtoneNotifier = ValueNotifier<String>('Default');
+final ValueNotifier<String> alarmNotifier = ValueNotifier<String>('alarm_lagu');
 
 String tr(String idText, String enText) {
   return languageNotifier.value == 'ID' ? idText : enText;
@@ -91,12 +94,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: bgColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (sheetContext) {
         return Consumer<SubProvider>(
           builder: (context, provider, child) {
             final now = DateTime.now();
-            final upcomingSubs = provider.subs.where((sub) {
+            final upcomingSubs = provider.activeSubs.where((sub) {
               final date = _extractDateSafely(sub);
               if (date == null) return false;
               return date.isAfter(now.subtract(const Duration(days: 1))) && date.isBefore(now.add(const Duration(days: 7)));
@@ -105,7 +108,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
 
             return Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,12 +163,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: bgColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (sheetContext) {
         return Consumer<SubProvider>(
           builder: (context, provider, child) {
             return Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,16 +290,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildProfileStat('Langganan', '${provider.subs.length}', textColor),
+                          _buildProfileStat('Langganan', '${provider.activeSubs.length}', textColor),
                           Container(width: 1, height: 40, color: Colors.white10),
                           _buildProfileStat('Pengeluaran', currencyFormat.format(provider.totalMonthly), textColor),
                         ],
                       );
                     }
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16).copyWith(top: 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).copyWith(top: 0),
                     child: InkWell(
                       onTap: () {
                         Navigator.pop(context);
@@ -314,9 +317,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.edit_note_rounded, color: Color(0xFF0D9488), size: 20),
+                            Icon(Icons.edit_note_rounded, color: Colors.white, size: 20),
                             SizedBox(width: 8),
-                            Text('Pengaturan Profil', style: TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('Pengaturan Profil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                           ],
                         ),
                       ),
@@ -396,7 +399,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       )
                     : Text(
                         'SubTracker',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)
                       ),
                 actions: [
                   IconButton(
@@ -633,7 +636,7 @@ class _HomeView extends StatelessWidget {
     final Color scaffoldBg = theme == 'Putih' ? const Color(0xFFF1F5F9) : (theme == 'Biru' ? const Color(0xFF0F172A) : const Color(0xFF0B101E));
 
     final now = DateTime.now();
-    final upcomingSubs = provider.subs.where((sub) {
+    final upcomingSubs = provider.activeSubs.where((sub) {
       final date = _extractDateSafely(sub);
       if (date == null) return false;
       return date.isAfter(now) || DateUtils.isSameDay(date, now);
@@ -642,7 +645,7 @@ class _HomeView extends StatelessWidget {
     upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
 
     final upcomingSub = upcomingSubs.isNotEmpty ? upcomingSubs.first : null;
-    final double averagePrice = provider.subs.isEmpty ? 0 : (provider.totalMonthly / provider.subs.length);
+    final double averagePrice = provider.activeSubs.isEmpty ? 0 : (provider.totalMonthly / provider.activeSubs.length);
 
     String upcomingDateStr = '';
     if (upcomingSub != null) {
@@ -673,7 +676,7 @@ class _HomeView extends StatelessWidget {
                                 final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
                                 return Text(
                                   displayText, 
-                                  style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                                  style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)
                                 );
                               },
                             ),
@@ -708,10 +711,10 @@ class _HomeView extends StatelessWidget {
                       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(16),
                         child: Stack(
                           children: [
                             Positioned(right: -30, top: -30, child: CircleAvatar(radius: 70, backgroundColor: Colors.white.withValues(alpha: 0.05))),
@@ -732,7 +735,7 @@ class _HomeView extends StatelessWidget {
                                       Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
                                     ],
                                   ),
-                                  const SizedBox(height: 24),
+                                  const SizedBox(height: 16),
                                   FittedBox(
                                     fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
                                     child: Text(
@@ -750,12 +753,12 @@ class _HomeView extends StatelessWidget {
                   ),
                 ),
 
-                if (provider.subs.isNotEmpty)
+                if (provider.activeSubs.isNotEmpty)
                   SliverToBoxAdapter(
                     child: FadeInSlide(
                       delay: const Duration(milliseconds: 200),
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
+                        padding: const EdgeInsets.only(left: 16, right: 16, top: 4),
                         child: Row(
                           children: [
                             Expanded(
@@ -769,8 +772,8 @@ class _HomeView extends StatelessWidget {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 11)),
-                                        Text('${provider.subs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                                        Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 10))]),
+                                        Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
                                       ],
                                     )
                                   ],
@@ -790,7 +793,7 @@ class _HomeView extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                                          Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 10)),
                                           FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
                                         ],
                                       ),
@@ -805,12 +808,12 @@ class _HomeView extends StatelessWidget {
                     ),
                   ),
 
-                if (provider.subs.isNotEmpty)
+                if (provider.activeSubs.isNotEmpty)
                   SliverToBoxAdapter(
                     child: FadeInSlide(
                       delay: const Duration(milliseconds: 250),
                       child: Container(
-                        margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
+                        margin: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: cardBg, 
@@ -861,7 +864,7 @@ class _HomeView extends StatelessWidget {
                   ),
                 ),
 
-                if (provider.subs.isEmpty)
+                if (provider.activeSubs.isEmpty)
                   SliverToBoxAdapter(
                     child: FadeInSlide(
                       delay: const Duration(milliseconds: 400),
@@ -904,16 +907,16 @@ class _HomeView extends StatelessWidget {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100),
+                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           return FadeInSlide(
                             delay: Duration(milliseconds: 450 + (index * 100)),
-                            child: SubTile(sub: provider.subs[index]),
+                            child: SubTile(sub: provider.activeSubs[index]),
                           );
                         },
-                        childCount: provider.subs.length,
+                        childCount: provider.activeSubs.length,
                       ),
                     ),
                   ),
@@ -939,7 +942,7 @@ class _HomeView extends StatelessWidget {
                               final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
                               return Text(
                                 displayText, 
-                                style: const TextStyle(color: Colors.redAccent, fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                                style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)
                               );
                             },
                           ),
@@ -957,10 +960,10 @@ class _HomeView extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(16),
                       child: Stack(
                         children: [
                           Positioned(right: -30, top: -30, child: CircleAvatar(radius: 70, backgroundColor: Colors.white.withValues(alpha: 0.05))),
@@ -981,7 +984,7 @@ class _HomeView extends StatelessWidget {
                                     Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
                                   ],
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 16),
                                 FittedBox(
                                   fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
                                   child: Text(
@@ -998,11 +1001,11 @@ class _HomeView extends StatelessWidget {
                   ),
                 ),
 
-                if (provider.subs.isNotEmpty)
+                if (provider.activeSubs.isNotEmpty)
                   FadeInSlide(
                     delay: const Duration(milliseconds: 200),
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 20, right: 20, top: 4),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 4),
                       child: Row(
                         children: [
                           Expanded(
@@ -1016,8 +1019,8 @@ class _HomeView extends StatelessWidget {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 11)),
-                                      Text('${provider.subs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                                      Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 10))]),
+                                      Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
                                     ],
                                   )
                                 ],
@@ -1037,7 +1040,7 @@ class _HomeView extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                                        Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 10)),
                                         FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
                                       ],
                                     ),
@@ -1051,11 +1054,11 @@ class _HomeView extends StatelessWidget {
                     ),
                   ),
 
-                if (provider.subs.isNotEmpty)
+                if (provider.activeSubs.isNotEmpty)
                   FadeInSlide(
                     delay: const Duration(milliseconds: 250),
                     child: Container(
-                      margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
+                      margin: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: cardBg, 
@@ -1104,7 +1107,7 @@ class _HomeView extends StatelessWidget {
                 ),
 
                 Expanded(
-                  child: provider.subs.isEmpty
+                  child: provider.activeSubs.isEmpty
                       ? FadeInSlide(
                           delay: const Duration(milliseconds: 400),
                           child: Center(
@@ -1123,7 +1126,7 @@ class _HomeView extends StatelessWidget {
                                     color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
                                   ),
                                 ),
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 16),
                                 Text(
                                   tr('Belum Ada Tagihan', 'No Bills Yet'), 
                                   style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
@@ -1143,11 +1146,11 @@ class _HomeView extends StatelessWidget {
                           ),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 100), 
+                          padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 100), 
                           physics: const BouncingScrollPhysics(),
-                          itemCount: provider.subs.length,
+                          itemCount: provider.activeSubs.length,
                           itemBuilder: (context, index) {
-                            return FadeInSlide(delay: Duration(milliseconds: 450 + (index * 100)), child: SubTile(sub: provider.subs[index]));
+                            return FadeInSlide(delay: Duration(milliseconds: 450 + (index * 100)), child: SubTile(sub: provider.activeSubs[index]));
                           },
                         ),
                 ),
@@ -1218,7 +1221,7 @@ class _CalendarViewState extends State<_CalendarView> {
     final daysInMonth = DateUtils.getDaysInMonth(_currentDate.year, _currentDate.month);
     final firstDayOffset = DateTime(_currentDate.year, _currentDate.month, 1).weekday - 1; 
     
-    final subsOnSelectedDate = provider.subs.where((sub) {
+    final subsOnSelectedDate = provider.activeSubs.where((sub) {
       final date = _extractDateSafely(sub);
       if (date == null) return false;
       return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
@@ -1257,11 +1260,11 @@ class _CalendarViewState extends State<_CalendarView> {
                   child: FadeInSlide(
                     delay: const Duration(milliseconds: 100),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+                          Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
                           Row(
                             children: [
                               IconButton(icon: Icon(Icons.chevron_left, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month - 1))),
@@ -1278,11 +1281,11 @@ class _CalendarViewState extends State<_CalendarView> {
                   child: FadeInSlide(
                     delay: const Duration(milliseconds: 200),
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: cardBg, 
-                        borderRadius: BorderRadius.circular(20), 
+                        borderRadius: BorderRadius.circular(16), 
                         border: Border.all(color: Colors.white10),
                         boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                       ),
@@ -1348,12 +1351,12 @@ class _CalendarViewState extends State<_CalendarView> {
                     ),
                   ),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                const SliverToBoxAdapter(child: SizedBox(height: 16)),
                 
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 
@@ -1387,7 +1390,7 @@ class _CalendarViewState extends State<_CalendarView> {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100),
+                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
                     sliver: SliverList(
                       delegate: SliverChildBuilderDelegate(
                         (context, i) => SubTile(sub: subsOnSelectedDate[i]),
@@ -1406,11 +1409,11 @@ class _CalendarViewState extends State<_CalendarView> {
                 FadeInSlide(
                   delay: const Duration(milliseconds: 100),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+                        Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
                         Row(
                           children: [
                             IconButton(icon: Icon(Icons.chevron_left, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month - 1))),
@@ -1425,11 +1428,11 @@ class _CalendarViewState extends State<_CalendarView> {
                 FadeInSlide(
                   delay: const Duration(milliseconds: 200),
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: cardBg, 
-                      borderRadius: BorderRadius.circular(20), 
+                      borderRadius: BorderRadius.circular(16), 
                       border: Border.all(color: Colors.white10),
                       boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                     ),
@@ -1494,11 +1497,11 @@ class _CalendarViewState extends State<_CalendarView> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
                 
                 if (selectedHoliday != null)
@@ -1524,7 +1527,7 @@ class _CalendarViewState extends State<_CalendarView> {
                   child: subsOnSelectedDate.isEmpty
                       ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
                       : ListView.builder(
-                          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 100), 
+                          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100), 
                           physics: const BouncingScrollPhysics(),
                           itemCount: subsOnSelectedDate.length,
                           itemBuilder: (context, i) {
@@ -1579,7 +1582,7 @@ class _StatsView extends StatelessWidget {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1619,12 +1622,12 @@ class _StatsView extends StatelessWidget {
               FadeInSlide(
                 delay: const Duration(milliseconds: 450),
                 child: Container(
-                  height: 240,
+                  height: 160,
                   margin: const EdgeInsets.only(bottom: 24),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: cardBg,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Row(
                     children: [
@@ -1660,7 +1663,7 @@ class _StatsView extends StatelessWidget {
                                   Text(tr('Total', 'Total'), style: const TextStyle(color: Colors.white54, fontSize: 10)),
                                   Text(
                                     currencyFormat.format(totalMonthly),
-                                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
@@ -1711,7 +1714,7 @@ class _StatsView extends StatelessWidget {
               FadeInSlide(
                 delay: const Duration(milliseconds: 500),
                 child: Container(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: cardBg, 
                     borderRadius: BorderRadius.circular(16),
@@ -1731,13 +1734,13 @@ class _StatsView extends StatelessWidget {
                 delay: Duration(milliseconds: 500 + (index * 150)),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft, end: Alignment.bottomRight,
                       colors: theme == 'Putih' ? [Colors.white, Colors.grey.shade50] : [cardBg, cardBg.withValues(alpha: 0.7)],
                     ),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1),
                     boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
                   ),
@@ -1747,8 +1750,8 @@ class _StatsView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(category, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
-                          Text(currencyFormat.format(amount), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.w900, fontSize: 16)),
+                          Text(category, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+                          Text(currencyFormat.format(amount), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.w900, fontSize: 14)),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -1778,10 +1781,10 @@ class _StatsView extends StatelessWidget {
             FadeInSlide(
               delay: const Duration(milliseconds: 600),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: theme == 'Putih' ? const Color(0xFF0D9488).withValues(alpha: 0.05) : const Color(0xFF0D9488).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.3)),
                 ),
                 child: Row(
@@ -1792,7 +1795,7 @@ class _StatsView extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14)),
                           const SizedBox(height: 8),
                           Text(
                             activeSubs.isEmpty 
@@ -1826,7 +1829,7 @@ class _StatsView extends StatelessWidget {
             ? [Colors.white, Colors.grey.shade50] 
             : [cardBg, cardBg.withValues(alpha: 0.8)],
         ),
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1.5),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 15, offset: const Offset(0, 8))],
       ),
@@ -1912,7 +1915,7 @@ class _SettingsViewState extends State<_SettingsView> {
     showModalBottomSheet(
       context: context,
       backgroundColor: dialogBg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (sheetContext) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 24),
@@ -1949,7 +1952,7 @@ class _SettingsViewState extends State<_SettingsView> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
         title: Row(children: [const Icon(Icons.language, color: Color(0xFF0D9488)), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
         
         content: Theme(
@@ -2000,12 +2003,12 @@ class _SettingsViewState extends State<_SettingsView> {
       context: context,
       isScrollControlled: true, 
       backgroundColor: sheetBg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (ctx) {
         return FractionallySizedBox(
           heightFactor: 0.85, 
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -2023,7 +2026,7 @@ class _SettingsViewState extends State<_SettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14)),
                         const SizedBox(height: 8),
                         Text(tr('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTracker, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
@@ -2042,7 +2045,7 @@ class _SettingsViewState extends State<_SettingsView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(children: [const Icon(Icons.warning_rounded, color: Colors.redAccent), const SizedBox(width: 8), Text(tr('Zona Bahaya', 'Danger Zone'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16))]),
+                              Row(children: [const Icon(Icons.warning_rounded, color: Colors.redAccent), const SizedBox(width: 8), Text(tr('Zona Bahaya', 'Danger Zone'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14))]),
                               const SizedBox(height: 8),
                               Text(tr('Menghapus semua data akan menghilangkan seluruh catatan Anda secara permanen.', 'Deleting all data will permanently remove all your records.'), style: TextStyle(color: subTextColor, fontSize: 12)),
                               const SizedBox(height: 16),
@@ -2054,7 +2057,7 @@ class _SettingsViewState extends State<_SettingsView> {
                                     context: context,
                                     builder: (confirmCtx) => AlertDialog(
                                       backgroundColor: sheetBg,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
                                       title: Text(tr('Reboot Sistem?', 'System Reboot?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                                       content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?'), style: TextStyle(color: subTextColor)),
                                       actions: [
@@ -2126,7 +2129,7 @@ class _SettingsViewState extends State<_SettingsView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
                 const SizedBox(height: 6),
                 Text(desc, style: TextStyle(color: subTextColor, fontSize: 13, height: 1.5)),
               ],
@@ -2157,16 +2160,16 @@ class _SettingsViewState extends State<_SettingsView> {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             FadeInSlide(
               delay: const Duration(milliseconds: 100),
-              child: Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+              child: Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             
 
 
@@ -2187,7 +2190,7 @@ class _SettingsViewState extends State<_SettingsView> {
                   inactiveTrackColor: Colors.black26,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   secondary: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488), size: 24)),
-                  title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+                  title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
                   subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 12)),
                   value: _notifEnabled,
                   onChanged: (val) {
@@ -2198,18 +2201,18 @@ class _SettingsViewState extends State<_SettingsView> {
               ),
             ),
 
+            
+            _buildGroupHeader(Icons.person, tr('Preferensi Pengguna', 'User Preferences')),
             FadeInSlide(
               delay: const Duration(milliseconds: 245),
               child: _buildSettingTile(Icons.account_circle, tr('Profil Saya', 'My Profile'), tr('Ubah Nama & Foto', 'Edit Name & Photo'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
-            
             FadeInSlide(
               delay: const Duration(milliseconds: 250),
               child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, widget.theme),
             ),
-
             FadeInSlide(
               delay: const Duration(milliseconds: 260),
               child: ValueListenableBuilder<String>(
@@ -2219,15 +2222,28 @@ class _SettingsViewState extends State<_SettingsView> {
                 }
               ),
             ),
-
             FadeInSlide(
               delay: const Duration(milliseconds: 325),
               child: ValueListenableBuilder<String>(
                 valueListenable: ringtoneNotifier,
                 builder: (context, ringtone, child) {
-                  return _buildSettingTile(Icons.notifications_active_rounded, tr('Nada Notifikasi', 'Notification Sound'), ringtone.replaceAll('ringtone_', '').toUpperCase(), _showRingtoneSelector, cardBg, textColor, subTextColor, widget.theme);
+                  return ValueListenableBuilder<String>(
+                    valueListenable: alarmNotifier,
+                    builder: (context, alarm, child) {
+                      return _buildSettingTile(Icons.notifications_active_rounded, tr('Nada Notifikasi', 'Notification Sound'), "${ringtone.replaceAll('ringtone_', '').toUpperCase()} | ${alarm.replaceAll('alarm_', '').toUpperCase()}", _showRingtoneSelector, cardBg, textColor, subTextColor, widget.theme);
+                    }
+                  );
                 }
               )
+            ),
+
+            const SizedBox(height: 8),
+            _buildGroupHeader(Icons.storage_rounded, tr('Manajemen Data', 'Data Management')),
+            FadeInSlide(
+              delay: const Duration(milliseconds: 242),
+              child: _buildSettingTile(Icons.history_rounded, tr('Riwayat Tagihan', 'Billing History'), tr('Tagihan yang sudah selesai', 'Completed subscriptions'), () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
+              }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(
               delay: const Duration(milliseconds: 270),
@@ -2236,27 +2252,26 @@ class _SettingsViewState extends State<_SettingsView> {
                   context: context,
                   backgroundColor: cardBg,
                   isScrollControlled: true,
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
                   builder: (_) => CurrencyConverterSheet(bgColor: cardBg, textColor: textColor),
                 );
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
-
             FadeInSlide(
               delay: const Duration(milliseconds: 300),
-              child: _buildSettingTile(Icons.save_rounded, tr('Cadangkan Data', 'Backup Data'), tr('Ekspor ke File', 'Export to File'), _backupData, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.save_rounded, tr('Cadangkan Data', 'Backup Data'), tr('Ekspor ke File JSON', 'Export to JSON File'), _backupData, cardBg, textColor, subTextColor, widget.theme),
             ),
-            const SizedBox(height: 12),
             FadeInSlide(
               delay: const Duration(milliseconds: 350),
               child: _buildSettingTile(Icons.restore_rounded, tr('Pulihkan Data', 'Restore Data'), tr('Impor dari File', 'Import from File'), _restoreData, cardBg, textColor, subTextColor, widget.theme),
             ),
 
+            const SizedBox(height: 8),
+            _buildGroupHeader(Icons.security_rounded, tr('Sistem & Privasi', 'System & Privacy')),
             FadeInSlide(
               delay: const Duration(milliseconds: 400),
               child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme),
             ),
-
             FadeInSlide(
               delay: const Duration(milliseconds: 500),
               child: _buildSettingTile(
@@ -2277,6 +2292,26 @@ class _SettingsViewState extends State<_SettingsView> {
     );
   }
 
+  void _previewSound(String soundFile, {bool isAlarm = false}) {
+    final channelId = 'preview_${soundFile}_v1';
+    final details = NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId, 'Pratinjau Suara',
+        channelDescription: 'Preview',
+        importance: Importance.max,
+        priority: Priority.high,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound(soundFile),
+        audioAttributesUsage: isAlarm ? AudioAttributesUsage.alarm : AudioAttributesUsage.notification,
+      ),
+    );
+    FlutterLocalNotificationsPlugin().show(8888, 'Pratinjau Suara', 'Memutar $soundFile...', details);
+    
+    Future.delayed(const Duration(seconds: 3), () {
+      FlutterLocalNotificationsPlugin().cancel(8888);
+    });
+  }
+
   void _showRingtoneSelector() {
     final isLight = widget.theme == 'Putih';
     final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
@@ -2287,28 +2322,93 @@ class _SettingsViewState extends State<_SettingsView> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488)), const SizedBox(width: 10), Text(tr('Nada Notifikasi', 'Notification Sound'), style: TextStyle(color: textColor))]),
-        
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488)), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 14))]),
+        contentPadding: const EdgeInsets.symmetric(vertical: 20),
         content: Theme(
           data: Theme.of(context).copyWith(unselectedWidgetColor: unselectedRadioColor),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: ['ringtone_default', 'ringtone_chime', 'ringtone_alert', 'ringtone_synth'].map((r) => RadioListTile<String>(
-              title: Text(r.replaceAll('ringtone_', '').toUpperCase(), style: TextStyle(color: textColor)),
-              value: r,
-              groupValue: ringtoneNotifier.value, 
-              activeColor: const Color(0xFF0D9488),
-              onChanged: (val) async {
-                ringtoneNotifier.value = val!; 
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setString('app_ringtone', val); 
-                if (mounted) Navigator.pop(ctx); 
-              },
-            )).toList(),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: StatefulBuilder(
+              builder: (context, setStateSB) {
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                      ...['ringtone_default', 'ringtone_chime', 'ringtone_alert', 'ringtone_synth'].map((r) {
+                        return RadioListTile<String>(
+                          title: Text(r.replaceAll('ringtone_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 14)),
+                          value: r,
+                          groupValue: ringtoneNotifier.value, 
+                          activeColor: const Color(0xFF0D9488),
+                          dense: true,
+                          onChanged: (val) async {
+                            ringtoneNotifier.value = val!; 
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setString('app_ringtone', val); 
+                            setStateSB((){});
+                            if (mounted) setState((){});
+                            _previewSound(val);
+                          },
+                        );
+                      }),
+                      const Divider(color: Colors.white10),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Text(tr('Suara Alarm Tagihan', 'Billing Alarm Sound'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                      ...['alarm_lagu', 'alarm_digital', 'alarm_classic'].map((r) {
+                        return RadioListTile<String>(
+                          title: Text(r.replaceAll('alarm_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 14)),
+                          value: r,
+                          groupValue: alarmNotifier.value, 
+                          activeColor: Colors.redAccent,
+                          dense: true,
+                          onChanged: (val) async {
+                            alarmNotifier.value = val!; 
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setString('app_alarm', val); 
+                            setStateSB((){});
+                            if (mounted) setState((){});
+                            _previewSound(val, isAlarm: true);
+                          },
+                        );
+                      }),
+                    ],
+                  ),
+                );
+              }
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              FlutterLocalNotificationsPlugin().cancel(8888);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Tutup', style: TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold))
+          )
+        ],
       )
+    );
+  }
+
+  Widget _buildGroupHeader(IconData icon, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 8, top: 16),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.cyanAccent, size: 18),
+          const SizedBox(width: 8),
+          Text(title, style: TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+        ],
+      ),
     );
   }
 
@@ -2324,7 +2424,7 @@ class _SettingsViewState extends State<_SettingsView> {
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: const Color(0xFF0D9488), size: 24)),
-        title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15)),
+        title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
         subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 12))),
         trailing: Icon(Icons.chevron_right_rounded, color: subTextColor),
         onTap: onTap, 
@@ -2333,29 +2433,13 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 }
 
-class FadeInSlide extends StatefulWidget {
+class FadeInSlide extends StatelessWidget {
   final Widget child;
   final Duration delay;
   const FadeInSlide({super.key, required this.child, required this.delay});
+
   @override
-  State<FadeInSlide> createState() => _FadeInSlideState();
-}
-class _FadeInSlideState extends State<FadeInSlide> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _opacityAnim;
-  late Animation<Offset> _slideAnim;
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
-    _opacityAnim = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-    _slideAnim = Tween<Offset>(begin: const Offset(0, 0.2), end: Offset.zero).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-    Future.delayed(widget.delay, () { if (mounted) _controller.forward(); });
-  }
-  @override
-  void dispose() { _controller.dispose(); super.dispose(); }
-  @override
-  Widget build(BuildContext context) { return FadeTransition(opacity: _opacityAnim, child: SlideTransition(position: _slideAnim, child: widget.child)); }
+  Widget build(BuildContext context) => child;
 }
 
 class BlinkingWidget extends StatefulWidget {

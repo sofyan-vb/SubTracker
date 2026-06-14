@@ -52,6 +52,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _showImageOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: widget.cardBg,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: widget.textColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: Color(0xFF0D9488)),
+                title: Text('Pilih dari Galeri', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _pickImage();
+                },
+              ),
+              if (_base64Image != null)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                  title: const Text('Hapus Foto Profil', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                  onTap: () async {
+                    setState(() {
+                      _base64Image = null;
+                    });
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.remove('profile_image');
+                    userPhotoNotifier.value = null;
+                    if (mounted) Navigator.pop(ctx);
+                  },
+                ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      }
+    );
+  }
+
   Future<void> _pickImage() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.image);
@@ -82,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             GestureDetector(
-              onTap: _pickImage,
+              onTap: _showImageOptions,
               child: Stack(
                 alignment: Alignment.bottomRight,
                 children: [
@@ -94,9 +137,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(color: Color(0xFF0D9488), shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: const Color(0xFF0D9488), shape: BoxShape.circle),
                     child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -111,9 +154,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 labelStyle: TextStyle(color: widget.textColor.withValues(alpha: 0.6)),
                 filled: true,
                 fillColor: widget.cardBg,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF0D9488))),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488))),
               ),
             ),
             const SizedBox(height: 40),
@@ -122,9 +165,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
                 onPressed: _saveProfile,
-                child: const Text('Simpan Profil', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text('Simpan Profil', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
               ),
-            )
+            ),
+
           ],
         ),
       ),
