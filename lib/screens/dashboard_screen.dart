@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../utils/toast_utils.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
+import 'profile_screen.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:math';
@@ -19,7 +21,8 @@ import 'add_screen.dart';
 
 
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Putih');
-final ValueNotifier<String> userNameNotifier = ValueNotifier<String>(''); 
+final ValueNotifier<String> userNameNotifier = ValueNotifier<String>('');
+final ValueNotifier<String?> userPhotoNotifier = ValueNotifier<String?>(null); 
 final ValueNotifier<String> languageNotifier = ValueNotifier<String>('EN'); 
 final ValueNotifier<String> currencyNotifier = ValueNotifier<String>('IDR');
 
@@ -55,12 +58,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     
     final savedName = prefs.getString('user_name');
     if (savedName != null) userNameNotifier.value = savedName;
+    final savedPhoto = prefs.getString('profile_image');
+    if (savedPhoto != null) userPhotoNotifier.value = savedPhoto;
 
     final savedLang = prefs.getString('app_lang');
     if (savedLang != null) languageNotifier.value = savedLang;
 
     final savedCurrency = prefs.getString('app_currency');
     if (savedCurrency != null) currencyNotifier.value = savedCurrency;
+
+    CurrencyUtils.fetchRealTimeRates().then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -101,7 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488)),
+                      const Icon(Icons.notifications_active_rounded, color: Colors.white),
                       const SizedBox(width: 12),
                       Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
                     ],
@@ -266,11 +275,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Consumer<SubProvider>(
                       builder: (context, provider, child) {
                         final now = DateTime.now();
-                        final hasUrgent = provider.subs.any((sub) {
-                          final date = _extractDateSafely(sub);
-                          if (date == null) return false;
-                          return date.isAfter(now.subtract(const Duration(days: 1))) && date.isBefore(now.add(const Duration(days: 7)));
-                        });
+                        final hasUrgent = provider.subs.any((sub) => !sub.isFinished);
                         return IconButton(
                           icon: Stack(
                             children: [
@@ -348,22 +353,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround, 
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.space_dashboard_outlined, color: _currentIndex == 0 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
-                        onPressed: () => setState(() => _currentIndex = 0),
+                      InkWell(
+                        onTap: () => setState(() => _currentIndex = 0),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.space_dashboard_outlined, color: _currentIndex == 0 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Beranda', 'Home'), style: TextStyle(color: _currentIndex == 0 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 0 ? FontWeight.bold : FontWeight.normal)),
+                          ],
+                        ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.calendar_month_outlined, color: _currentIndex == 1 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
-                        onPressed: () => setState(() => _currentIndex = 1),
+                      InkWell(
+                        onTap: () => setState(() => _currentIndex = 1),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.calendar_month_outlined, color: _currentIndex == 1 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Kalender', 'Calendar'), style: TextStyle(color: _currentIndex == 1 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 1 ? FontWeight.bold : FontWeight.normal)),
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 48),
-                      IconButton(
-                        icon: Icon(Icons.insert_chart_outlined, color: _currentIndex == 2 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
-                        onPressed: () => setState(() => _currentIndex = 2),
+                      InkWell(
+                        onTap: () => setState(() => _currentIndex = 2),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.insert_chart_outlined, color: _currentIndex == 2 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Statistik', 'Statistics'), style: TextStyle(color: _currentIndex == 2 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 2 ? FontWeight.bold : FontWeight.normal)),
+                          ],
+                        ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.settings_outlined, color: _currentIndex == 3 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 28),
-                        onPressed: () => setState(() => _currentIndex = 3),
+                      InkWell(
+                        onTap: () => setState(() => _currentIndex = 3),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.settings_outlined, color: _currentIndex == 3 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: _currentIndex == 3 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 3 ? FontWeight.bold : FontWeight.normal)),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -1635,7 +1668,7 @@ class _SettingsViewState extends State<_SettingsView> {
         text: 'Ini adalah backup data langganan SubTracker Anda. Simpan file ini di tempat yang aman.'
       );
     } catch(e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Backup Gagal: $e', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+      if (mounted) ToastUtils.show(context, 'Backup Gagal: $e', icon: Icons.error_outline, iconColor: Colors.redAccent);
     }
   }
 
@@ -1655,14 +1688,14 @@ class _SettingsViewState extends State<_SettingsView> {
           await prefs.setString('saved_subs', data);
           
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Data berhasil dipulihkan Tutup dan buka ulang aplikasi', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+            ToastUtils.show(context, 'Data berhasil dipulihkan! Tutup dan buka ulang aplikasi.');
           }
         } else {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Format file backup tidak valid', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+          if (mounted) ToastUtils.show(context, 'Format file backup tidak valid', icon: Icons.error_outline, iconColor: Colors.redAccent);
         }
       }
     } catch(e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Restore Gagal: $e', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+      if (mounted) ToastUtils.show(context, 'Restore Gagal: $e', icon: Icons.error_outline, iconColor: Colors.redAccent);
     }
   }
 
@@ -1836,7 +1869,7 @@ class _SettingsViewState extends State<_SettingsView> {
                                             themeNotifier.value = 'Hitam';
                                             userNameNotifier.value = ''; 
                                             
-                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+                                            ToastUtils.show(context, tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared'));
                                           }, 
                                           child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
                                         ),
@@ -1935,7 +1968,7 @@ class _SettingsViewState extends State<_SettingsView> {
                 decoration: BoxDecoration(
                   color: cardBg, 
                   borderRadius: BorderRadius.circular(16), 
-                  border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade300 : Colors.white10),
+                  border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade300 : Colors.transparent),
                   boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
                 ),
                 child: SwitchListTile(
@@ -1950,15 +1983,22 @@ class _SettingsViewState extends State<_SettingsView> {
                   value: _notifEnabled,
                   onChanged: (val) {
                     setState(() => _notifEnabled = val);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(val ? tr('Notifikasi Diaktifkan', 'Notifications Enabled') : tr('Notifikasi Dimatikan', 'Notifications Disabled'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+                    ToastUtils.show(context, val ? tr('Notifikasi Diaktifkan', 'Notifications Enabled') : tr('Notifikasi Dimatikan', 'Notifications Disabled'));
                   },
                 ),
               ),
             ),
 
             FadeInSlide(
+              delay: const Duration(milliseconds: 245),
+              child: _buildSettingTile(Icons.account_circle, tr('Profil Saya', 'My Profile'), tr('Ubah Nama & Foto', 'Edit Name & Photo'), () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: themeNotifier.value == 'Putih' ? const Color(0xFFF1F5F9) : const Color(0xFF0B101E), textColor: textColor, cardBg: cardBg)));
+              }, cardBg, textColor, subTextColor, themeNotifier.value),
+            ),
+            
+            FadeInSlide(
               delay: const Duration(milliseconds: 250),
-              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, themeNotifier.value),
             ),
 
             FadeInSlide(
@@ -2025,7 +2065,7 @@ class _SettingsViewState extends State<_SettingsView> {
       decoration: BoxDecoration(
         color: cardBg, 
         borderRadius: BorderRadius.circular(16), 
-        border: Border.all(color: currentTheme == 'Putih' ? Colors.grey.shade300 : Colors.white10),
+        border: Border.all(color: currentTheme == 'Putih' ? Colors.grey.shade300 : Colors.transparent),
         boxShadow: currentTheme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
       ),
       child: ListTile(

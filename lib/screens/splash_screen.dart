@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../utils/toast_utils.dart';
 import 'dart:math'; 
 import 'dart:async'; 
 import 'dart:ui'; 
@@ -70,15 +72,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Future<void> _processEntry() async {
     if (_state == SplashState.form) {
       if (_nameCtrl.text.trim().isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr('Nama pengguna tidak boleh kosong!', 'Username cannot be empty!'), 
-              style: const TextStyle(fontWeight: FontWeight.bold)
-            ), 
-            backgroundColor: Colors.redAccent
-          ),
-        );
+        ToastUtils.show(context, tr('Nama pengguna tidak boleh kosong!', 'Username cannot be empty!'), icon: Icons.error_outline, iconColor: Colors.redAccent);
         return;
       }
       
@@ -422,6 +416,7 @@ class WelcomeReturningView extends StatefulWidget {
 }
 
 class _WelcomeReturningViewState extends State<WelcomeReturningView> with TickerProviderStateMixin {
+  String? _base64Image;
   late AnimationController _logoCtrl;
   late AnimationController _textCtrl;
   late AnimationController _arrowCtrl;
@@ -525,9 +520,15 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
     );
   }
 
+  Future<void> _loadPhoto() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) setState(() { _base64Image = prefs.getString('profile_image'); });
+  }
+
   @override
   void initState() {
     super.initState();
+    _loadPhoto();
     _logoCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut));
 
@@ -587,21 +588,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    
-                      ScaleTransition(
-                        scale: _logoScale,
-                        child: ClipOval(
-                          child: Image.asset(
-                            'assets/icon.png',
-                            width: 110,
-                            height: 110,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 45),
-                    
-                    
                     SlideTransition(
                       position: _textSlide,
                       child: FadeTransition(
@@ -612,15 +598,25 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      tr('Selamat Datang Kembali,', 'Welcome Back,'),
+                                      tr('Selamat Datang Kembali', 'Welcome Back'),
                                       style: const TextStyle(
-                                        color: Colors.white54,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
                                         letterSpacing: 0.5,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 30),
+                                    ScaleTransition(
+                                      scale: _logoScale,
+                                      child: CircleAvatar(
+                                        radius: 55,
+                                        backgroundColor: Colors.white10,
+                                        backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
+                                        child: _base64Image == null ? const Icon(Icons.account_circle, size: 80, color: Colors.white54) : null,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
                                     Text(
                                       widget.userName.isEmpty ? 'SubTracker' : widget.userName,
                                       textAlign: TextAlign.center,

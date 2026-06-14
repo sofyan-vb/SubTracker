@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/toast_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart'; 
@@ -8,6 +9,7 @@ import '../services/notification_service.dart';
 import '../utils/currency_utils.dart';
 import 'dashboard_screen.dart'; 
 import 'package:flutter/services.dart';
+import '../utils/category_utils.dart';
 
 class AddScreen extends StatefulWidget {
   const AddScreen({super.key});
@@ -153,7 +155,7 @@ class _AddScreenState extends State<AddScreen> {
                     style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
                     onPressed: () async { 
                       if (_selectedCategory.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Pilih kategori terlebih dahulu', 'Select a category first'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+                        ToastUtils.show(context, tr('Pilih kategori terlebih dahulu', 'Select a category first'), icon: Icons.warning_rounded, iconColor: Colors.redAccent);
                         return;
                       }
                       if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
@@ -161,7 +163,7 @@ class _AddScreenState extends State<AddScreen> {
                         DateTime scheduledDateTime = exactDateTime.subtract(Duration(days: _reminderDays));
 
                         if (scheduledDateTime.isBefore(DateTime.now())) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Jadwal pengingat sudah terlewat', 'Reminder schedule has passed'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+                          ToastUtils.show(context, tr('Jadwal pengingat sudah terlewat', 'Reminder schedule has passed'), icon: Icons.info_outline, iconColor: Colors.blueAccent);
                           return; 
                         }
 
@@ -181,17 +183,7 @@ class _AddScreenState extends State<AddScreen> {
 
                         try { NotificationService.scheduleNotification(newSub.id.hashCode, notifTitle, notifBody, scheduledDateTime, isAlarm: isUsingAlarm); } catch (_) {}
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(tr('Berhasil ditambahkan', 'Successfully added'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])),
-                              backgroundColor: Colors.transparent,
-                              elevation: 0,
-                              behavior: SnackBarBehavior.floating,
-                              margin: const EdgeInsets.only(bottom: 130),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
+                          ToastUtils.show(context, tr('Berhasil ditambahkan', 'Successfully added'));
                           Navigator.pop(context); 
                         }
                       }
@@ -254,17 +246,8 @@ class _AddScreenState extends State<AddScreen> {
               itemBuilder: (context, index) {
                 final cat = categories[index];
                 final isSelected = _selectedCategory == cat;
-                
-                IconData iconData = Icons.category;
-                if (cat == 'Hiburan' || cat == 'Entertainment') iconData = Icons.movie_creation_rounded;
-                if (cat == 'Musik' || cat == 'Music') iconData = Icons.headphones_rounded;
-                if (cat == 'Software') iconData = Icons.computer_rounded;
-                if (cat == 'Utilitas' || cat == 'Utilities') iconData = Icons.bolt_rounded;
-                if (cat == 'Belanja' || cat == 'Shopping') iconData = Icons.shopping_bag_rounded;
-                if (cat == 'Game') iconData = Icons.videogame_asset_rounded;
-                if (cat == 'Edukasi' || cat == 'Education') iconData = Icons.school_rounded;
-                if (cat == 'Cloud Storage') iconData = Icons.cloud_rounded;
-                if (cat == 'Lainnya' || cat == 'Others') iconData = Icons.dashboard_customize_rounded;
+                IconData iconData = CategoryUtils.getIcon(cat);
+                Color catColor = CategoryUtils.getColor(cat);
 
                 return GestureDetector(
                   onTap: () {
@@ -291,7 +274,7 @@ class _AddScreenState extends State<AddScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(iconData, color: isSelected ? Colors.white : textColor.withValues(alpha: 0.5), size: 30),
+                        Icon(iconData, color: isSelected ? Colors.white : catColor, size: 30),
                         const SizedBox(height: 8),
                         Text(cat, style: TextStyle(color: isSelected ? Colors.white : textColor.withValues(alpha: 0.5), fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
                       ],

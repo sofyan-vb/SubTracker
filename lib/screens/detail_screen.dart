@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../utils/toast_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; 
 import '../models/subscription.dart';
@@ -65,7 +66,7 @@ class _DetailScreenState extends State<DetailScreen> {
             onPressed: () {
               context.read<SubProvider>().removeSub(currentSub.id);
               Navigator.pop(ctx); Navigator.pop(context); 
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Catatan berhasil dihapus', 'Record deleted successfully'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+              ToastUtils.show(context, tr('Catatan berhasil dihapus', 'Record deleted successfully'));
             }, 
             child: Text(tr('Hapus', 'Delete'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
           ),
@@ -93,7 +94,7 @@ class _DetailScreenState extends State<DetailScreen> {
     final updatedSub = Subscription(id: currentSub.id, name: currentSub.name, price: currentSub.price, dueDate: currentSub.dueDate, category: currentSub.category, isFinished: true);
     provider.removeSub(currentSub.id); provider.addSub(updatedSub);
     setState(() { currentSub = updatedSub; });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Catatan ditandai selesai', 'Record marked as completed'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+    ToastUtils.show(context, tr('Catatan ditandai selesai', 'Record marked as completed'));
   }
 
   void _showRenewInput() {
@@ -120,7 +121,7 @@ class _DetailScreenState extends State<DetailScreen> {
             onPressed: () {
               final int? m = int.tryParse(_monthCtrl.text);
               if (m != null && m > 0) { Navigator.pop(ctx); _processRenewal(m); } 
-              else { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Masukkan angka valid', 'Enter valid number'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130))); }
+              else { ToastUtils.show(context, tr('Masukkan angka valid', 'Enter valid number'), icon: Icons.error_outline, iconColor: Colors.redAccent); }
             }, 
             child: Text(tr('Simpan', 'Save'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold))
           ),
@@ -135,7 +136,7 @@ class _DetailScreenState extends State<DetailScreen> {
     final updatedSub = Subscription(id: currentSub.id, name: currentSub.name, price: currentSub.price, dueDate: newDate, category: currentSub.category, isFinished: false);
     provider.removeSub(currentSub.id); provider.addSub(updatedSub);
     setState(() { currentSub = updatedSub; });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Diperpanjang $monthsToAdd Bulan', 'Renewed for $monthsToAdd Month(s)'), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 14, shadows: [Shadow(color: Colors.black, blurRadius: 15), Shadow(color: Colors.black, blurRadius: 8)])), backgroundColor: Colors.transparent, elevation: 0, behavior: SnackBarBehavior.floating, margin: const EdgeInsets.only(bottom: 130)));
+    ToastUtils.show(context, tr('Diperpanjang $monthsToAdd Bulan', 'Renewed for $monthsToAdd Month(s)'));
   }
 
   @override
@@ -166,7 +167,7 @@ class _DetailScreenState extends State<DetailScreen> {
               const SizedBox(height: 24),
               Text(currentSub.name, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
               const SizedBox(height: 8),
-              Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Color(0xFF0D9488), fontSize: 24, fontWeight: FontWeight.bold)),
+              Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 40),
               Container(
                 width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: const Color(0xFF151B2B), borderRadius: BorderRadius.circular(20)),
