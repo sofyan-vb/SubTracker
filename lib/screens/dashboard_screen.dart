@@ -16,6 +16,8 @@ import 'dart:math';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart'; 
 import '../providers/subscription_provider.dart';
+import '../models/subscription.dart';
+import '../widgets/category_filter_menu.dart';
 import '../widgets/subscription_tile.dart';
 import '../utils/category_utils.dart';
 import '../utils/currency_utils.dart';
@@ -43,6 +45,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+
+
   int _currentIndex = 0;
   bool _isSearching = false;
   final TextEditingController _searchCtrl = TextEditingController();
@@ -108,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
 
             return Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +121,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       const Icon(Icons.notifications_active_rounded, color: Colors.white),
                       const SizedBox(width: 12),
-                      Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -144,7 +148,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 20),
                             ),
                             title: Text(sub.name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                            subtitle: Text(tr('Sekarang waktunya tagihan', 'Now its bill time'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12)),
+                            subtitle: Text(tr('Sekarang waktunya tagihan', 'Now its bill time'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 10)),
                             trailing: Text(daysLeftStr, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                           );
                         }
@@ -168,12 +172,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return Consumer<SubProvider>(
           builder: (context, provider, child) {
             return Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tr('Urutkan Berdasarkan', 'Sort By'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text(tr('Urutkan Berdasarkan', 'Sort By'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
                   _buildSortTile(context, provider, tr('Terdekat', 'Closest'), Icons.calendar_today, textColor),
                   _buildSortTile(context, provider, tr('Termahal', 'Highest Price'), Icons.arrow_upward, textColor),
@@ -197,9 +201,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: isActive ? const Color(0xFF0D9488) : defaultTextColor.withOpacity(0.6)),
-      title: Text(title, style: TextStyle(color: isActive ? const Color(0xFF0D9488) : defaultTextColor, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
-      trailing: isActive ? const Icon(Icons.check_circle, color: Color(0xFF0D9488)) : null,
+      leading: Icon(icon, color: isActive ? Colors.white : defaultTextColor.withOpacity(0.6)),
+      title: Text(title, style: TextStyle(color: isActive ? Colors.white : defaultTextColor, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
+      trailing: isActive ? const Icon(Icons.check_circle, color: Colors.white) : null,
       onTap: () {
         if (title == 'Closest' || title == 'Terdekat') provider.setSortBy('Terdekat');
         else if (title == 'Highest Price' || title == 'Termahal') provider.setSortBy('Termahal');
@@ -280,7 +284,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ValueListenableBuilder<String>(
                     valueListenable: userNameNotifier,
                     builder: (context, userName, child) {
-                      return Text(userName.isEmpty ? 'SubTracker User' : userName, style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold));
+                      return Text(userName.isEmpty ? 'SubTracker User' : userName, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold));
                     }
                   ),
                   const SizedBox(height: 28),
@@ -299,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(height: 16),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16).copyWith(top: 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12).copyWith(top: 0),
                     child: InkWell(
                       onTap: () {
                         Navigator.pop(context);
@@ -319,7 +323,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           children: [
                             Icon(Icons.edit_note_rounded, color: Colors.white, size: 20),
                             SizedBox(width: 8),
-                            Text('Pengaturan Profil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                            Text('Pengaturan Profil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -343,9 +347,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildProfileStat(String label, String value, Color textColor) {
     return Column(
       children: [
-        Text(value, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w900)),
+        Text(value, style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.w900)),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 12)),
+        Text(label, style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 10)),
       ],
     );
   }
@@ -380,7 +384,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Scaffold(
               backgroundColor: scaffoldBg,
               resizeToAvoidBottomInset: false, 
-              appBar: AppBar(
+              appBar: _currentIndex == 0 ? AppBar(
+                automaticallyImplyLeading: false,
                 backgroundColor: scaffoldBg,
                 elevation: 0,
                 title: _isSearching
@@ -399,12 +404,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       )
                     : Text(
                         'SubTracker',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)
                       ),
                 actions: [
-                  IconButton(
-                    icon: Icon(_isSearching ? Icons.close : Icons.search, color: appBarIcons),
-                    onPressed: () {
+                  GestureDetector(
+                    onTap: () {
                       setState(() {
                         _isSearching = !_isSearching;
                         if (!_isSearching) {
@@ -413,43 +417,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         }
                       });
                     },
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.all(6),
+                      decoration: _isSearching ? null : BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white24, width: 1)),
+                      child: Icon(_isSearching ? Icons.close : Icons.search, color: appBarIcons, size: 20),
+                    ),
                   ),
                   
                   if (!_isSearching)
                     Consumer<SubProvider>(
                       builder: (context, provider, child) {
                         final now = DateTime.now();
-                        final hasUrgent = provider.subs.any((sub) {
+                        final urgentCount = provider.subs.where((sub) {
                           if (sub.isFinished) return false;
                           final date = sub.dueDate;
                           final today = DateTime(now.year, now.month, now.day);
                           final subDate = DateTime(date.year, date.month, date.day);
                           return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
-                        });
-                        return IconButton(
-                          icon: Stack(
-                            children: [
-                              Icon(Icons.notifications_none_rounded, color: appBarIcons),
-                              if (hasUrgent)
-                                Positioned(
-                                  right: 2, top: 2,
-                                  child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle)),
-                                )
-                            ]
+                        }).length;
+                        return GestureDetector(
+                          onTap: () => _showNotificationsSheet(context, bottomNavBg, textColor),
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white24, width: 1)),
+                            child: Stack(
+                              children: [
+                                Icon(Icons.notifications_none_rounded, color: appBarIcons, size: 20),
+                                if (urgentCount > 0)
+                                  Positioned(
+                                    right: -2, top: -2,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(2),
+                                      decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                                      constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
+                                      child: Center(
+                                        child: Text(
+                                          urgentCount > 9 ? '9+' : urgentCount.toString(),
+                                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                              ]
+                            ),
                           ),
-                          onPressed: () => _showNotificationsSheet(context, bottomNavBg, textColor),
                         );
                       },
                     ),
 
                   if (!_isSearching)
-                    IconButton(
-                      icon: Icon(Icons.tune, color: appBarIcons),
-                      onPressed: () => _showFilterSheet(context, bottomNavBg, textColor),
+                    GestureDetector(
+                      onTap: () => _showFilterSheet(context, bottomNavBg, textColor),
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.all(6),
+                        
+                        child: Icon(Icons.tune, color: appBarIcons, size: 20),
+                      ),
                     ),
                   if (!_isSearching)
                     Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
+                      padding: const EdgeInsets.only(right: 8.0, left: 4.0),
                       child: GestureDetector(
                         onTap: () {
                           _showPremiumProfileDialog(context, bottomNavBg, textColor, scaffoldBg);
@@ -473,10 +504,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   const SizedBox(width: 8),
                 ],
+              ) : AppBar(
+                automaticallyImplyLeading: false,
+                backgroundColor: scaffoldBg,
+                elevation: 0,
+                title: Text(
+                  _currentIndex == 1 ? tr('Kalender', 'Calendar') : 
+                  _currentIndex == 2 ? tr('Statistik', 'Statistics') : 
+                  tr('Pengaturan', 'Settings'),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)
+                ),
+                centerTitle: false,
               ),
 
-              body: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+              body: AnimatedSwitcher(duration: Duration.zero,
                 child: ValueListenableBuilder<String>(
                   valueListenable: languageNotifier, 
                   builder: (context, lang, child) => _buildBodyContent(currentTheme),
@@ -533,8 +574,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.space_dashboard_outlined, color: _currentIndex == 0 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Beranda', 'Home'), style: TextStyle(color: _currentIndex == 0 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 0 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.space_dashboard_outlined, color: _currentIndex == 0 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Beranda', 'Home'), style: TextStyle(color: _currentIndex == 0 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 0 ? FontWeight.bold : FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -544,8 +585,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.calendar_month_outlined, color: _currentIndex == 1 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Kalender', 'Calendar'), style: TextStyle(color: _currentIndex == 1 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 1 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.calendar_month_outlined, color: _currentIndex == 1 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Kalender', 'Calendar'), style: TextStyle(color: _currentIndex == 1 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 1 ? FontWeight.bold : FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -556,8 +597,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.insert_chart_outlined, color: _currentIndex == 2 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Statistik', 'Statistics'), style: TextStyle(color: _currentIndex == 2 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 2 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.insert_chart_outlined, color: _currentIndex == 2 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Statistik', 'Statistics'), style: TextStyle(color: _currentIndex == 2 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 2 ? FontWeight.bold : FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -567,8 +608,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.settings_outlined, color: _currentIndex == 3 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: _currentIndex == 3 ? const Color(0xFF0D9488) : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 10, fontWeight: _currentIndex == 3 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.settings_outlined, color: _currentIndex == 3 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
+                            Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: _currentIndex == 3 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 3 ? FontWeight.bold : FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -662,21 +703,20 @@ class _HomeView extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
-                  child: FadeInSlide(
-                    delay: const Duration(milliseconds: 50),
+                  child: FadeInSlide(delay: Duration.zero,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          BlinkingWidget(
+                          Container(
                             child: ValueListenableBuilder<String>(
                               valueListenable: userNameNotifier,
                               builder: (context, userName, child) {
                                 final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
                                 return Text(
                                   displayText, 
-                                  style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                                  style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0)
                                 );
                               },
                             ),
@@ -704,8 +744,7 @@ class _HomeView extends StatelessWidget {
                 ),
 
                 SliverToBoxAdapter(
-                  child: FadeInSlide(
-                    delay: const Duration(milliseconds: 150),
+                  child: FadeInSlide(delay: Duration.zero,
                     child: Container(
                       width: double.infinity,
                       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -732,7 +771,7 @@ class _HomeView extends StatelessWidget {
                                         child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 20),
                                       ),
                                       const SizedBox(width: 12),
-                                      Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
+                                      Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                   const SizedBox(height: 16),
@@ -740,7 +779,7 @@ class _HomeView extends StatelessWidget {
                                     fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
                                     child: Text(
                                       currencyFormat.format(provider.totalMonthly),
-                                      style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                                      style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                                     ),
                                   ),
                                 ],
@@ -755,15 +794,14 @@ class _HomeView extends StatelessWidget {
 
                 if (provider.activeSubs.isNotEmpty)
                   SliverToBoxAdapter(
-                    child: FadeInSlide(
-                      delay: const Duration(milliseconds: 200),
+                    child: FadeInSlide(delay: Duration.zero,
                       child: Padding(
                         padding: const EdgeInsets.only(left: 16, right: 16, top: 4),
                         child: Row(
                           children: [
                             Expanded(
                               child: Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                                 child: Row(
                                   children: [
@@ -772,8 +810,8 @@ class _HomeView extends StatelessWidget {
                                     Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 10))]),
-                                        Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                                        Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 9))]),
+                                        Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
                                       ],
                                     )
                                   ],
@@ -783,7 +821,7 @@ class _HomeView extends StatelessWidget {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Container(
-                                padding: const EdgeInsets.all(16),
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                                 child: Row(
                                   children: [
@@ -793,8 +831,8 @@ class _HomeView extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 10)),
-                                          FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
+                                          Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 9)),
+                                          FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold))),
                                         ],
                                       ),
                                     )
@@ -810,11 +848,10 @@ class _HomeView extends StatelessWidget {
 
                 if (provider.activeSubs.isNotEmpty)
                   SliverToBoxAdapter(
-                    child: FadeInSlide(
-                      delay: const Duration(milliseconds: 250),
+                    child: FadeInSlide(delay: Duration.zero,
                       child: Container(
                         margin: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: cardBg, 
                           borderRadius: BorderRadius.circular(16), 
@@ -832,13 +869,13 @@ class _HomeView extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold)),
                                   const SizedBox(height: 4),
                                   Text(
                                     upcomingSub != null 
                                         ? '${upcomingSub.name} • $upcomingDateStr' 
                                         : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
-                                    style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
+                                    style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)
                                   ),
                                 ],
                               ),
@@ -850,14 +887,76 @@ class _HomeView extends StatelessWidget {
                   ),
                 
                 SliverToBoxAdapter(
-                  child: FadeInSlide(
-                    delay: const Duration(milliseconds: 350),
+                  child: FadeInSlide(delay: Duration.zero,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 10),
+                      child: Column(
                         children: [
-                          Text(tr('Semua Layanan', 'All Services'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w800)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  InkWell(
+                                    borderRadius: BorderRadius.circular(8),
+                                    onTap: () {
+                                      CategoryFilterMenu.show(context, provider, cardBg, textColor, languageNotifier.value);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                                      child: Stack(
+                                          clipBehavior: Clip.none,
+                                          alignment: Alignment.center,
+                                          children: [
+                                            const Icon(Icons.grid_view_rounded, color: Colors.white, size: 18),
+                                            const Positioned(
+                                              bottom: -10,
+                                              child: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                                            ),
+                                          ],
+                                        ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    provider.categoryFilter == 'Semua Layanan' ? tr('Semua Layanan', 'All Services') : provider.categoryFilter.toUpperCase(), 
+                                    style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)
+                                  ),
+                                ],
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(
+                                    bgColor: scaffoldBg,
+                                    textColor: textColor,
+                                    cardBg: cardBg,
+                                  )));
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(border: Border.all(color: textColor.withValues(alpha: 0.15)), borderRadius: BorderRadius.circular(20)),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.manage_search_rounded, color: textColor.withValues(alpha: 0.8), size: 18),
+                                      const SizedBox(width: 4),
+                                      Text(tr('Riwayat', 'History'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.w600)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                          height: 2,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            gradient: LinearGradient(
+                              colors: [textColor.withValues(alpha: 0.0), textColor.withValues(alpha: 0.15), textColor.withValues(alpha: 0.0)],
+                              begin: Alignment.centerLeft, end: Alignment.centerRight,
+                            ),
+                          ),
+                        ),
                         ],
                       ),
                     ),
@@ -866,15 +965,14 @@ class _HomeView extends StatelessWidget {
 
                 if (provider.activeSubs.isEmpty)
                   SliverToBoxAdapter(
-                    child: FadeInSlide(
-                      delay: const Duration(milliseconds: 400),
+                    child: FadeInSlide(delay: Duration.zero,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
                                 shape: BoxShape.circle,
@@ -888,13 +986,13 @@ class _HomeView extends StatelessWidget {
                             const SizedBox(height: 12),
                             Text(
                               tr('Belum Ada Tagihan', 'No Bills Yet'), 
-                              style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)
+                              style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)
                             ),
                             const SizedBox(height: 6),
                             Text(
                               tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
                               textAlign: TextAlign.center,
-                              style: TextStyle(color: subTextColor, fontSize: 13, height: 1.4)
+                              style: TextStyle(color: subTextColor, fontSize: 11, height: 1.4)
                             ),
                             const SizedBox(height: 16),
                             BlinkingWidget(
@@ -928,10 +1026,9 @@ class _HomeView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FadeInSlide(
-                  delay: const Duration(milliseconds: 50),
+                FadeInSlide(delay: Duration.zero,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 24, right: 24, top: 10, bottom: 0),
+                    padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -942,7 +1039,7 @@ class _HomeView extends StatelessWidget {
                               final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
                               return Text(
                                 displayText, 
-                                style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)
+                                style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0)
                               );
                             },
                           ),
@@ -953,8 +1050,7 @@ class _HomeView extends StatelessWidget {
                   ),
                 ),
 
-                FadeInSlide(
-                  delay: const Duration(milliseconds: 150),
+                FadeInSlide(delay: Duration.zero,
                   child: Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
@@ -981,7 +1077,7 @@ class _HomeView extends StatelessWidget {
                                       child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 20),
                                     ),
                                     const SizedBox(width: 12),
-                                    Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.bold)),
+                                    Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
                                   ],
                                 ),
                                 const SizedBox(height: 16),
@@ -989,7 +1085,7 @@ class _HomeView extends StatelessWidget {
                                   fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
                                   child: Text(
                                     currencyFormat.format(provider.totalMonthly),
-                                    style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.5),
                                   ),
                                 ),
                               ],
@@ -1002,15 +1098,14 @@ class _HomeView extends StatelessWidget {
                 ),
 
                 if (provider.activeSubs.isNotEmpty)
-                  FadeInSlide(
-                    delay: const Duration(milliseconds: 200),
+                  FadeInSlide(delay: Duration.zero,
                     child: Padding(
                       padding: const EdgeInsets.only(left: 16, right: 16, top: 4),
                       child: Row(
                         children: [
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                               child: Row(
                                 children: [
@@ -1019,8 +1114,8 @@ class _HomeView extends StatelessWidget {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 10))]),
-                                      Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                                      Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 9))]),
+                                      Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
                                     ],
                                   )
                                 ],
@@ -1030,7 +1125,7 @@ class _HomeView extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
                               child: Row(
                                 children: [
@@ -1040,8 +1135,8 @@ class _HomeView extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 10)),
-                                        FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold))),
+                                        Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 9)),
+                                        FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold))),
                                       ],
                                     ),
                                   )
@@ -1055,11 +1150,10 @@ class _HomeView extends StatelessWidget {
                   ),
 
                 if (provider.activeSubs.isNotEmpty)
-                  FadeInSlide(
-                    delay: const Duration(milliseconds: 250),
+                  FadeInSlide(delay: Duration.zero,
                     child: Container(
                       margin: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: cardBg, 
                         borderRadius: BorderRadius.circular(16), 
@@ -1077,13 +1171,13 @@ class _HomeView extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 4),
                                 Text(
                                   upcomingSub != null 
                                       ? '${upcomingSub.name} • $upcomingDateStr' 
                                       : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
-                                  style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
+                                  style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)
                                 ),
                               ],
                             ),
@@ -1093,14 +1187,76 @@ class _HomeView extends StatelessWidget {
                     ),
                   ),
                 
-                FadeInSlide(
-                  delay: const Duration(milliseconds: 350),
+                FadeInSlide(delay: Duration.zero,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 24, right: 24, top: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+                    child: Column(
                       children: [
-                        Text(tr('Semua Layanan', 'All Services'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w800)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                                children: [
+                                  InkWell(
+                                    borderRadius: BorderRadius.circular(8),
+                                    onTap: () {
+                                      CategoryFilterMenu.show(context, provider, cardBg, textColor, languageNotifier.value);
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+                                      child: Stack(
+                                          clipBehavior: Clip.none,
+                                          alignment: Alignment.center,
+                                          children: [
+                                            const Icon(Icons.grid_view_rounded, color: Colors.white, size: 18),
+                                            const Positioned(
+                                              bottom: -10,
+                                              child: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                                            ),
+                                          ],
+                                        ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    provider.categoryFilter == 'Semua Layanan' ? tr('Semua Layanan', 'All Services') : provider.categoryFilter.toUpperCase(), 
+                                    style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)
+                                  ),
+                                ],
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(
+                                    bgColor: scaffoldBg,
+                                    textColor: textColor,
+                                    cardBg: cardBg,
+                                  )));
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(border: Border.all(color: textColor.withValues(alpha: 0.15)), borderRadius: BorderRadius.circular(20)),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.manage_search_rounded, color: textColor.withValues(alpha: 0.8), size: 18),
+                                      const SizedBox(width: 4),
+                                      Text(tr('Riwayat', 'History'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.w600)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          height: 2,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            gradient: LinearGradient(
+                              colors: [textColor.withValues(alpha: 0.0), textColor.withValues(alpha: 0.15), textColor.withValues(alpha: 0.0)],
+                              begin: Alignment.centerLeft, end: Alignment.centerRight,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -1108,8 +1264,7 @@ class _HomeView extends StatelessWidget {
 
                 Expanded(
                   child: provider.activeSubs.isEmpty
-                      ? FadeInSlide(
-                          delay: const Duration(milliseconds: 400),
+                      ? FadeInSlide(delay: Duration.zero,
                           child: Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -1129,13 +1284,13 @@ class _HomeView extends StatelessWidget {
                                 const SizedBox(height: 16),
                                 Text(
                                   tr('Belum Ada Tagihan', 'No Bills Yet'), 
-                                  style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.bold)
+                                  style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
                                   textAlign: TextAlign.center,
-                                  style: TextStyle(color: subTextColor, fontSize: 14, height: 1.5)
+                                  style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5)
                                 ),
                                 const SizedBox(height: 40),
                                 BlinkingWidget(
@@ -1257,14 +1412,13 @@ class _CalendarViewState extends State<_CalendarView> {
               physics: const BouncingScrollPhysics(),
               slivers: [
                 SliverToBoxAdapter(
-                  child: FadeInSlide(
-                    delay: const Duration(milliseconds: 100),
+                  child: FadeInSlide(delay: Duration.zero,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
+                          Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                           Row(
                             children: [
                               IconButton(icon: Icon(Icons.chevron_left, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month - 1))),
@@ -1278,11 +1432,10 @@ class _CalendarViewState extends State<_CalendarView> {
                 ),
                 
                 SliverToBoxAdapter(
-                  child: FadeInSlide(
-                    delay: const Duration(milliseconds: 200),
+                  child: FadeInSlide(delay: Duration.zero,
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16),
-                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: cardBg, 
                         borderRadius: BorderRadius.circular(16), 
@@ -1294,7 +1447,7 @@ class _CalendarViewState extends State<_CalendarView> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: (isID ? daysID : daysEN).map((d) => 
-                              SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
+                              SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 10))))
                             ).toList(),
                           ),
                           const SizedBox(height: 16),
@@ -1355,15 +1508,15 @@ class _CalendarViewState extends State<_CalendarView> {
                 
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 
                 if (selectedHoliday != null)
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 24, right: 24, top: 8),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
                       child: Row(
                         children: [
                           const Icon(Icons.event_available_rounded, color: Colors.redAccent, size: 18),
@@ -1371,7 +1524,7 @@ class _CalendarViewState extends State<_CalendarView> {
                           Expanded(
                             child: Text(
                               selectedHoliday, 
-                              style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)
+                              style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12)
                             )
                           ),
                         ],
@@ -1385,7 +1538,7 @@ class _CalendarViewState extends State<_CalendarView> {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold))),
+                      child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 12, fontWeight: FontWeight.bold))),
                     ),
                   )
                 else
@@ -1406,14 +1559,13 @@ class _CalendarViewState extends State<_CalendarView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FadeInSlide(
-                  delay: const Duration(milliseconds: 100),
+                FadeInSlide(delay: Duration.zero,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(stringBulanTahunKini, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                         Row(
                           children: [
                             IconButton(icon: Icon(Icons.chevron_left, color: textColor), onPressed: () => setState(() => _currentDate = DateTime(_currentDate.year, _currentDate.month - 1))),
@@ -1425,11 +1577,10 @@ class _CalendarViewState extends State<_CalendarView> {
                   ),
                 ),
                 
-                FadeInSlide(
-                  delay: const Duration(milliseconds: 200),
+                FadeInSlide(delay: Duration.zero,
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: cardBg, 
                       borderRadius: BorderRadius.circular(16), 
@@ -1441,7 +1592,7 @@ class _CalendarViewState extends State<_CalendarView> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: (isID ? daysID : daysEN).map((d) => 
-                            SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 12))))
+                            SizedBox(width: 30, child: Center(child: Text(d, style: TextStyle(color: (d == 'Min' || d == 'Sun') ? Colors.redAccent : subTextColor, fontWeight: FontWeight.bold, fontSize: 10))))
                           ).toList(),
                         ),
                         const SizedBox(height: 16),
@@ -1500,13 +1651,13 @@ class _CalendarViewState extends State<_CalendarView> {
                 const SizedBox(height: 16),
                 
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
                 
                 if (selectedHoliday != null)
                   Padding(
-                    padding: const EdgeInsets.only(left: 24, right: 24, top: 8),
+                    padding: const EdgeInsets.only(left: 16, right: 16, top: 8),
                     child: Row(
                       children: [
                         const Icon(Icons.event_available_rounded, color: Colors.redAccent, size: 18),
@@ -1514,7 +1665,7 @@ class _CalendarViewState extends State<_CalendarView> {
                         Expanded(
                           child: Text(
                             selectedHoliday, 
-                            style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)
+                            style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12)
                           )
                         ),
                       ],
@@ -1525,7 +1676,7 @@ class _CalendarViewState extends State<_CalendarView> {
                 
                 Expanded(
                   child: subsOnSelectedDate.isEmpty
-                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 14, fontWeight: FontWeight.bold)))
+                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 12, fontWeight: FontWeight.bold)))
                       : ListView.builder(
                           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100), 
                           physics: const BouncingScrollPhysics(),
@@ -1582,16 +1733,15 @@ class _StatsView extends StatelessWidget {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeInSlide(delay: const Duration(milliseconds: 100), child: Text(tr('Ringkasan', 'Summary'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
+            FadeInSlide(delay: Duration.zero, child: Row(children: [Icon(Icons.pie_chart_rounded, color: Colors.white, size: 20), const SizedBox(width: 8), Text(tr('Ringkasan', 'Summary'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold))])),
             const SizedBox(height: 16),
             
-            FadeInSlide(
-              delay: const Duration(milliseconds: 200),
+            FadeInSlide(delay: Duration.zero,
               child: Row(
                 children: [
                   Expanded(child: _buildSummaryCard(tr('Tahunan', 'Yearly'), currencyFormat.format(provider.totalYearly), Icons.all_inclusive, Colors.purpleAccent, cardBg, textColor, subTextColor, theme)),
@@ -1602,8 +1752,7 @@ class _StatsView extends StatelessWidget {
             ),
             const SizedBox(height: 16), 
 
-            FadeInSlide(
-              delay: const Duration(milliseconds: 300),
+            FadeInSlide(delay: Duration.zero,
               child: Row(
                 children: [
                   Expanded(child: _buildSummaryCard(tr('Rata-rata /Bulan', 'Average /Month'), currencyFormat.format(averagePrice), Icons.analytics_outlined, Colors.orangeAccent, cardBg, textColor, subTextColor, theme)),
@@ -1615,16 +1764,15 @@ class _StatsView extends StatelessWidget {
             
             const SizedBox(height: 40),
 
-            FadeInSlide(delay: const Duration(milliseconds: 400), child: Text(tr('Analisis Kategori', 'Category Analysis'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold))),
+            FadeInSlide(delay: Duration.zero, child: Row(children: [Icon(Icons.analytics_rounded, color: Colors.white, size: 20), const SizedBox(width: 8), Text(tr('Analisis Kategori', 'Category Analysis'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold))])),
             const SizedBox(height: 16),
 
                         if (breakdown.isNotEmpty)
-              FadeInSlide(
-                delay: const Duration(milliseconds: 450),
+              FadeInSlide(delay: Duration.zero,
                 child: Container(
                   height: 160,
                   margin: const EdgeInsets.only(bottom: 24),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: cardBg,
                     borderRadius: BorderRadius.circular(16),
@@ -1651,7 +1799,7 @@ class _StatsView extends StatelessWidget {
                                       color: CategoryUtils.getColor(entry.value.key),
                                       value: amount,
                                       title: '${percentage.toStringAsFixed(1)}%',
-                                      titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                                      titleStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
                                       radius: 25 + (index == 0 ? 5.0 : 0.0), 
                                     );
                                   }).toList(),
@@ -1660,10 +1808,10 @@ class _StatsView extends StatelessWidget {
                               Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(tr('Total', 'Total'), style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                                  Text(tr('Total', 'Total'), style: const TextStyle(color: Colors.white54, fontSize: 9)),
                                   Text(
                                     currencyFormat.format(totalMonthly),
-                                    style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                    style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
@@ -1693,9 +1841,9 @@ class _StatsView extends StatelessWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(name, style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                                        Text(name, style: TextStyle(color: textColor, fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
                                         const SizedBox(height: 2),
-                                        Text('${percentage.toStringAsFixed(1)}% • ${currencyFormat.format(amount)}', style: TextStyle(color: subTextColor, fontSize: 10), overflow: TextOverflow.ellipsis),
+                                        Text('${percentage.toStringAsFixed(1)}% • ${currencyFormat.format(amount)}', style: TextStyle(color: subTextColor, fontSize: 9), overflow: TextOverflow.ellipsis),
                                       ],
                                     ),
                                   ),
@@ -1711,10 +1859,9 @@ class _StatsView extends StatelessWidget {
               ),
 
             if (breakdown.isEmpty)
-              FadeInSlide(
-                delay: const Duration(milliseconds: 500),
+              FadeInSlide(delay: Duration.zero,
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: cardBg, 
                     borderRadius: BorderRadius.circular(16),
@@ -1734,7 +1881,7 @@ class _StatsView extends StatelessWidget {
                 delay: Duration(milliseconds: 500 + (index * 150)),
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft, end: Alignment.bottomRight,
@@ -1750,8 +1897,8 @@ class _StatsView extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(category, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
-                          Text(currencyFormat.format(amount), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.w900, fontSize: 14)),
+                          Text(category, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12)),
+                          Text(currencyFormat.format(amount), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12)),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -1769,7 +1916,7 @@ class _StatsView extends StatelessWidget {
                       
                       Align(
                         alignment: Alignment.centerRight,
-                        child: Text('${(percentage * 100).toStringAsFixed(1)}% ${tr('dari total', 'of total')}', style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                        child: Text('${(percentage * 100).toStringAsFixed(1)}% ${tr('dari total', 'of total')}', style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -1778,10 +1925,9 @@ class _StatsView extends StatelessWidget {
             }),
 
             const SizedBox(height: 16),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 600),
+            FadeInSlide(delay: Duration.zero,
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: theme == 'Putih' ? const Color(0xFF0D9488).withValues(alpha: 0.05) : const Color(0xFF0D9488).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
@@ -1789,19 +1935,19 @@ class _StatsView extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.trending_up_rounded, color: Color(0xFF0D9488), size: 32),
+                    const Icon(Icons.trending_up_rounded, color: Colors.white, size: 32),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14)),
+                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                           const SizedBox(height: 8),
                           Text(
                             activeSubs.isEmpty 
                               ? tr('Tambahkan tagihan untuk melihat proyeksi.', 'Add bills to see projections.') 
                               : tr('Jika semua langganan ini diperpanjang, kamu harus menyiapkan ${currencyFormat.format(totalMonthly)} lagi bulan depan. Yuk, evaluasi aplikasi yang jarang dipakai!', 'If all these subscriptions renew, you must prepare ${currencyFormat.format(totalMonthly)} next month. Let\'s evaluate unused apps!'),
-                            style: TextStyle(color: textColor, fontSize: 13, height: 1.5),
+                            style: TextStyle(color: textColor, fontSize: 11, height: 1.5),
                           ),
                         ],
                       ),
@@ -1836,15 +1982,19 @@ class _StatsView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.15), shape: BoxShape.circle),
-            child: Icon(icon, color: iconColor, size: 28),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.15), shape: BoxShape.circle),
+                child: Icon(icon, color: iconColor, size: 20),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: Text(title, style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold))),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(title, style: TextStyle(color: subTextColor, fontSize: 14, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          FittedBox(fit: BoxFit.scaleDown, child: Text(value, style: TextStyle(color: textColor, fontSize: 22, fontWeight: FontWeight.w900))),
+          const SizedBox(height: 16),
+          FittedBox(fit: BoxFit.scaleDown, child: Text(value, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900))),
         ],
       ),
     );
@@ -1953,7 +2103,7 @@ class _SettingsViewState extends State<_SettingsView> {
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.language, color: Color(0xFF0D9488)), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
+        title: Row(children: [const Icon(Icons.language, color: Colors.white), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
         
         content: Theme(
           data: Theme.of(context).copyWith(
@@ -2008,14 +2158,14 @@ class _SettingsViewState extends State<_SettingsView> {
         return FractionallySizedBox(
           heightFactor: 0.85, 
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(tr('Privasi & Keamanan Data', 'Privacy & Data Security'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text(tr('Privasi & Keamanan Data', 'Privacy & Data Security'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                     IconButton(icon: Icon(Icons.close, color: textColor), onPressed: () => Navigator.pop(ctx))
                   ],
                 ),
@@ -2026,7 +2176,7 @@ class _SettingsViewState extends State<_SettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                         const SizedBox(height: 8),
                         Text(tr('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTracker, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
@@ -2040,14 +2190,14 @@ class _SettingsViewState extends State<_SettingsView> {
                         const SizedBox(height: 30),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.redAccent.withOpacity(0.3))),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(children: [const Icon(Icons.warning_rounded, color: Colors.redAccent), const SizedBox(width: 8), Text(tr('Zona Bahaya', 'Danger Zone'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14))]),
+                              Row(children: [const Icon(Icons.warning_rounded, color: Colors.redAccent), const SizedBox(width: 8), Text(tr('Zona Bahaya', 'Danger Zone'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12))]),
                               const SizedBox(height: 8),
-                              Text(tr('Menghapus semua data akan menghilangkan seluruh catatan Anda secara permanen.', 'Deleting all data will permanently remove all your records.'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                              Text(tr('Menghapus semua data akan menghilangkan seluruh catatan Anda secara permanen.', 'Deleting all data will permanently remove all your records.'), style: TextStyle(color: subTextColor, fontSize: 10)),
                               const SizedBox(height: 16),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, elevation: 0),
@@ -2106,7 +2256,7 @@ class _SettingsViewState extends State<_SettingsView> {
   Widget _buildPrivacyPoint(String number, String title, String desc, Color textColor, Color subTextColor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: textColor.withOpacity(0.02),
         borderRadius: BorderRadius.circular(16),
@@ -2122,16 +2272,16 @@ class _SettingsViewState extends State<_SettingsView> {
               color: const Color(0xFF0D9488).withOpacity(0.15),
               shape: BoxShape.circle,
             ),
-            child: Text(number, style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 13)),
+            child: Text(number, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
+                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)),
                 const SizedBox(height: 6),
-                Text(desc, style: TextStyle(color: subTextColor, fontSize: 13, height: 1.5)),
+                Text(desc, style: TextStyle(color: subTextColor, fontSize: 11, height: 1.5)),
               ],
             ),
           ),
@@ -2160,21 +2310,16 @@ class _SettingsViewState extends State<_SettingsView> {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeInSlide(
-              delay: const Duration(milliseconds: 100),
-              child: Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(height: 16),
+            
             
 
 
-            FadeInSlide(
-              delay: const Duration(milliseconds: 200),
+            FadeInSlide(delay: Duration.zero,
               child: Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
@@ -2185,13 +2330,13 @@ class _SettingsViewState extends State<_SettingsView> {
                 ),
                 child: SwitchListTile(
                   activeColor: Colors.black,
-                  activeTrackColor: const Color(0xFF0D9488),
+                  activeTrackColor: Colors.white,
                   inactiveThumbColor: Colors.grey,
                   inactiveTrackColor: Colors.black26,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  secondary: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488), size: 24)),
-                  title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
-                  subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                  secondary: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.notifications_active_rounded, color: Colors.white, size: 20)),
+                  title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+                  subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 11)),
                   value: _notifEnabled,
                   onChanged: (val) {
                     setState(() => _notifEnabled = val);
@@ -2203,18 +2348,15 @@ class _SettingsViewState extends State<_SettingsView> {
 
             
             _buildGroupHeader(Icons.person, tr('Preferensi Pengguna', 'User Preferences')),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 245),
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.account_circle, tr('Profil Saya', 'My Profile'), tr('Ubah Nama & Foto', 'Edit Name & Photo'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 250),
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, widget.theme),
             ),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 260),
+            FadeInSlide(delay: Duration.zero,
               child: ValueListenableBuilder<String>(
                 valueListenable: currencyNotifier,
                 builder: (context, currency, child) {
@@ -2222,15 +2364,14 @@ class _SettingsViewState extends State<_SettingsView> {
                 }
               ),
             ),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 325),
+            FadeInSlide(delay: Duration.zero,
               child: ValueListenableBuilder<String>(
                 valueListenable: ringtoneNotifier,
                 builder: (context, ringtone, child) {
                   return ValueListenableBuilder<String>(
                     valueListenable: alarmNotifier,
                     builder: (context, alarm, child) {
-                      return _buildSettingTile(Icons.notifications_active_rounded, tr('Nada Notifikasi', 'Notification Sound'), "${ringtone.replaceAll('ringtone_', '').toUpperCase()} | ${alarm.replaceAll('alarm_', '').toUpperCase()}", _showRingtoneSelector, cardBg, textColor, subTextColor, widget.theme);
+                      return _buildSettingTile(Icons.library_music_rounded, tr('Nada Notifikasi', 'Notification Sound'), "${ringtone.replaceAll('ringtone_', '').toUpperCase()} | ${alarm.replaceAll('alarm_', '').toUpperCase()}", _showRingtoneSelector, cardBg, textColor, subTextColor, widget.theme);
                     }
                   );
                 }
@@ -2239,14 +2380,8 @@ class _SettingsViewState extends State<_SettingsView> {
 
             const SizedBox(height: 8),
             _buildGroupHeader(Icons.storage_rounded, tr('Manajemen Data', 'Data Management')),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 242),
-              child: _buildSettingTile(Icons.history_rounded, tr('Riwayat Tagihan', 'Billing History'), tr('Tagihan yang sudah selesai', 'Completed subscriptions'), () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
-              }, cardBg, textColor, subTextColor, widget.theme),
-            ),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 270),
+
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Currency Converter'), tr('Perbandingan Mata Uang', 'Compare Currencies'), () {
                 showModalBottomSheet(
                   context: context,
@@ -2257,23 +2392,19 @@ class _SettingsViewState extends State<_SettingsView> {
                 );
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 300),
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.save_rounded, tr('Cadangkan Data', 'Backup Data'), tr('Ekspor ke File JSON', 'Export to JSON File'), _backupData, cardBg, textColor, subTextColor, widget.theme),
             ),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 350),
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.restore_rounded, tr('Pulihkan Data', 'Restore Data'), tr('Impor dari File', 'Import from File'), _restoreData, cardBg, textColor, subTextColor, widget.theme),
             ),
 
             const SizedBox(height: 8),
             _buildGroupHeader(Icons.security_rounded, tr('Sistem & Privasi', 'System & Privacy')),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 400),
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme),
             ),
-            FadeInSlide(
-              delay: const Duration(milliseconds: 500),
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(
                 Icons.info_rounded, tr('Tentang SubTracker', 'About SubTracker'), 'Version 1.0.0',
                 () => showAboutDialog(
@@ -2323,7 +2454,7 @@ class _SettingsViewState extends State<_SettingsView> {
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Color(0xFF0D9488)), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 14))]),
+        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Colors.white), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 12))]),
         contentPadding: const EdgeInsets.symmetric(vertical: 20),
         content: Theme(
           data: Theme.of(context).copyWith(unselectedWidgetColor: unselectedRadioColor),
@@ -2337,12 +2468,12 @@ class _SettingsViewState extends State<_SettingsView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 13)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
                       ),
                       ...['ringtone_default', 'ringtone_chime', 'ringtone_alert', 'ringtone_synth'].map((r) {
                         return RadioListTile<String>(
-                          title: Text(r.replaceAll('ringtone_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 14)),
+                          title: Text(r.replaceAll('ringtone_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 12)),
                           value: r,
                           groupValue: ringtoneNotifier.value, 
                           activeColor: const Color(0xFF0D9488),
@@ -2359,12 +2490,12 @@ class _SettingsViewState extends State<_SettingsView> {
                       }),
                       const Divider(color: Colors.white10),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Text(tr('Suara Alarm Tagihan', 'Billing Alarm Sound'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 13)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Text(tr('Suara Alarm Tagihan', 'Billing Alarm Sound'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 11)),
                       ),
                       ...['alarm_lagu', 'alarm_digital', 'alarm_classic'].map((r) {
                         return RadioListTile<String>(
-                          title: Text(r.replaceAll('alarm_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 14)),
+                          title: Text(r.replaceAll('alarm_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 12)),
                           value: r,
                           groupValue: alarmNotifier.value, 
                           activeColor: Colors.redAccent,
@@ -2392,7 +2523,7 @@ class _SettingsViewState extends State<_SettingsView> {
               FlutterLocalNotificationsPlugin().cancel(8888);
               Navigator.pop(ctx);
             },
-            child: const Text('Tutup', style: TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold))
+            child: const Text('Tutup', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
           )
         ],
       )
@@ -2402,13 +2533,7 @@ class _SettingsViewState extends State<_SettingsView> {
   Widget _buildGroupHeader(IconData icon, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 8, top: 16),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.cyanAccent, size: 18),
-          const SizedBox(width: 8),
-          Text(title, style: TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 14)),
-        ],
-      ),
+      child: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 
@@ -2423,9 +2548,9 @@ class _SettingsViewState extends State<_SettingsView> {
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: const Color(0xFF0D9488), size: 24)),
-        title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
-        subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 12))),
+        leading: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: (title.contains('SubTracker') || title.contains('Privasi') || title.contains('Syarat')) ? const Color(0xFF0D9488) : Colors.white, size: 20)),
+        title: Text(title, style: TextStyle(color: (title.contains('SubTracker') || title.contains('Privasi') || title.contains('Syarat')) ? const Color(0xFF0D9488) : textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+        subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 11))),
         trailing: Icon(Icons.chevron_right_rounded, color: subTextColor),
         onTap: onTap, 
       ),
@@ -2493,3 +2618,4 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
   @override
   Widget build(BuildContext context) { return Row(mainAxisAlignment: MainAxisAlignment.center, children: [_buildDot(0), _buildDot(1), _buildDot(2)]); }
 }
+

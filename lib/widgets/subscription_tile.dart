@@ -67,26 +67,26 @@ class _SubTileState extends State<SubTile> {
           borderRadius: BorderRadius.circular(16),
           onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(sub: widget.sub))); },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
-                Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle), child: Icon(catIcon, color: Colors.white, size: 18)),
-                const SizedBox(width: 14),
+                Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle), child: Icon(catIcon, color: Colors.white, size: 16)),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.sub.name, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
+                      Text(widget.sub.name, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
                       isFinished
-                          ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600))
+                          ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600))
                           : isDue 
-                              ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
-                              : Text(countdownText, style: const TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.w600)),
+                              ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.w600))
+                              : Text(countdownText, style: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),
-                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w900)),
+                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900)),
               ],
             ),
           ),

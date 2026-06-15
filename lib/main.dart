@@ -7,7 +7,6 @@ import 'dart:async';
 import 'providers/subscription_provider.dart';
 import 'services/notification_service.dart';
 import 'screens/splash_screen.dart';
-import 'screens/onboarding_choice_screen.dart'; 
 import 'screens/terms_screen.dart'; 
 import 'screens/dashboard_screen.dart'; 
 
@@ -45,6 +44,12 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF09090B), elevation: 0),
         colorScheme: const ColorScheme.dark(primary: Color(0xFF0D9488), secondary: Color(0xFF0D9488)),
         useMaterial3: true,
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
       ),
       home: const GateKeeper(), 
     );
@@ -67,6 +72,7 @@ class _GateKeeperState extends State<GateKeeper> {
   }
 
   Future<void> _checkRoute() async {
+    await context.read<SubProvider>().ensureLoaded();
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name');
     final hasAccepted = prefs.getBool('hasAcceptedTerms') ?? false;
@@ -80,11 +86,11 @@ class _GateKeeperState extends State<GateKeeper> {
       }
     } else {
       
-      await Future.delayed(const Duration(milliseconds: 8500));
+      await Future.delayed(const Duration(milliseconds: 5100));
       if (mounted) {
         if (hasAccepted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const OnboardingChoiceScreen()),
+            MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: true)),
           ); 
         } else {
           setState(() {

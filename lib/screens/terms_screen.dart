@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'splash_screen.dart';
-import 'onboarding_choice_screen.dart'; 
 import 'dashboard_screen.dart'; 
 
 class TermsScreen extends StatefulWidget {
@@ -15,6 +14,7 @@ class TermsScreen extends StatefulWidget {
 
 class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin {
   bool _isLoading = false;
+  bool _isAgreed = false;
   late AnimationController _arrowCtrl;
   late Animation<double> _arrowSlide;
 
@@ -41,7 +41,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
     
     if (context.mounted) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const OnboardingChoiceScreen()),
+        MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: true)),
       );
       setState(() => _isLoading = false); 
     }
@@ -139,17 +139,40 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                         const Divider(color: Colors.white12, thickness: 1),
                         const SizedBox(height: 16),
                         
-                        Text(
-                          tr('Harap klik "Terima & Lanjut" di bawah jika Anda memahami dan menyetujui seluruh kebijakan di atas.', 'Please click "Accept & Next" below if you understand and agree to all the policies above.'),
-                          style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5, fontStyle: FontStyle.italic),
-                        ),
+
                       ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () => setState(() => _isAgreed = !_isAgreed),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: Checkbox(
+                        value: _isAgreed,
+                        onChanged: (value) => setState(() => _isAgreed = value ?? false),
+                        activeColor: const Color(0xFF0D9488),
+                        checkColor: Colors.white,
+                        side: const BorderSide(color: Colors.white54, width: 2),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        tr('Saya memahami dan menyetujui syarat & ketentuan', 'I understand and agree to the terms & conditions'),
+                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -158,23 +181,26 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
                   ),
                   TextButton(
-                    onPressed: _isLoading ? null : () => _acceptTerms(context),
+                    onPressed: (_isLoading || !_isAgreed) ? null : () => _acceptTerms(context),
                     child: _isLoading 
                         ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                              Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: TextStyle(color: _isAgreed ? Colors.white : Colors.white30, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                               const SizedBox(width: 8),
-                              AnimatedBuilder(
-                                animation: _arrowSlide,
-                                builder: (context, child) {
-                                  return Transform.translate(
-                                    offset: Offset(_arrowSlide.value, 0),
-                                    child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                                  );
-                                },
-                              ),
+                              if (_isAgreed)
+                                AnimatedBuilder(
+                                  animation: _arrowSlide,
+                                  builder: (context, child) {
+                                    return Transform.translate(
+                                      offset: Offset(_arrowSlide.value, 0),
+                                      child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                    );
+                                  },
+                                )
+                              else
+                                const Icon(Icons.arrow_forward_rounded, color: Colors.white30, size: 20),
                             ],
                           ),
                   ),

@@ -11,11 +11,39 @@ class SubProvider extends ChangeNotifier {
 
   String _searchQuery = '';
   String _sortBy = 'Terdekat';
+  String _categoryFilter = 'Semua Layanan';
 
   String get sortBy => _sortBy;
+  String get categoryFilter => _categoryFilter;
+
+  void setCategoryFilter(String category) {
+    _categoryFilter = category;
+    notifyListeners();
+  }
+
+  bool _isLoaded = false;
 
   SubProvider() {
-    _loadData();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? savedData = prefs.getString('saved_subs');
+
+    if (savedData != null) {
+      final List<dynamic> decodedData = jsonDecode(savedData);
+      _subs = decodedData.map((item) => Subscription.fromJson(item)).toList();
+    }
+    _isLoaded = true;
+    notifyListeners();
+  }
+
+  Future<void> ensureLoaded() async {
+    if (_isLoaded) return;
+    while (!_isLoaded) {
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
   }
 
   void setSearchQuery(String query) {
@@ -33,7 +61,9 @@ class SubProvider extends ChangeNotifier {
 
   List<Subscription> get subs {
     List<Subscription> filtered = _subs.where((sub) {
-      return sub.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      bool matchesSearch = sub.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      bool matchesCategory = _categoryFilter == 'Semua Layanan' || sub.category == _categoryFilter;
+      return matchesSearch && matchesCategory;
     }).toList();
 
     if (_sortBy == 'Terdekat') {

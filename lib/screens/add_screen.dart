@@ -110,23 +110,23 @@ class _AddScreenState extends State<AddScreen> {
           appBar: AppBar(
             backgroundColor: scaffoldBg, elevation: 0,
             leading: IconButton(icon: Icon(Icons.arrow_back, color: iconColor), onPressed: () => Navigator.pop(context)),
-            title: Text(tr('Tambah Langganan', 'Add Subscription'), style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor)),
+            title: Text(tr('Tambah Langganan', 'Add Subscription'), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textColor)),
           ),
           body: SafeArea(
             child: Column(
               children: [
                 Expanded(
                   child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(), padding: const EdgeInsets.all(16),
+                    physics: const BouncingScrollPhysics(), padding: const EdgeInsets.all(12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         FadeInSlide(delay: const Duration(milliseconds: 50), child: _buildCategoryIcons(categories, cardBg, textColor)),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         FadeInSlide(delay: const Duration(milliseconds: 100), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Kategori', 'Category'), subTextColor), _buildDropdown(_selectedCategory, categories, (val) => setState(() { _selectedCategory = val!; _isShortcutUsed = false; }), cardBg, textColor, disabled: _isShortcutUsed)])), const SizedBox(width: 16), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel('Status', subTextColor), _buildDropdown(_selectedStatus, statuses, (val) => setState(() => _selectedStatus = val!), cardBg, textColor)]))])),
                         
                         if (_selectedCategory.isNotEmpty) ...[
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
                           FadeInSlide(delay: const Duration(milliseconds: 150), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Nama Layanan', 'Service Name'), subTextColor), _buildTextField(_nameCtrl, _getHintForCategory(_selectedCategory), cardBg, textColor, hintColor)])),
                           FadeInSlide(delay: const Duration(milliseconds: 200), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Harga', 'Price'), subTextColor), 
                             ValueListenableBuilder<String>(
@@ -141,18 +141,18 @@ class _AddScreenState extends State<AddScreen> {
                           FadeInSlide(delay: const Duration(milliseconds: 250), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Waktu Pengingat (Tanggal & Jam)', 'Reminder Time (Date & Time)'), subTextColor), Row(children: [Expanded(flex: 3, child: GestureDetector(onTap: () => _selectDate(context), child: _buildFakeInput(DateFormat('dd MMM yyyy').format(_selectedDate), Icons.calendar_month, cardBg, textColor, hintColor))), const SizedBox(width: 12), Expanded(flex: 2, child: GestureDetector(onTap: () => _selectTime(context), child: _buildFakeInput(_selectedTime.format(context), Icons.access_time_filled, cardBg, textColor, hintColor)))])])),
                           FadeInSlide(delay: const Duration(milliseconds: 300), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Ingatkan Saya Pada', 'Remind Me On'), subTextColor), _buildDropdown('H-$_reminderDays', ['H-0', 'H-1', 'H-3', 'H-7'], (val) { setState(() => _reminderDays = int.parse(val!.replaceAll('H-', ''))); }, cardBg, textColor)])),
                           FadeInSlide(delay: const Duration(milliseconds: 350), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Tipe Pengingat', 'Reminder Type'), subTextColor), _buildDropdown(_selectedNotifType, notifTypes, (val) => setState(() => _selectedNotifType = val!), cardBg, textColor)])),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 14),
                           FadeInSlide(delay: const Duration(milliseconds: 400), child: _buildSwitch(tr('Perpanjangan Otomatis', 'Auto Renewal'), _isAutoRenew, (val) => setState(() => _isAutoRenew = val), textColor, hintColor)),
                         ],
-                        const SizedBox(height: 40),
+                        const SizedBox(height: 24),
                       ],
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.all(16), width: double.infinity,
+                  padding: const EdgeInsets.all(12), width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
                     onPressed: () async { 
                       if (_selectedCategory.isEmpty) {
                         ToastUtils.show(context, tr('Pilih kategori terlebih dahulu', 'Select a category first'), icon: Icons.warning_rounded, iconColor: Colors.redAccent);
@@ -188,7 +188,7 @@ class _AddScreenState extends State<AddScreen> {
                         }
                       }
                     },
-                    child: Text(tr('TAMBAHKAN', 'ADD NEW'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white)),
+                    child: Text(tr('TAMBAHKAN', 'ADD NEW'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white)),
                   ),
                 ),
               ],
@@ -220,10 +220,10 @@ class _AddScreenState extends State<AddScreen> {
 
     return Container(
       margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cardBg.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: Colors.white10),
       ),
       child: Column(
@@ -233,12 +233,12 @@ class _AddScreenState extends State<AddScreen> {
             children: [
               Icon(Icons.auto_awesome, color: const Color(0xFF0D9488), size: 18),
               const SizedBox(width: 8),
-              Text(tr('Pilih Pintasan Kategori', 'Select Category Shortcut'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontWeight: FontWeight.bold, fontSize: 13)),
+              Text(tr('Pilih Pintasan Kategori', 'Select Category Shortcut'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontWeight: FontWeight.bold, fontSize: 11)),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           SizedBox(
-            height: 85,
+            height: 65,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               physics: const BouncingScrollPhysics(),
@@ -264,19 +264,19 @@ class _AddScreenState extends State<AddScreen> {
                     });
                   },
                   child: Container(
-                    width: 80,
+                    width: 70,
                     margin: const EdgeInsets.only(right: 14),
                     decoration: BoxDecoration(
                       color: isSelected ? const Color(0xFF0D9488) : cardBg,
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: isSelected ? Colors.transparent : Colors.white10, width: 1.5),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(iconData, color: isSelected ? Colors.white : catColor, size: 30),
+                        Icon(iconData, color: isSelected ? Colors.white : catColor, size: 22),
                         const SizedBox(height: 8),
-                        Text(cat, style: TextStyle(color: isSelected ? Colors.white : textColor.withValues(alpha: 0.5), fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                        Text(cat, style: TextStyle(color: isSelected ? Colors.white : textColor.withValues(alpha: 0.5), fontSize: 9, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -285,21 +285,27 @@ class _AddScreenState extends State<AddScreen> {
             ),
           ),
           if (_isShortcutUsed && appExamples[_selectedCategory] != null && appExamples[_selectedCategory]!.isNotEmpty) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: appExamples[_selectedCategory]!.map((appName) {
-                return ActionChip(
-                  backgroundColor: cardBg,
-                  side: const BorderSide(color: Colors.white10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  label: Text(appName, style: TextStyle(color: textColor.withValues(alpha: 0.8), fontWeight: FontWeight.bold, fontSize: 13)),
-                  onPressed: () {
+                return InkWell(
+                  onTap: () {
                     setState(() {
                       _nameCtrl.text = appName;
                     });
                   },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0D9488).withValues(alpha: 0.15),
+                      border: Border.all(color: Colors.white10, width: 1.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(appName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                  ),
                 );
               }).toList(),
             ),
@@ -309,16 +315,16 @@ class _AddScreenState extends State<AddScreen> {
     );
   }
 
-  Widget _buildLabel(String text, Color color) { return Padding(padding: const EdgeInsets.only(bottom: 8, left: 4, top: 16), child: Text(text, style: TextStyle(color: color, fontSize: 14, fontWeight: FontWeight.bold))); }
-  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), inputFormatters: formatters, decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(18)))); }
+  Widget _buildLabel(String text, Color color) { return Padding(padding: const EdgeInsets.only(bottom: 6, left: 4, top: 12), child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold))); }
+  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), inputFormatters: formatters, decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(12)))); }
   Widget _buildDropdown(String? value, List<String> items, Function(String?) onChanged, Color bg, Color textColor, {bool disabled = false}) { 
     return IgnorePointer(
       ignoring: disabled,
       child: Opacity(
         opacity: disabled ? 0.4 : 1.0,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16), 
-          decoration: BoxDecoration(color: disabled ? bg.withValues(alpha: 0.5) : bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), 
+          padding: const EdgeInsets.symmetric(horizontal: 12), 
+          decoration: BoxDecoration(color: disabled ? bg.withValues(alpha: 0.5) : bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), 
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: (value == null || value.isEmpty) ? null : value, 
@@ -334,8 +340,8 @@ class _AddScreenState extends State<AddScreen> {
       )
     ); 
   }
-  Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { return Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])); }
-  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFF0D9488), inactiveTrackColor: hintColor)]); }
+  Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { return Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])); }
+  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFF0D9488), inactiveTrackColor: hintColor)]); }
 }
 
 class ThousandsSeparatorInputFormatter extends TextInputFormatter {

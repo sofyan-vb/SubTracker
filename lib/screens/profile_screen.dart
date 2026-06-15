@@ -66,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(width: 40, height: 4, decoration: BoxDecoration(color: widget.textColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Color(0xFF0D9488)),
+                leading: const Icon(Icons.photo_library, color: const Color(0xFF0D9488)),
                 title: Text('Pilih dari Galeri', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.w600)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -156,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fillColor: widget.cardBg,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488))),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white)),
               ),
             ),
             const SizedBox(height: 40),

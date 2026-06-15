@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../utils/toast_utils.dart';
 import 'dart:math'; 
 import 'dart:async'; 
@@ -25,6 +26,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   late SplashState _state;
   late PageController _pageController;
   int _onboardingPageIndex = 0;
+  bool _isFormLoading = false;
 
   final TextEditingController _nameCtrl = TextEditingController();
   String _savedName = ''; 
@@ -66,9 +68,36 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   void _goToDashboard() {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const DashboardScreen()),
-      (route) => false,
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const PopScope(
+          canPop: false,
+          child: DashboardScreen(),
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: Curves.easeOutCubic));
+          
+          return SlideTransition(
+            position: animation.drive(tween),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                    offset: const Offset(-5, 0),
+                  )
+                ]
+              ),
+              child: child,
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 600),
+      )
     );
   }
 
@@ -79,9 +108,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         return;
       }
       
+      setState(() => _isFormLoading = true);
+      
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_name', _nameCtrl.text.trim());
       userNameNotifier.value = _nameCtrl.text.trim();
+      
+      await Future.delayed(const Duration(milliseconds: 800));
     }
 
     _goToDashboard();
@@ -109,7 +142,11 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             Positioned.fill(
               child: WelcomeReturningView(
                 userName: _savedName,
-                onEnter: _goToDashboard,
+                onEnter: () async {
+                  setState(() => _isFormLoading = true);
+                  await Future.delayed(const Duration(milliseconds: 800));
+                  _goToDashboard();
+                },
               ),
             ),
 
@@ -138,7 +175,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           ],
 
         
-          if (_state == SplashState.onboarding || _state == SplashState.form || _state == SplashState.loading)
+          if (_state == SplashState.onboarding || _state == SplashState.choice || _state == SplashState.form || _state == SplashState.loading)
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -196,7 +233,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         decoration: InputDecoration(
                                           labelText: tr('Nama Pengguna', 'Username'),
                                           labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                          prefixIcon: const Icon(Icons.person, color: Color(0xFF0D9488), size: 22),
+                                          prefixIcon: const Icon(Icons.person, color: Colors.white, size: 22),
                                           filled: true, fillColor: const Color(0xFF151B2B).withOpacity(0.5),
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
                                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -213,7 +250,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
                                   child: Column(
                                     children: [
-                                      Text(tr('Langkah Terakhir', 'Final Step'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
+                                      Text(tr('Mulai Perjalanan', 'Start Your Journey'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
                                       const SizedBox(height: 8),
                                       Text(tr('Pilih bagaimana Anda ingin memulai', 'Choose how you want to start'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
                                       const SizedBox(height: 48),
@@ -372,22 +409,31 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           _processEntry(); 
                                         }
                                       },
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
-                                          const SizedBox(width: 8),
-                                          AnimatedBuilder(
-                                            animation: _arrowSlide,
-                                            builder: (context, child) {
-                                              return Transform.translate(
-                                                offset: Offset(_arrowSlide.value, 0),
-                                                child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
+                                      child: _isFormLoading 
+                                      ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(tr('Memuat', 'Loading'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                            const SizedBox(width: 8),
+                                            const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0)),
+                                          ],
+                                        )
+                                      : Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                            const SizedBox(width: 8),
+                                            AnimatedBuilder(
+                                              animation: _arrowSlide,
+                                              builder: (context, child) {
+                                                return Transform.translate(
+                                                  offset: Offset(_arrowSlide.value, 0),
+                                                  child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
                                     ),
                                   );
                                 },
@@ -406,39 +452,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         ],
       ),
     ),
-    if (_state == SplashState.loading)
-      Positioned.fill(
-        child: Container(
-          color: Colors.black.withOpacity(0.7),
-          child: Center(
-            child: Material(
-              color: Colors.transparent,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                  tr('Memuat', 'Loading'),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Padding(
-                  padding: EdgeInsets.only(top: 4.0),
-                  child: WavyDotsProgressIndicator(
-                    color: Colors.white,
-                    dotSize: 5.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ),
+
   ],
 );
   }
@@ -717,6 +731,8 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                   setState(() {
                                     _isLoading = true;
                                   });
+                                  await context.read<SubProvider>().ensureLoaded();
+                                  await Future.delayed(const Duration(milliseconds: 800));
                                   if (mounted) {
                                     widget.onEnter();
                                   }
@@ -792,7 +808,7 @@ class _WavyDotsProgressIndicatorState extends State<WavyDotsProgressIndicator> w
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1800),
     )..repeat();
   }
 
@@ -849,7 +865,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _showSubTracker = true);
     });
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    Future.delayed(const Duration(milliseconds: 3500), () {
       if (mounted) widget.onNext();
     });
   }
@@ -907,20 +923,6 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-
-         
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                child: TypewriterText(
-                  tr('Aplikasi cerdas pemantau dan pengingat tagihan langgananmu.', 'Smart subscription tracking and reminder application.'),
-                  delay: const Duration(milliseconds: 2800),
-                  speed: const Duration(milliseconds: 50),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.5),
-                ),
-              ),
-
               const SizedBox(height: 60),
             ],
           ),

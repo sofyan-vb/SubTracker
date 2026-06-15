@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class CategoryUtils {
+  static const List<String> categoriesID = ['Hiburan', 'Musik', 'Software', 'Utilitas', 'Belanja', 'Game', 'Edukasi', 'Cloud Storage', 'Lainnya'];
+  static const List<String> categoriesEN = ['Entertainment', 'Music', 'Software', 'Utilities', 'Shopping', 'Game', 'Education', 'Cloud Storage', 'Others'];
+
   static Color getColor(String category) {
     switch (category) {
       case 'Hiburan':

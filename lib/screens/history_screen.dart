@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import '../models/subscription.dart';
 import 'package:provider/provider.dart';
 import '../providers/subscription_provider.dart';
+import '../widgets/category_filter_menu.dart';
 import '../widgets/subscription_tile.dart';
 import 'dashboard_screen.dart'; // untuk mengambil languageNotifier dan fungsi tr()
 
+import '../utils/category_utils.dart';
+
 class HistoryScreen extends StatelessWidget {
+
   final Color bgColor;
   final Color textColor;
   final Color cardBg;
@@ -18,6 +23,7 @@ class HistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<SubProvider>();
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
@@ -29,7 +35,7 @@ class HistoryScreen extends StatelessWidget {
           builder: (context, lang, child) {
             return Text(
               tr('Riwayat Tagihan', 'Billing History'),
-              style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 18),
+              style: TextStyle(color: textColor, fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: -0.5),
             );
           }
         ),
@@ -37,6 +43,44 @@ class HistoryScreen extends StatelessWidget {
           icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                CategoryFilterMenu.show(context, provider, cardBg, textColor, languageNotifier.value);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      provider.categoryFilter == 'Semua Layanan' ? Icons.apps_rounded : CategoryUtils.getIcon(provider.categoryFilter), 
+                      color: Colors.white, 
+                      size: 16
+                    ),
+                    const SizedBox(width: 2),
+                    const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                    if (provider.categoryFilter != 'Semua Layanan') ...[
+                      const SizedBox(width: 6),
+                      Text(
+                        provider.categoryFilter,
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
+                      )
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: Consumer<SubProvider>(
         builder: (context, provider, child) {
