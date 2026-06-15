@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dashboard_screen.dart';
 import '../utils/toast_utils.dart';
+import '../services/email_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Color bgColor;
@@ -20,7 +21,9 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _emailCtrl = TextEditingController();
   String? _base64Image;
+  bool _isSendingTest = false;
 
   @override
   void initState() {
@@ -32,6 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _nameCtrl.text = prefs.getString('user_name') ?? '';
+      _emailCtrl.text = prefs.getString('user_email') ?? '';
       _base64Image = prefs.getString('profile_image');
     });
   }
@@ -39,6 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _saveProfile() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_name', _nameCtrl.text);
+    await prefs.setString('user_email', _emailCtrl.text.trim());
     userNameNotifier.value = _nameCtrl.text;
     
     if (_base64Image != null) {
@@ -49,6 +54,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       ToastUtils.show(context, 'Profil berhasil disimpan');
       Navigator.pop(context);
+    }
+  }
+
+  Future<void> _testSendEmail() async {
+    final email = _emailCtrl.text.trim();
+    if (email.isEmpty) {
+      if (mounted) {
+        ToastUtils.show(context, 'Masukkan email terlebih dahulu!', icon: Icons.warning, iconColor: Colors.orange);
+      }
+      return;
+    }
+
+    // Save email first
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_email', email);
+
+    setState(() => _isSendingTest = true);
+
+    final result = await EmailService.sendNotificationEmail(
+      toEmail: email,
+      subject: 'Tes Notifikasi SubTracker',
+      message: 'Selamat! Email notifikasi SubTracker Anda berhasil terhubung. Mulai sekarang, setiap kali Anda menambahkan langganan baru, notifikasinya akan dikirim ke email ini.',
+      name: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'SubTracker',
+    );
+
+    if (mounted) {
+      setState(() => _isSendingTest = false);
+      final success = result == 'OK';
+      
+      ToastUtils.show(
+        context, 
+        success ? 'Email tes berhasil dikirim ke $email! Cek inbox.' : 'Gagal: $result',
+        icon: success ? Icons.check_circle : Icons.error,
+        iconColor: success ? const Color(0xFF0D9488) : Colors.redAccent,
+        duration: const Duration(seconds: 8),
+      );
     }
   }
 
@@ -66,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(width: 40, height: 4, decoration: BoxDecoration(color: widget.textColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: const Color(0xFF0D9488)),
+                leading: const Icon(Icons.photo_library, color: Color(0xFF0D9488)),
                 title: Text('Pilih dari Galeri', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.w600)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -137,7 +178,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(color: const Color(0xFF0D9488), shape: BoxShape.circle),
+                    decoration: const BoxDecoration(color: Color(0xFF0D9488), shape: BoxShape.circle),
                     child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
                   ),
                 ],
@@ -159,7 +200,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white)),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _emailCtrl,
+              style: TextStyle(color: widget.textColor),
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                labelStyle: TextStyle(color: widget.textColor.withValues(alpha: 0.6)),
+                prefixIcon: Icon(Icons.email_outlined, color: widget.textColor.withValues(alpha: 0.5)),
+                filled: true,
+                fillColor: widget.cardBg,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: _isSendingTest 
+                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: widget.textColor))
+                    : Icon(Icons.send_rounded, size: 18, color: widget.textColor),
+                label: Text(
+                  _isSendingTest ? 'Mengirim...' : 'Tes Kirim Email',
+                  style: TextStyle(color: widget.textColor, fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: widget.textColor.withValues(alpha: 0.2)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: _isSendingTest ? null : _testSendEmail,
+              ),
+            ),
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -168,7 +244,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: const Text('Simpan Profil', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
               ),
             ),
-
           ],
         ),
       ),

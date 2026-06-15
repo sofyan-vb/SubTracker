@@ -5,6 +5,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/subscription.dart';
+import '../services/email_service.dart';
+import 'package:intl/intl.dart';
 
 class SubProvider extends ChangeNotifier {
   List<Subscription> _subs = [];
@@ -106,10 +108,25 @@ class SubProvider extends ChangeNotifier {
   }
 
 
-  void addSub(Subscription sub) {
+  void addSub(Subscription sub) async {
     _subs.add(sub);
     _saveData();
     notifyListeners();
+    
+    // Trigger EmailJS
+    final prefs = await SharedPreferences.getInstance();
+    final userEmail = prefs.getString('user_email');
+    if (userEmail != null && userEmail.isNotEmpty) {
+      final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+      final dateStr = DateFormat('dd MMMM yyyy').format(sub.dueDate);
+      final message = 'Terdapat langganan baru untuk layanan ${sub.name} (Kategori: ${sub.category}) sebesar ${formatter.format(sub.price)} yang akan ditagihkan pada $dateStr. Mohon persiapkan dana Anda.';
+      
+      EmailService.sendNotificationEmail(
+        toEmail: userEmail,
+        subject: 'Tagihan Baru: ${sub.name}',
+        message: message,
+      );
+    }
   }
 
   void removeSub(String id) {

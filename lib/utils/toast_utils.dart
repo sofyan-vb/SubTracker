@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ToastUtils {
-  static void show(BuildContext context, String message, {IconData icon = Icons.check_circle, Color iconColor = const Color(0xFF0D9488)}) {
+  static void show(BuildContext context, String message, {IconData icon = Icons.check_circle, Color iconColor = const Color(0xFF0D9488), Duration duration = const Duration(seconds: 3), Color bgColor = const Color(0xFF282A2E)}) {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -9,7 +9,7 @@ class ToastUtils {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: const Color(0xFF282A2E), // Dark gray pill background
+              color: bgColor,
               borderRadius: BorderRadius.circular(50),
               boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
             ),
@@ -33,8 +33,8 @@ class ToastUtils {
         backgroundColor: Colors.transparent, 
         elevation: 0,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 50),
-        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.only(bottom: 50, left: 24, right: 24),
+        duration: duration,
         padding: EdgeInsets.zero,
       )
     );

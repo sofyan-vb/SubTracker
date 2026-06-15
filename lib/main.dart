@@ -74,11 +74,11 @@ class _GateKeeperState extends State<GateKeeper> {
   Future<void> _checkRoute() async {
     await context.read<SubProvider>().ensureLoaded();
     final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString('user_name');
+    final budget = prefs.getString('monthly_budget');
     final hasAccepted = prefs.getBool('hasAcceptedTerms') ?? false;
 
   
-    if (name != null && name.trim().isNotEmpty) {
+    if (budget != null && budget.isNotEmpty) {
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: false)),

@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../utils/toast_utils.dart';
@@ -29,6 +31,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   bool _isFormLoading = false;
 
   final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _emailCtrl = TextEditingController();
+  final TextEditingController _budgetCtrl = TextEditingController();
   String _savedName = ''; 
 
   late AnimationController _arrowCtrl;
@@ -63,6 +67,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   void dispose() {
     _pageController.dispose();
     _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _budgetCtrl.dispose();
     _arrowCtrl.dispose();
     super.dispose();
   }
@@ -103,8 +109,28 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   Future<void> _processEntry() async {
     if (_state == SplashState.form) {
-      if (_nameCtrl.text.trim().isEmpty) {
-        ToastUtils.show(context, tr('Nama pengguna tidak boleh kosong!', 'Username cannot be empty!'), icon: Icons.error_outline, iconColor: Colors.redAccent);
+      if (_nameCtrl.text.trim().isEmpty || _emailCtrl.text.trim().isEmpty || _budgetCtrl.text.trim().isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr('Semua kolom wajib diisi!', 'All fields are required!')),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          )
+        );
+        return;
+      }
+      
+      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+      if (!emailRegex.hasMatch(_emailCtrl.text.trim())) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tr('Format email tidak valid', 'Invalid email format')),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          )
+        );
         return;
       }
       
@@ -112,6 +138,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_name', _nameCtrl.text.trim());
+      await prefs.setString('user_email', _emailCtrl.text.trim());
+      await prefs.setString('monthly_budget', _budgetCtrl.text.trim());
       userNameNotifier.value = _nameCtrl.text.trim();
       
       await Future.delayed(const Duration(milliseconds: 800));
@@ -181,7 +209,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 builder: (context, constraints) {
                   final screenHeight = constraints.maxHeight; 
                   return SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
+                    physics: const ClampingScrollPhysics(),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(minHeight: screenHeight),
                       child: IntrinsicHeight(
@@ -235,6 +263,41 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
                                           prefixIcon: const Icon(Icons.person, color: Colors.white, size: 22),
                                           filled: true, fillColor: const Color(0xFF151B2B).withOpacity(0.5),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      TextField(
+                                        controller: _emailCtrl,
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        keyboardType: TextInputType.emailAddress,
+                                        decoration: InputDecoration(
+                                          labelText: tr('Alamat Email', 'Email Address'),
+                                          labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
+                                          prefixIcon: const Icon(Icons.email, color: Colors.white, size: 22),
+                                          filled: true, fillColor: const Color(0xFF151B2B).withValues(alpha: 0.5),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      TextField(
+                                        controller: _budgetCtrl,
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [FilteringTextInputFormatter.digitsOnly, _BudgetThousandsFormatter()],
+                                        decoration: InputDecoration(
+                                          labelText: tr('Target Anggaran Per Bulan', 'Monthly Budget Target'),
+                                          labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
+                                          prefixIcon: const Icon(Icons.account_balance_wallet, color: Colors.white, size: 22),
+                                          prefixText: 'Rp ',
+                                          prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                          filled: true, fillColor: const Color(0xFF151B2B).withValues(alpha: 0.5),
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
                                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -862,10 +925,10 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) setState(() => _showSubTracker = true);
     });
-    Future.delayed(const Duration(milliseconds: 3500), () {
+    Future.delayed(const Duration(milliseconds: 4500), () {
       if (mounted) widget.onNext();
     });
   }
@@ -1137,3 +1200,19 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [_buildDot(0), _buildDot(1), _buildDot(2)]); 
   }
 }
+
+class _BudgetThousandsFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.isEmpty) return newValue;
+    final cleanText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (cleanText.isEmpty) return const TextEditingValue();
+    final intValue = int.tryParse(cleanText);
+    if (intValue == null) return oldValue;
+    final newText = NumberFormat.decimalPattern('id').format(intValue);
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
+    );
+  }
+}

@@ -149,6 +149,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
               GestureDetector(
                 onTap: () => setState(() => _isAgreed = !_isAgreed),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(
                       height: 24,
@@ -158,14 +159,14 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                         onChanged: (value) => setState(() => _isAgreed = value ?? false),
                         activeColor: const Color(0xFF0D9488),
                         checkColor: Colors.white,
-                        side: const BorderSide(color: Colors.white54, width: 2),
+                        side: BorderSide(color: _isAgreed ? const Color(0xFF0D9488) : Colors.white54, width: 2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        tr('Saya memahami dan menyetujui syarat & ketentuan', 'I understand and agree to the terms & conditions'),
+                        tr('Saya telah membaca dan menyetujui Syarat & Ketentuan', 'I have read and agree to the Terms & Conditions'),
                         style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ),
