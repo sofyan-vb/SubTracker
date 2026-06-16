@@ -5,6 +5,7 @@ import '../utils/toast_utils.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:provider/provider.dart';
@@ -119,7 +120,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.notifications_active_rounded, color: Colors.white),
+                      const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E293B)),
                       const SizedBox(width: 12),
                       Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                     ],
@@ -203,7 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: isActive ? Colors.white : defaultTextColor.withOpacity(0.6)),
       title: Text(title, style: TextStyle(color: isActive ? Colors.white : defaultTextColor, fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
-      trailing: isActive ? const Icon(Icons.check_circle, color: Colors.white) : null,
+      trailing: isActive ? const Icon(Icons.check_circle, color: Color(0xFF1E293B)) : null,
       onTap: () {
         if (title == 'Closest' || title == 'Terdekat') provider.setSortBy('Terdekat');
         else if (title == 'Highest Price' || title == 'Termahal') provider.setSortBy('Termahal');
@@ -243,7 +244,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     height: 100,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                      gradient: LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                      gradient: LinearGradient(colors: [Color(0xFF0D9488), Color(0xFFF5F7FA)], begin: Alignment.topLeft, end: Alignment.bottomRight),
                     ),
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -251,7 +252,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Positioned(
                           right: 12, top: 12,
                           child: IconButton(
-                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
+                            icon: const Icon(Icons.close_rounded, color: Color(0xFF1E293B), size: 24),
                             onPressed: () => Navigator.pop(context)
                           )
                         ),
@@ -321,9 +322,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.edit_note_rounded, color: Colors.white, size: 20),
+                            Icon(Icons.edit_note_rounded, color: Color(0xFF1E293B), size: 20),
                             SizedBox(width: 8),
-                            Text('Pengaturan Profil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                            Text('Pengaturan Profil', style: TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -373,10 +374,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       valueListenable: themeNotifier,
       builder: (context, _, child) {
         const currentTheme = 'Biru';
-        // Tema: Navy Dark Mode (Sesuai Splash Screen)
-        Color scaffoldBg = const Color(0xFF0B101E); 
-        Color bottomNavBg = const Color(0xFF151B2B);
-        Color textColor = Colors.white; 
+        // Tema: Light Mode (Sesuai Referensi)
+        Color scaffoldBg = const Color(0xFFF5F7FA); 
+        Color bottomNavBg = Colors.white;
+        Color textColor = const Color(0xFF1E293B); 
         Color appBarIcons = Colors.white;
 
         return Stack(
@@ -384,135 +385,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Scaffold(
               backgroundColor: scaffoldBg,
               resizeToAvoidBottomInset: false, 
-              appBar: _currentIndex == 0 ? AppBar(
+              appBar: _currentIndex == 0 ? null : AppBar(
                 automaticallyImplyLeading: false,
-                backgroundColor: scaffoldBg,
-                elevation: 0,
-                title: _isSearching
-                    ? TextField(
-                        controller: _searchCtrl,
-                        autofocus: true,
-                        style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
-                        decoration: InputDecoration(
-                          hintText: tr('Cari langganan...', 'Search subscriptions...'),
-                          hintStyle: TextStyle(color: textColor.withValues(alpha: 0.5)),
-                          border: InputBorder.none,
-                        ),
-                        onChanged: (val) {
-                          context.read<SubProvider>().setSearchQuery(val); 
-                        },
-                      )
-                    : Text(
-                        'SubTracker',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)
-                      ),
-                actions: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _isSearching = !_isSearching;
-                        if (!_isSearching) {
-                          _searchCtrl.clear();
-                          context.read<SubProvider>().setSearchQuery(''); 
-                        }
-                      });
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      padding: const EdgeInsets.all(6),
-                      decoration: _isSearching ? null : BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white24, width: 1)),
-                      child: Icon(_isSearching ? Icons.close : Icons.search, color: appBarIcons, size: 20),
-                    ),
-                  ),
-                  
-                  if (!_isSearching)
-                    Consumer<SubProvider>(
-                      builder: (context, provider, child) {
-                        final now = DateTime.now();
-                        final urgentCount = provider.subs.where((sub) {
-                          if (sub.isFinished) return false;
-                          final date = sub.dueDate;
-                          final today = DateTime(now.year, now.month, now.day);
-                          final subDate = DateTime(date.year, date.month, date.day);
-                          return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
-                        }).length;
-                        return GestureDetector(
-                          onTap: () => _showNotificationsSheet(context, bottomNavBg, textColor),
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white24, width: 1)),
-                            child: Stack(
-                              children: [
-                                Icon(Icons.notifications_none_rounded, color: appBarIcons, size: 20),
-                                if (urgentCount > 0)
-                                  Positioned(
-                                    right: -2, top: -2,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(2),
-                                      decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
-                                      constraints: const BoxConstraints(minWidth: 12, minHeight: 12),
-                                      child: Center(
-                                        child: Text(
-                                          urgentCount > 9 ? '9+' : urgentCount.toString(),
-                                          style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  )
-                              ]
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                  if (!_isSearching)
-                    GestureDetector(
-                      onTap: () => _showFilterSheet(context, bottomNavBg, textColor),
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        padding: const EdgeInsets.all(6),
-                        
-                        child: Icon(Icons.tune, color: appBarIcons, size: 20),
-                      ),
-                    ),
-                  if (!_isSearching)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0, left: 4.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          _showPremiumProfileDialog(context, bottomNavBg, textColor, scaffoldBg);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white38, width: 1.5)),
-                          child: ValueListenableBuilder<String?>(
-                            valueListenable: userPhotoNotifier,
-                            builder: (context, photo, child) {
-                              return CircleAvatar(
-                                radius: 14,
-                                backgroundColor: bottomNavBg,
-                                backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
-                                child: photo == null ? Icon(Icons.account_circle, size: 24, color: textColor.withValues(alpha: 0.5)) : null,
-                              );
-                            }
-                          ),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(width: 8),
-                ],
-              ) : AppBar(
-                automaticallyImplyLeading: false,
-                backgroundColor: scaffoldBg,
+                backgroundColor: const Color(0xFF1E3A8A),
                 elevation: 0,
                 title: Text(
                   _currentIndex == 1 ? tr('Kalender', 'Calendar') : 
                   _currentIndex == 2 ? tr('Statistik', 'Statistics') : 
                   tr('Pengaturan', 'Settings'),
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -0.5)
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5)
                 ),
                 centerTitle: false,
               ),
@@ -527,11 +408,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
               floatingActionButton: Container(
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF64FFDA), Color(0xFF004D40)],
-                    begin: Alignment.topLeft, end: Alignment.bottomRight,
-                  ),
+                  color: const Color(0xFF2563EB),
                   borderRadius: BorderRadius.circular(22),
+                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: FloatingActionButton(
                   elevation: 0, hoverElevation: 0, highlightElevation: 0, focusElevation: 0,
@@ -544,7 +423,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           setState(() {
                             _isLoadingAdd = true;
                           });
-                        
                         
                         await Future.delayed(const Duration(milliseconds: 1200));
                         
@@ -560,7 +438,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               bottomNavigationBar: BottomAppBar(
                 color: bottomNavBg, 
-                elevation: 0,
+                elevation: 10,
+                shadowColor: Colors.black26,
                 shape: const CircularNotchedRectangle(),
                 notchMargin: 8,
                 child: SizedBox(
@@ -574,8 +453,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.space_dashboard_outlined, color: _currentIndex == 0 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Beranda', 'Home'), style: TextStyle(color: _currentIndex == 0 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 0 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.home_filled, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
                           ],
                         ),
                       ),
@@ -585,20 +463,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.calendar_month_outlined, color: _currentIndex == 1 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Kalender', 'Calendar'), style: TextStyle(color: _currentIndex == 1 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 1 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.calendar_today_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.grey[400], size: 26),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 48),
+                      const SizedBox(width: 48), // Space for FAB
                       InkWell(
                         onTap: () => setState(() => _currentIndex = 2),
                         borderRadius: BorderRadius.circular(12),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.insert_chart_outlined, color: _currentIndex == 2 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Statistik', 'Statistics'), style: TextStyle(color: _currentIndex == 2 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 2 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.pie_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
                           ],
                         ),
                       ),
@@ -608,8 +484,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.settings_outlined, color: _currentIndex == 3 ? Colors.white : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), size: 24),
-                            Text(tr('Pengaturan', 'Settings'), style: TextStyle(color: _currentIndex == 3 ? textColor : (currentTheme == 'Putih' ? Colors.grey[400] : Colors.grey[700]), fontSize: 9, fontWeight: _currentIndex == 3 ? FontWeight.bold : FontWeight.normal)),
+                            Icon(Icons.settings_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
                           ],
                         ),
                       ),
@@ -653,7 +528,6 @@ class _HomeView extends StatelessWidget {
     
     final List<String> namaBulanSingkatID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
     final List<String> namaBulanSingkatEN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
     final namaBulanSingkat = languageNotifier.value == 'ID' ? namaBulanSingkatID : namaBulanSingkatEN;
 
     final hour = DateTime.now().hour;
@@ -662,19 +536,9 @@ class _HomeView extends StatelessWidget {
     else if (hour >= 15 && hour < 18) greeting = tr('Selamat Sore', 'Good Evening');
     else if (hour >= 18 || hour < 4) greeting = tr('Selamat Malam', 'Good Night');
 
-    Color cardBg = const Color(0xFF1A1A1C);
-    Color textColor = Colors.white;
-    Color subTextColor = Colors.white70;
-    
-    if (theme == 'Putih') {
-      cardBg = Colors.white;
-      textColor = Colors.black87;
-      subTextColor = Colors.black54;
-    } else if (theme == 'Biru') {
-      cardBg = const Color(0xFF1A2235); 
-    }
-
-    final Color scaffoldBg = theme == 'Putih' ? const Color(0xFFF1F5F9) : (theme == 'Biru' ? const Color(0xFF0F172A) : const Color(0xFF0B101E));
+    Color cardBg = Colors.white;
+    Color textColor = const Color(0xFF1E293B);
+    Color subTextColor = Colors.black54;
 
     final now = DateTime.now();
     final upcomingSubs = provider.activeSubs.where((sub) {
@@ -682,641 +546,391 @@ class _HomeView extends StatelessWidget {
       if (date == null) return false;
       return date.isAfter(now) || DateUtils.isSameDay(date, now);
     }).toList();
-
     upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
 
-    final upcomingSub = upcomingSubs.isNotEmpty ? upcomingSubs.first : null;
-    final double averagePrice = provider.activeSubs.isEmpty ? 0 : (provider.totalMonthly / provider.activeSubs.length);
+    // Calculate category percentages for pie chart
+    Map<String, double> categoryTotals = {};
+    for (var sub in provider.activeSubs) {
+      categoryTotals[sub.category] = (categoryTotals[sub.category] ?? 0) + sub.price;
+    }
+    
+    final List<Color> pieColors = [
+      const Color(0xFF2563EB), // Royal Blue
+      const Color(0xFF3B82F6), // Blue
+      const Color(0xFF60A5FA), // Light Blue
+      const Color(0xFF93C5FD), // Lighter Blue
+      const Color(0xFFDBEAFE), // Very Light Blue
+    ];
 
-    String upcomingDateStr = '';
-    if (upcomingSub != null) {
-      final date = _extractDateSafely(upcomingSub)!;
-      upcomingDateStr = '${date.day} ${namaBulanSingkat[date.month - 1]}';
+    List<PieChartSectionData> pieSections = [];
+    List<Widget> legendWidgets = [];
+    
+    if (provider.totalMonthly > 0) {
+      int colorIndex = 0;
+      var sortedCategories = categoryTotals.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+      
+      for (var entry in sortedCategories) {
+        if (entry.value <= 0) continue;
+        final percentage = (entry.value / provider.totalMonthly) * 100;
+        final color = pieColors[colorIndex % pieColors.length];
+        
+        pieSections.add(
+          PieChartSectionData(
+            color: color,
+            value: percentage,
+            title: '',
+            radius: 20,
+          )
+        );
+        
+        if (colorIndex < 4) { // Show top 4 in legends
+          legendWidgets.add(
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text(entry.key, style: TextStyle(color: subTextColor, fontSize: 11), overflow: TextOverflow.ellipsis)),
+                  Text('${percentage.toStringAsFixed(0)}%', style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            )
+          );
+        }
+        colorIndex++;
+      }
+      
+      if (pieSections.isEmpty) {
+        pieSections.add(PieChartSectionData(color: Colors.grey[300], value: 100, title: '', radius: 20));
+        legendWidgets.add(Text(tr('Belum ada data', 'No data yet'), style: TextStyle(color: subTextColor, fontSize: 11)));
+      }
+    } else {
+      pieSections.add(PieChartSectionData(color: Colors.grey[300], value: 100, title: '', radius: 20));
+      legendWidgets.add(Text(tr('Belum ada data', 'No data yet'), style: TextStyle(color: subTextColor, fontSize: 11)));
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final bool isSmallScreen = constraints.maxHeight < 600;
-        if (isSmallScreen) {
-          return SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(
-                  child: FadeInSlide(delay: Duration.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            child: ValueListenableBuilder<String>(
-                              valueListenable: userNameNotifier,
-                              builder: (context, userName, child) {
-                                final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
-                                return Text(
-                                  displayText, 
-                                  style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0)
-                                );
-                              },
-                            ),
+    return SafeArea(
+      child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          // GREETING
+          SliverToBoxAdapter(
+            child: FadeInSlide(delay: Duration.zero,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: Colors.white, textColor: textColor, cardBg: Colors.white)));
+                          },
+                          child: ValueListenableBuilder<String?>(
+                            valueListenable: userPhotoNotifier,
+                            builder: (context, photo, child) {
+                              return CircleAvatar(
+                                radius: 24,
+                                backgroundColor: Colors.grey[200],
+                                backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
+                                child: photo == null ? Icon(Icons.account_circle, size: 30, color: textColor.withValues(alpha: 0.5)) : null,
+                              );
+                            }
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
-                            },
-                            child: ValueListenableBuilder<String?>(
-                              valueListenable: userPhotoNotifier,
-                              builder: (context, photo, child) {
-                                return CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor: cardBg,
-                                  backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
-                                  child: photo == null ? Icon(Icons.account_circle, size: 28, color: textColor.withValues(alpha: 0.5)) : null,
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tr('Selamat datang kembali,', 'Welcome back,'), 
+                              style: TextStyle(color: subTextColor, fontSize: 13, fontWeight: FontWeight.w500)
+                            ),
+                            const SizedBox(height: 2),
+                            ValueListenableBuilder<String>(
+                              valueListenable: userNameNotifier,
+                              builder: (context, name, child) {
+                                return Text(
+                                  name.isEmpty ? 'User' : name, 
+                                  style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)
                                 );
                               }
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ]
                     ),
-                  ),
-                ),
-
-                SliverToBoxAdapter(
-                  child: FadeInSlide(delay: Duration.zero,
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Stack(
-                          children: [
-                            Positioned(right: -30, top: -30, child: CircleAvatar(radius: 70, backgroundColor: Colors.white.withValues(alpha: 0.05))),
-                            Positioned(right: 60, bottom: -40, child: CircleAvatar(radius: 60, backgroundColor: Colors.white.withValues(alpha: 0.05))),
-                            Padding(
-                              padding: const EdgeInsets.all(28),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                                        child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 20),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  FittedBox(
-                                    fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      currencyFormat.format(provider.totalMonthly),
-                                      style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.5),
+                    
+                    // Notification Bell (moved from appbar)
+                    Consumer<SubProvider>(
+                      builder: (context, provider, child) {
+                        final now = DateTime.now();
+                        final urgentCount = provider.subs.where((sub) {
+                          if (sub.isFinished) return false;
+                          final date = sub.dueDate;
+                          final today = DateTime(now.year, now.month, now.day);
+                          final subDate = DateTime(date.year, date.month, date.day);
+                          return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
+                        }).length;
+                        return GestureDetector(
+                          onTap: () {
+                            // Show notifications
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Icon(Icons.notifications_none_rounded, color: textColor, size: 24),
+                                if (urgentCount > 0)
+                                  Positioned(
+                                    right: -2, top: -2,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                                      child: Text('$urgentCount', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  )
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                        );
+                      }
                     ),
-                  ),
+                  ],
                 ),
+              ),
+            ),
+          ),
 
-                if (provider.activeSubs.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: FadeInSlide(delay: Duration.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 4),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.widgets_rounded, color: Colors.cyanAccent, size: 20),
-                                    const SizedBox(width: 10),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 9))]),
-                                        Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
-                                      ],
-                                    )
-                                  ],
-                                ),
+          // SPENDING ANALYTICS CARD
+          SliverToBoxAdapter(
+            child: FadeInSlide(delay: const Duration(milliseconds: 100),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 20, offset: const Offset(0, 8))],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(tr('Analitik Pengeluaran', 'Spending Analytics'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                          child: Text(tr('Bulan Ini', 'This Month'), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold)),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        // PIE CHART
+                        SizedBox(
+                          height: 100,
+                          width: 100,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              PieChart(
+                                PieChartData(
+                                  sectionsSpace: 2,
+                                  centerSpaceRadius: 28, // 28 + 20 = 48 (safe for 100/2 = 50)
+                                  sections: pieSections,
+                                  startDegreeOffset: -90,
+                                )
+                              ),
+                              Text(
+                                '${provider.activeSubs.length}\n${tr('Subs', 'Subs')}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w900),
                               )
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.analytics_rounded, color: Colors.orangeAccent, size: 20),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 9)),
-                                          FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold))),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              )
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        // LEGEND
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: legendWidgets,
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // TOTAL MONTHLY EXPENSE CARD (BLUE CARD)
+          SliverToBoxAdapter(
+            child: FadeInSlide(delay: const Duration(milliseconds: 200),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2563EB), Color(0xFF1E3A8A)], // Glassy blue gradient
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 10))],
+                ),
+                child: Stack(
+                  children: [
+                    // Glass reflection effect
+                    Positioned(
+                      top: -20, right: -20,
+                      child: Container(
+                        width: 100, height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                     ),
-                  ),
-
-                if (provider.activeSubs.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: FadeInSlide(delay: Duration.zero,
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: cardBg, 
-                          borderRadius: BorderRadius.circular(16), 
-                          border: Border.all(color: Colors.white10)
-                        ),
-                        child: Row(
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tr('Total Tagihan Bulanan', 'Total Monthly Spending'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 12),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(color: upcomingSub != null ? Colors.orange.withOpacity(0.15) : Colors.green.withOpacity(0.15), shape: BoxShape.circle),
-                              child: Icon(upcomingSub != null ? Icons.notification_important_rounded : Icons.check_circle_rounded, color: upcomingSub != null ? Colors.orange : Colors.green, size: 24),
-                            ),
-                            const SizedBox(width: 16),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    upcomingSub != null 
-                                        ? '${upcomingSub.name} • $upcomingDateStr' 
-                                        : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
-                                    style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)
-                                  ),
-                                ],
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
+                                child: Text(
+                                  currencyFormat.format(provider.totalMonthly),
+                                  style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900, letterSpacing: -1.0),
+                                ),
                               ),
                             ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.trending_up_rounded, color: Colors.white, size: 14),
+                                  const SizedBox(width: 4),
+                                  Text(tr('Bulan Ini', 'This Month'), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            )
                           ],
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                
-                SliverToBoxAdapter(
-                  child: FadeInSlide(delay: Duration.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 10),
-                      child: Column(
-                        children: [
-                          Row(
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // UPCOMING BILLS TITLE
+          SliverToBoxAdapter(
+            child: FadeInSlide(delay: const Duration(milliseconds: 300),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(tr('Tagihan Mendatang', 'Upcoming Bills'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                    Text(tr('Lihat Semua', 'See All'), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 12, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // UPCOMING BILLS HORIZONTAL LIST
+          SliverToBoxAdapter(
+            child: FadeInSlide(delay: const Duration(milliseconds: 400),
+              child: SizedBox(
+                height: 140,
+                child: upcomingSubs.isEmpty 
+                  ? Center(child: Text(tr('Tidak ada tagihan', 'No upcoming bills'), style: TextStyle(color: subTextColor)))
+                  : ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: upcomingSubs.length,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemBuilder: (context, index) {
+                        final sub = upcomingSubs[index];
+                        final subDate = _extractDateSafely(sub);
+                        int daysLeft = subDate != null ? subDate.difference(now).inDays : 0;
+                        
+                        return Container(
+                          width: 130,
+                          margin: const EdgeInsets.only(left: 4, right: 12, bottom: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: cardBg,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5))],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  InkWell(
-                                    borderRadius: BorderRadius.circular(8),
-                                    onTap: () {
-                                      CategoryFilterMenu.show(context, provider, cardBg, textColor, languageNotifier.value);
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-                                      child: Stack(
-                                          clipBehavior: Clip.none,
-                                          alignment: Alignment.center,
-                                          children: [
-                                            const Icon(Icons.grid_view_rounded, color: Colors.white, size: 18),
-                                            const Positioned(
-                                              bottom: -10,
-                                              child: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                                            ),
-                                          ],
-                                        ),
+                                  Container(
+                                    width: 36, height: 36,
+                                    decoration: BoxDecoration(
+                                      color: CategoryUtils.getColor(sub.category),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    provider.categoryFilter == 'Semua Layanan' ? tr('Semua Layanan', 'All Services') : provider.categoryFilter.toUpperCase(), 
-                                    style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)
+                                    child: const Center(child: Icon(Icons.subscriptions_rounded, color: Colors.white, size: 18)),
                                   ),
                                 ],
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(
-                                    bgColor: scaffoldBg,
-                                    textColor: textColor,
-                                    cardBg: cardBg,
-                                  )));
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(border: Border.all(color: textColor.withValues(alpha: 0.15)), borderRadius: BorderRadius.circular(20)),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.manage_search_rounded, color: textColor.withValues(alpha: 0.8), size: 18),
-                                      const SizedBox(width: 4),
-                                      Text(tr('Riwayat', 'History'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(sub.name, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                  const SizedBox(height: 2),
+                                  Text('${daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft'}', style: TextStyle(color: const Color(0xFF2563EB), fontSize: 11, fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 6),
+                                  Text(currencyFormat.format(sub.price), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900)),
+                                ],
+                              )
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          Container(
-                          height: 2,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
-                            gradient: LinearGradient(
-                              colors: [textColor.withValues(alpha: 0.0), textColor.withValues(alpha: 0.15), textColor.withValues(alpha: 0.0)],
-                              begin: Alignment.centerLeft, end: Alignment.centerRight,
-                            ),
-                          ),
-                        ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  ),
-                ),
-
-                if (provider.activeSubs.isEmpty)
-                  SliverToBoxAdapter(
-                    child: FadeInSlide(delay: Duration.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.wallet_rounded, 
-                                size: 48, 
-                                color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              tr('Belum Ada Tagihan', 'No Bills Yet'), 
-                              style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: subTextColor, fontSize: 11, height: 1.4)
-                            ),
-                            const SizedBox(height: 16),
-                            BlinkingWidget(
-                              child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withValues(alpha: 0.5), size: 32)
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                else
-                  SliverPadding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          return FadeInSlide(
-                            delay: Duration(milliseconds: 450 + (index * 100)),
-                            child: SubTile(sub: provider.activeSubs[index]),
-                          );
-                        },
-                        childCount: provider.activeSubs.length,
-                      ),
-                    ),
-                  ),
-              ],
+              ),
             ),
-          );
-        } else {
-          return SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FadeInSlide(delay: Duration.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        BlinkingWidget(
-                          child: ValueListenableBuilder<String>(
-                            valueListenable: userNameNotifier,
-                            builder: (context, userName, child) {
-                              final displayText = userName.isEmpty ? greeting : '$greeting, $userName';
-                              return Text(
-                                displayText, 
-                                style: const TextStyle(color: Colors.redAccent, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0)
-                              );
-                            },
-                          ),
-                        ),
-
-                      ],
-                    ),
-                  ),
-                ),
-
-                FadeInSlide(delay: Duration.zero,
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight), 
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Stack(
-                        children: [
-                          Positioned(right: -30, top: -30, child: CircleAvatar(radius: 70, backgroundColor: Colors.white.withValues(alpha: 0.05))),
-                          Positioned(right: 60, bottom: -40, child: CircleAvatar(radius: 60, backgroundColor: Colors.white.withValues(alpha: 0.05))),
-                          Padding(
-                            padding: const EdgeInsets.all(28),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-                                      child: const Icon(Icons.wallet_rounded, color: Colors.white, size: 20),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Text(tr('Total Tagihan Bulanan', 'Total Monthly Bills'), style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                FittedBox(
-                                  fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    currencyFormat.format(provider.totalMonthly),
-                                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                if (provider.activeSubs.isNotEmpty)
-                  FadeInSlide(delay: Duration.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, top: 4),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.widgets_rounded, color: Colors.cyanAccent, size: 20),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(children: [Icon(Icons.subscriptions_rounded, color: subTextColor, size: 12), const SizedBox(width: 4), Text(tr('Layanan', 'Services'), style: TextStyle(color: subTextColor, fontSize: 9))]),
-                                      Text('${provider.activeSubs.length} ${tr('Aktif', 'Active')}', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            )
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white10), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))]),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.analytics_rounded, color: Colors.orangeAccent, size: 20),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(tr('Rata-rata', 'Average'), style: TextStyle(color: subTextColor, fontSize: 9)),
-                                        FittedBox(fit: BoxFit.scaleDown, child: Text(currencyFormat.format(averagePrice), style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold))),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            )
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                if (provider.activeSubs.isNotEmpty)
-                  FadeInSlide(delay: Duration.zero,
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 0),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: cardBg, 
-                        borderRadius: BorderRadius.circular(16), 
-                        border: Border.all(color: Colors.white10)
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(color: upcomingSub != null ? Colors.orange.withOpacity(0.15) : Colors.green.withOpacity(0.15), shape: BoxShape.circle),
-                            child: Icon(upcomingSub != null ? Icons.notification_important_rounded : Icons.check_circle_rounded, color: upcomingSub != null ? Colors.orange : Colors.green, size: 24),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(upcomingSub != null ? tr('Tagihan Terdekat', 'Upcoming Bill') : tr('Semua Tagihan Aman', 'All Bills Safe'), style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold)),
-                                const SizedBox(height: 4),
-                                Text(
-                                  upcomingSub != null 
-                                      ? '${upcomingSub.name} • $upcomingDateStr' 
-                                      : tr('Tidak ada tagihan dalam waktu dekat.', 'No upcoming bills soon.'), 
-                                  style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                
-                FadeInSlide(delay: Duration.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                                children: [
-                                  InkWell(
-                                    borderRadius: BorderRadius.circular(8),
-                                    onTap: () {
-                                      CategoryFilterMenu.show(context, provider, cardBg, textColor, languageNotifier.value);
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-                                      child: Stack(
-                                          clipBehavior: Clip.none,
-                                          alignment: Alignment.center,
-                                          children: [
-                                            const Icon(Icons.grid_view_rounded, color: Colors.white, size: 18),
-                                            const Positioned(
-                                              bottom: -10,
-                                              child: Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
-                                            ),
-                                          ],
-                                        ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    provider.categoryFilter == 'Semua Layanan' ? tr('Semua Layanan', 'All Services') : provider.categoryFilter.toUpperCase(), 
-                                    style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)
-                                  ),
-                                ],
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(
-                                    bgColor: scaffoldBg,
-                                    textColor: textColor,
-                                    cardBg: cardBg,
-                                  )));
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(border: Border.all(color: textColor.withValues(alpha: 0.15)), borderRadius: BorderRadius.circular(20)),
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.manage_search_rounded, color: textColor.withValues(alpha: 0.8), size: 18),
-                                      const SizedBox(width: 4),
-                                      Text(tr('Riwayat', 'History'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontSize: 10, fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Container(
-                          height: 2,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
-                            gradient: LinearGradient(
-                              colors: [textColor.withValues(alpha: 0.0), textColor.withValues(alpha: 0.15), textColor.withValues(alpha: 0.0)],
-                              begin: Alignment.centerLeft, end: Alignment.centerRight,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                Expanded(
-                  child: provider.activeSubs.isEmpty
-                      ? FadeInSlide(delay: Duration.zero,
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(28),
-                                  decoration: BoxDecoration(
-                                    color: theme == 'Putih' ? Colors.grey.shade100 : Colors.white.withOpacity(0.05),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.wallet_rounded, 
-                                    size: 72, 
-                                    color: theme == 'Putih' ? Colors.grey.shade400 : Colors.white24
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  tr('Belum Ada Tagihan', 'No Bills Yet'), 
-                                  style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  tr('Catat pengeluaran langganan pertamamu\ndengan menekan tombol (+) di bawah.', 'Record your first subscription expense\nby pressing the (+) button below.'), 
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5)
-                                ),
-                                const SizedBox(height: 40),
-                                BlinkingWidget(
-                                  child: Icon(Icons.keyboard_double_arrow_down_rounded, color: const Color(0xFF0D9488).withValues(alpha: 0.5), size: 32)
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.only(left: 16, right: 16, top: 10, bottom: 100), 
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: provider.activeSubs.length,
-                          itemBuilder: (context, index) {
-                            return FadeInSlide(delay: Duration(milliseconds: 450 + (index * 100)), child: SubTile(sub: provider.activeSubs[index]));
-                          },
-                        ),
-                ),
-              ],
-            ),
-          );
-        }
-      }
+          ),
+          
+          const SliverToBoxAdapter(child: SizedBox(height: 100)), // Space for FAB
+        ],
+      ),
     );
   }
 }
+
 
 class _CalendarView extends StatefulWidget {
   final String theme;
@@ -1382,17 +996,9 @@ class _CalendarViewState extends State<_CalendarView> {
       return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
     }).toList();
 
-    Color cardBg = const Color(0xFF1A1A1C);
-    Color textColor = Colors.white;
-    Color subTextColor = Colors.white54;
-    
-    if (widget.theme == 'Putih') {
-      cardBg = Colors.white;
-      textColor = Colors.black87;
-      subTextColor = Colors.black54;
-    } else if (widget.theme == 'Biru') {
-      cardBg = const Color(0xFF1A2235); 
-    }
+    Color cardBg = Colors.white;
+    Color textColor = const Color(0xFF1E293B);
+    Color subTextColor = Colors.black54;
 
     final isID = languageNotifier.value == 'ID';
     String stringBulanTahunKini = '${(isID ? namaBulanPenuhID : namaBulanPenuhEN)[_currentDate.month - 1]} ${_currentDate.year}';
@@ -1440,7 +1046,7 @@ class _CalendarViewState extends State<_CalendarView> {
                         color: cardBg, 
                         borderRadius: BorderRadius.circular(16), 
                         border: Border.all(color: Colors.white10),
-                        boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))],
                       ),
                       child: Column(
                         children: [
@@ -1476,10 +1082,10 @@ class _CalendarViewState extends State<_CalendarView> {
                               Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
 
                               if (isSelected) {
-                                circleColor = isHoliday ? Colors.redAccent : const Color(0xFF0D9488);
-                                dayTextColor = isHoliday ? Colors.white : Colors.black; 
+                                circleColor = isHoliday ? Colors.redAccent : const Color(0xFF2563EB);
+                                dayTextColor = Colors.white; 
                               } else if (isToday) {
-                                circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
+                                circleColor = Colors.black12;
                               }
 
                               return GestureDetector(
@@ -1492,7 +1098,7 @@ class _CalendarViewState extends State<_CalendarView> {
                                     children: [
                                       Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
                                       if (hasBill) 
-                                        Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFF0D9488), shape: BoxShape.circle))),
+                                        Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFF2563EB), shape: BoxShape.circle))),
                                     ],
                                   ),
                                 ),
@@ -1538,7 +1144,7 @@ class _CalendarViewState extends State<_CalendarView> {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 12, fontWeight: FontWeight.bold))),
+                      child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: const TextStyle(color: Colors.black38, fontSize: 12, fontWeight: FontWeight.bold))),
                     ),
                   )
                 else
@@ -1582,10 +1188,9 @@ class _CalendarViewState extends State<_CalendarView> {
                     margin: const EdgeInsets.symmetric(horizontal: 12),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: cardBg, 
+                      color: Colors.white, 
                       borderRadius: BorderRadius.circular(16), 
-                      border: Border.all(color: Colors.white10),
-                      boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
+                      border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: Column(
                       children: [
@@ -1621,10 +1226,10 @@ class _CalendarViewState extends State<_CalendarView> {
                             Color dayTextColor = isHoliday ? Colors.redAccent : textColor; 
 
                             if (isSelected) {
-                              circleColor = isHoliday ? Colors.redAccent : const Color(0xFF0D9488);
-                              dayTextColor = isHoliday ? Colors.white : Colors.black; 
+                              circleColor = isHoliday ? Colors.redAccent : const Color(0xFF2563EB);
+                              dayTextColor = Colors.white; 
                             } else if (isToday) {
-                              circleColor = widget.theme == 'Putih' ? Colors.black12 : Colors.white12;
+                              circleColor = Colors.black12;
                             }
 
                             return GestureDetector(
@@ -1637,7 +1242,7 @@ class _CalendarViewState extends State<_CalendarView> {
                                   children: [
                                     Text('$day', style: TextStyle(color: dayTextColor, fontWeight: isSelected || isToday ? FontWeight.bold : FontWeight.normal)),
                                     if (hasBill) 
-                                      Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFF0D9488), shape: BoxShape.circle))),
+                                      Positioned(bottom: 4, child: Container(width: 4, height: 4, decoration: BoxDecoration(color: isSelected && !isHoliday ? Colors.white : const Color(0xFF2563EB), shape: BoxShape.circle))),
                                   ],
                                 ),
                               ),
@@ -1676,7 +1281,7 @@ class _CalendarViewState extends State<_CalendarView> {
                 
                 Expanded(
                   child: subsOnSelectedDate.isEmpty
-                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: widget.theme == 'Putih' ? Colors.black38 : Colors.white30, fontSize: 12, fontWeight: FontWeight.bold)))
+                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: const TextStyle(color: Colors.black38, fontSize: 12, fontWeight: FontWeight.bold)))
                       : ListView.builder(
                           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100), 
                           physics: const BouncingScrollPhysics(),
@@ -1695,261 +1300,100 @@ class _CalendarViewState extends State<_CalendarView> {
   }
 }
 
-class _StatsView extends StatelessWidget {
+class _StatsView extends StatefulWidget {
   final String theme;
   const _StatsView({super.key, required this.theme});
+  @override
+  State<_StatsView> createState() => _StatsViewState();
+}
 
+class _StatsViewState extends State<_StatsView> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SubProvider>();
     final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
-
+    
     final totalMonthly = provider.totalMonthly;
     final breakdown = provider.categoryBreakdown;
-    final activeSubs = provider.subs;
-    final double averagePrice = activeSubs.isEmpty ? 0 : (totalMonthly / activeSubs.length);
-
-    String mostExpensiveText = '-';
-    if (activeSubs.isNotEmpty) {
-      final mostExpensive = activeSubs.reduce((curr, next) => curr.price > next.price ? curr : next);
-      mostExpensiveText = mostExpensive.name;
-    }
-
-    Color cardBg = const Color(0xFF121214);
-    Color textColor = Colors.white;
-    Color subTextColor = Colors.white54;
     
-    if (theme == 'Putih') {
-      cardBg = Colors.white;
-      textColor = Colors.black87;
-      subTextColor = Colors.black54;
-    } else if (theme == 'Biru') {
-      cardBg = const Color(0xFF151B2B); 
-    }
-
-    Color scaffoldBg = const Color(0xFF0B101E); 
-    if (theme == 'Putih') scaffoldBg = const Color(0xFFF1F5F9);
-    else if (theme == 'Biru') scaffoldBg = const Color(0xFF0F172A);
+    Color textColor = const Color(0xFF1E293B);
+    Color subTextColor = Colors.black54;
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeInSlide(delay: Duration.zero, child: Row(children: [Icon(Icons.pie_chart_rounded, color: Colors.white, size: 20), const SizedBox(width: 8), Text(tr('Ringkasan', 'Summary'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold))])),
+            // Month Selector
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(icon: Icon(Icons.chevron_left, color: subTextColor), onPressed: () {}),
+                Text(
+                  '${languageNotifier.value == 'ID' ? 'Bulan Ini' : 'This Month'}', 
+                  style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
+                ),
+                IconButton(icon: Icon(Icons.chevron_right, color: subTextColor), onPressed: () {}),
+              ],
+            ),
             const SizedBox(height: 16),
             
-            FadeInSlide(delay: Duration.zero,
-              child: Row(
-                children: [
-                  Expanded(child: _buildSummaryCard(tr('Tahunan', 'Yearly'), currencyFormat.format(provider.totalYearly), Icons.all_inclusive, Colors.purpleAccent, cardBg, textColor, subTextColor, theme)),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildSummaryCard(tr('Layanan', 'Services'), '${activeSubs.length} ${tr('Aktif', 'Active')}', Icons.subscriptions_rounded, Colors.cyanAccent, cardBg, textColor, subTextColor, theme)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16), 
-
-            FadeInSlide(delay: Duration.zero,
-              child: Row(
-                children: [
-                  Expanded(child: _buildSummaryCard(tr('Rata-rata /Bulan', 'Average /Month'), currencyFormat.format(averagePrice), Icons.analytics_outlined, Colors.orangeAccent, cardBg, textColor, subTextColor, theme)),
-                  const SizedBox(width: 16),
-                  Expanded(child: _buildSummaryCard(tr('Termahal', 'Most Expensive'), mostExpensiveText, Icons.diamond_outlined, Colors.pinkAccent, cardBg, textColor, subTextColor, theme)),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 40),
-
-            FadeInSlide(delay: Duration.zero, child: Row(children: [Icon(Icons.analytics_rounded, color: Colors.white, size: 20), const SizedBox(width: 8), Text(tr('Analisis Kategori', 'Category Analysis'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold))])),
-            const SizedBox(height: 16),
-
-                        if (breakdown.isNotEmpty)
-              FadeInSlide(delay: Duration.zero,
-                child: Container(
-                  height: 160,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cardBg,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+            // Total Spending
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  currencyFormat.format(totalMonthly),
+                  style: TextStyle(color: textColor, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1.0)
+                ),
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
-                      Expanded(
-                        flex: 3,
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              PieChart(
-                                PieChartData(
-                                  sectionsSpace: 4,
-                                  centerSpaceRadius: 50,
-                                  sections: breakdown.entries.toList().asMap().entries.map((entry) {
-                                    final index = entry.key;
-                                    final amount = entry.value.value;
-                                    
-                                    final percentage = totalMonthly > 0 ? (amount / totalMonthly * 100) : 0;
-                                    return PieChartSectionData(
-                                      color: CategoryUtils.getColor(entry.value.key),
-                                      value: amount,
-                                      title: '${percentage.toStringAsFixed(1)}%',
-                                      titleStyle: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white),
-                                      radius: 25 + (index == 0 ? 5.0 : 0.0), 
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(tr('Total', 'Total'), style: const TextStyle(color: Colors.white54, fontSize: 9)),
-                                  Text(
-                                    currencyFormat.format(totalMonthly),
-                                    style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 32),
-                      Expanded(
-                        flex: 2,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: breakdown.entries.take(4).toList().asMap().entries.map((entry) {
-                            final name = entry.value.key;
-                            final amount = entry.value.value;
-                            final percentage = totalMonthly > 0 ? (amount / totalMonthly * 100) : 0;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(margin: const EdgeInsets.only(top: 4), width: 8, height: 8, decoration: BoxDecoration(color: CategoryUtils.getColor(name), shape: BoxShape.circle)),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(name, style: TextStyle(color: textColor, fontSize: 10, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-                                        const SizedBox(height: 2),
-                                        Text('${percentage.toStringAsFixed(1)}% • ${currencyFormat.format(amount)}', style: TextStyle(color: subTextColor, fontSize: 9), overflow: TextOverflow.ellipsis),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                      const Icon(Icons.arrow_upward_rounded, color: Colors.green, size: 14),
+                      Text(
+                        currencyFormat.format(totalMonthly * 0.8), // Mock previous month
+                        style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)
                       ),
                     ],
                   ),
                 ),
-              ),
-
-            if (breakdown.isEmpty)
-              FadeInSlide(delay: Duration.zero,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: cardBg, 
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1),
-                  ),
-                  child: Center(child: Text(tr('Belum ada data pengeluaran.', 'No expense data yet.'), style: TextStyle(color: subTextColor))),
-                ),
-              ),
-
-            ...breakdown.entries.toList().asMap().entries.map((entry) {
-              final index = entry.key;
-              final category = entry.value.key;
-              final amount = entry.value.value;
-              final percentage = totalMonthly > 0 ? (amount / totalMonthly) : 0.0;
-
-              return FadeInSlide(
-                delay: Duration(milliseconds: 500 + (index * 150)),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft, end: Alignment.bottomRight,
-                      colors: theme == 'Putih' ? [Colors.white, Colors.grey.shade50] : [cardBg, cardBg.withValues(alpha: 0.7)],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(category, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                          Text(currencyFormat.format(amount), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 12)),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: LinearProgressIndicator(
-                          value: percentage,
-                          backgroundColor: theme == 'Putih' ? Colors.grey.shade200 : Colors.white.withValues(alpha: 0.05),
-                          color: const Color(0xFF0D9488),
-                          minHeight: 12, 
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Text('${(percentage * 100).toStringAsFixed(1)}% ${tr('dari total', 'of total')}', style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
-
-            const SizedBox(height: 16),
-            FadeInSlide(delay: Duration.zero,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: theme == 'Putih' ? const Color(0xFF0D9488).withValues(alpha: 0.05) : const Color(0xFF0D9488).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.trending_up_rounded, color: Colors.white, size: 32),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(tr('Proyeksi Bulan Depan', 'Next Month Projection'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                          const SizedBox(height: 8),
-                          Text(
-                            activeSubs.isEmpty 
-                              ? tr('Tambahkan tagihan untuk melihat proyeksi.', 'Add bills to see projections.') 
-                              : tr('Jika semua langganan ini diperpanjang, kamu harus menyiapkan ${currencyFormat.format(totalMonthly)} lagi bulan depan. Yuk, evaluasi aplikasi yang jarang dipakai!', 'If all these subscriptions renew, you must prepare ${currencyFormat.format(totalMonthly)} next month. Let\'s evaluate unused apps!'),
-                            style: TextStyle(color: textColor, fontSize: 11, height: 1.5),
-                          ),
-                        ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(tr('Tren Pengeluaran', 'Spending Trend'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.w500)),
+            
+            const SizedBox(height: 24),
+            
+            // Line Chart (Mock Data based on total)
+            SizedBox(
+              height: 150,
+              child: LineChart(
+                LineChartData(
+                  gridData: const FlGridData(show: false),
+                  titlesData: const FlTitlesData(show: false),
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: [
+                        const FlSpot(0, 10),
+                        const FlSpot(1, 30),
+                        const FlSpot(2, 20),
+                        const FlSpot(3, 50),
+                        const FlSpot(4, 40),
+                        FlSpot(5, totalMonthly > 0 ? 80 : 0), // Use total as end point
+                      ],
+                      isCurved: true,
+                      color: const Color(0xFF2563EB),
+                      barWidth: 3,
+                      isStrokeCapRound: true,
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                       ),
                     ),
                   ],
@@ -1957,45 +1401,55 @@ class _StatsView extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(height: 80), 
+            const SizedBox(height: 32),
+            
+            // Recent by Category
+            Text(
+              tr('Kategori Pengeluaran', 'Recent by Category'),
+              style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)
+            ),
+            const SizedBox(height: 16),
+            
+            if (breakdown.isEmpty)
+              Center(child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(tr('Belum ada data', 'No data yet'), style: TextStyle(color: subTextColor)),
+              )),
+              
+            ...breakdown.entries.map((entry) {
+              final category = entry.key;
+              final amount = entry.value;
+              final percentage = totalMonthly > 0 ? (amount / totalMonthly) : 0.0;
+              
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 20),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Text(category, style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w600)),
+                        const Spacer(),
+                        Text(currencyFormat.format(amount), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: percentage,
+                        backgroundColor: Colors.grey.shade200,
+                        color: const Color(0xFF2563EB),
+                        minHeight: 6,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+            
+            const SizedBox(height: 80),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryCard(String title, String value, IconData icon, Color iconColor, Color cardBg, Color textColor, Color subTextColor, String theme) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: theme == 'Putih' 
-            ? [Colors.white, Colors.grey.shade50] 
-            : [cardBg, cardBg.withValues(alpha: 0.8)],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme == 'Putih' ? Colors.grey.shade200 : Colors.white10, width: 1.5),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 15, offset: const Offset(0, 8))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: iconColor.withValues(alpha: 0.15), shape: BoxShape.circle),
-                child: Icon(icon, color: iconColor, size: 20),
-              ),
-              const SizedBox(width: 8),
-              Expanded(child: Text(title, style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.bold))),
-            ],
-          ),
-          const SizedBox(height: 16),
-          FittedBox(fit: BoxFit.scaleDown, child: Text(value, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900))),
-        ],
       ),
     );
   }
@@ -2058,9 +1512,8 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showCurrencySelector() {
-    final isLight = widget.theme == 'Putih';
-    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
-    final textColor = isLight ? Colors.black87 : Colors.white;
+    final dialogBg = Colors.white;
+    final textColor = const Color(0xFF1E293B);
 
     showModalBottomSheet(
       context: context,
@@ -2075,7 +1528,7 @@ class _SettingsViewState extends State<_SettingsView> {
               children: CurrencyUtils.data.keys.map((code) {
                 return ListTile(
                   title: Text('${CurrencyUtils.data[code]!['name']} ($code)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                  trailing: currencyNotifier.value == code ? const Icon(Icons.check_circle_rounded, color: Color(0xFF0D9488)) : null,
+                  trailing: currencyNotifier.value == code ? const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB)) : null,
                   onTap: () async {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setString('app_currency', code);
@@ -2093,17 +1546,16 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showLanguageSelector() {
-    final isLight = widget.theme == 'Putih';
-    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
-    final textColor = isLight ? Colors.black87 : Colors.white;
-    final unselectedRadioColor = isLight ? Colors.black54 : Colors.white54; 
+    final dialogBg = Colors.white;
+    final textColor = const Color(0xFF1E293B);
+    final unselectedRadioColor = Colors.black54; 
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.language, color: Colors.white), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+        title: Row(children: [const Icon(Icons.language, color: Color(0xFF1E293B)), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
         
         content: Theme(
           data: Theme.of(context).copyWith(
@@ -2116,7 +1568,7 @@ class _SettingsViewState extends State<_SettingsView> {
                 title: Text('English', style: TextStyle(color: textColor)),
                 value: 'EN',
                 groupValue: languageNotifier.value, 
-                activeColor: const Color(0xFF0D9488),
+                activeColor: const Color(0xFF2563EB),
                 onChanged: (val) async {
                   languageNotifier.value = val!; 
                   final prefs = await SharedPreferences.getInstance();
@@ -2128,7 +1580,7 @@ class _SettingsViewState extends State<_SettingsView> {
                 title: Text('Bahasa Indonesia', style: TextStyle(color: textColor)),
                 value: 'ID',
                 groupValue: languageNotifier.value, 
-                activeColor: const Color(0xFF0D9488),
+                activeColor: const Color(0xFF2563EB),
                 onChanged: (val) async {
                   languageNotifier.value = val!; 
                   final prefs = await SharedPreferences.getInstance();
@@ -2144,10 +1596,9 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showPrivacySheet() {
-    final isLight = widget.theme == 'Putih';
-    final sheetBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF0B101E) : const Color(0xFF121214));
-    final textColor = isLight ? Colors.black87 : Colors.white;
-    final subTextColor = isLight ? Colors.black54 : Colors.white70;
+    final sheetBg = Colors.white;
+    final textColor = const Color(0xFF1E293B);
+    final subTextColor = Colors.black54;
 
     showModalBottomSheet(
       context: context,
@@ -2176,7 +1627,7 @@ class _SettingsViewState extends State<_SettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
                         const SizedBox(height: 8),
                         Text(tr('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTracker, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
@@ -2207,7 +1658,7 @@ class _SettingsViewState extends State<_SettingsView> {
                                     context: context,
                                     builder: (confirmCtx) => AlertDialog(
                                       backgroundColor: sheetBg,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
                                       title: Text(tr('Reboot Sistem?', 'System Reboot?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                                       content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?'), style: TextStyle(color: subTextColor)),
                                       actions: [
@@ -2269,10 +1720,10 @@ class _SettingsViewState extends State<_SettingsView> {
             width: 28, height: 28,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: const Color(0xFF0D9488).withOpacity(0.15),
+              color: const Color(0xFF2563EB).withOpacity(0.15),
               shape: BoxShape.circle,
             ),
-            child: Text(number, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+            child: Text(number, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 11)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -2292,21 +1743,11 @@ class _SettingsViewState extends State<_SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    Color cardBg = const Color(0xFF1A1A1C);
-    Color textColor = Colors.white;
-    Color subTextColor = Colors.white54;
-    
-    if (widget.theme == 'Putih') {
-      cardBg = Colors.white;
-      textColor = Colors.black87;
-      subTextColor = Colors.black54;
-    } else if (widget.theme == 'Biru') {
-      cardBg = const Color(0xFF1A2235); 
-    }
+    Color cardBg = Colors.white;
+    Color textColor = const Color(0xFF1E293B);
+    Color subTextColor = Colors.black54;
 
-    Color scaffoldBg = const Color(0xFF0B101E); 
-    if (widget.theme == 'Putih') scaffoldBg = const Color(0xFFF1F5F9);
-    else if (widget.theme == 'Biru') scaffoldBg = const Color(0xFF0F172A);
+    Color scaffoldBg = const Color(0xFFF5F7FA);
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -2321,20 +1762,13 @@ class _SettingsViewState extends State<_SettingsView> {
 
             FadeInSlide(delay: Duration.zero,
               child: Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: cardBg, 
-                  borderRadius: BorderRadius.circular(16), 
-                  border: Border.all(color: widget.theme == 'Putih' ? Colors.grey.shade300 : Colors.transparent),
-                  boxShadow: widget.theme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
-                ),
+                color: Colors.white,
                 child: SwitchListTile(
-                  activeColor: Colors.black,
-                  activeTrackColor: Colors.white,
+                  activeColor: Colors.white,
+                  activeTrackColor: const Color(0xFF2563EB),
                   inactiveThumbColor: Colors.grey,
-                  inactiveTrackColor: Colors.black26,
+                  inactiveTrackColor: Colors.grey.shade300,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  secondary: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.notifications_active_rounded, color: Colors.white, size: 20)),
                   title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
                   subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 11)),
                   value: _notifEnabled,
@@ -2412,7 +1846,7 @@ class _SettingsViewState extends State<_SettingsView> {
                   applicationName: 'SubTracker',
                   applicationVersion: '1.0.0',
                   applicationLegalese: 'Developed carefully.\n© 2026 Copyright.',
-                  applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF0D9488), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.black)),
+                  applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.white)),
                 ),
                 cardBg, textColor, subTextColor, widget.theme
               ),
@@ -2444,17 +1878,16 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showRingtoneSelector() {
-    final isLight = widget.theme == 'Putih';
-    final dialogBg = isLight ? Colors.white : (widget.theme == 'Biru' ? const Color(0xFF151B2B) : const Color(0xFF1A1A1C));
-    final textColor = isLight ? Colors.black87 : Colors.white;
-    final unselectedRadioColor = isLight ? Colors.black54 : Colors.white54; 
+    final dialogBg = Colors.white;
+    final textColor = const Color(0xFF1E293B);
+    final unselectedRadioColor = Colors.black54; 
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isLight ? Colors.grey.shade300 : Colors.white10)),
-        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Colors.white), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 12))]),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E293B)), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 12))]),
         contentPadding: const EdgeInsets.symmetric(vertical: 20),
         content: Theme(
           data: Theme.of(context).copyWith(unselectedWidgetColor: unselectedRadioColor),
@@ -2469,14 +1902,14 @@ class _SettingsViewState extends State<_SettingsView> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
+                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 11)),
                       ),
                       ...['ringtone_default', 'ringtone_chime', 'ringtone_alert', 'ringtone_synth'].map((r) {
                         return RadioListTile<String>(
                           title: Text(r.replaceAll('ringtone_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 12)),
                           value: r,
                           groupValue: ringtoneNotifier.value, 
-                          activeColor: const Color(0xFF0D9488),
+                          activeColor: const Color(0xFF2563EB),
                           dense: true,
                           onChanged: (val) async {
                             ringtoneNotifier.value = val!; 
@@ -2523,7 +1956,7 @@ class _SettingsViewState extends State<_SettingsView> {
               FlutterLocalNotificationsPlugin().cancel(8888);
               Navigator.pop(ctx);
             },
-            child: const Text('Tutup', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+            child: const Text('Tutup', style: TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold))
           )
         ],
       )
@@ -2533,23 +1966,16 @@ class _SettingsViewState extends State<_SettingsView> {
   Widget _buildGroupHeader(IconData icon, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 8, top: 16),
-      child: Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+      child: Text(title, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 
   Widget _buildSettingTile(IconData icon, String title, String subtitle, VoidCallback onTap, Color cardBg, Color textColor, Color subTextColor, String currentTheme) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: cardBg, 
-        borderRadius: BorderRadius.circular(16), 
-        border: Border.all(color: currentTheme == 'Putih' ? Colors.grey.shade300 : Colors.transparent),
-        boxShadow: currentTheme == 'Putih' ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 5))] : null,
-      ),
+      color: Colors.white,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        leading: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(8)), child: Icon(icon, color: (title.contains('SubTracker') || title.contains('Privasi') || title.contains('Syarat')) ? const Color(0xFF0D9488) : Colors.white, size: 20)),
-        title: Text(title, style: TextStyle(color: (title.contains('SubTracker') || title.contains('Privasi') || title.contains('Syarat')) ? const Color(0xFF0D9488) : textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+        title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
         subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 11))),
         trailing: Icon(Icons.chevron_right_rounded, color: subTextColor),
         onTap: onTap, 
@@ -2610,7 +2036,7 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
         double offset = sin(t + (index * 1.5)) * 4.0; 
         return Transform.translate(
           offset: Offset(0, offset),
-          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 12, height: 12, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 12, height: 12, decoration: const BoxDecoration(color: Color(0xFF1E293B), shape: BoxShape.circle)),
         );
       },
     );

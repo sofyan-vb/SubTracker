@@ -39,10 +39,20 @@ class MyApp extends StatelessWidget {
       title: 'SubTracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF09090B),
-        appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF09090B), elevation: 0),
-        colorScheme: const ColorScheme.dark(primary: Color(0xFF0D9488), secondary: Color(0xFF0D9488)),
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFF5F7FA), 
+          elevation: 0,
+          iconTheme: IconThemeData(color: Color(0xFF1E293B)),
+          titleTextStyle: TextStyle(color: Color(0xFF1E293B), fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        colorScheme: const ColorScheme.light(
+          primary: Color(0xFF2563EB), 
+          secondary: Color(0xFF2563EB),
+          surface: Colors.white,
+          onSurface: Color(0xFF1E293B),
+        ),
         useMaterial3: true,
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {
@@ -105,64 +115,70 @@ class _GateKeeperState extends State<GateKeeper> {
   Widget build(BuildContext context) {
     if (_showLanguageSelect) {
       return Scaffold(
-        backgroundColor: const Color(0xFF09090B),
+        backgroundColor: const Color(0xFFF5F7FA),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(28.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.language_rounded, size: 80, color: Color(0xFF0D9488)),
+                const Icon(Icons.language_rounded, size: 80, color: Color(0xFF2563EB)),
                 const SizedBox(height: 24),
-                const Text('Choose Language', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white)),
-                const Text('Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white54)),
-                const SizedBox(height: 40),
-                
-                SizedBox(
-                  width: double.infinity,
-                  height: 65,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1A1A1C),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      side: const BorderSide(color: Color(0xFF0D9488), width: 1.5),
-                      elevation: 0,
+                const Text('Choose Language', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
+                const Text('Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54)),
+                const SizedBox(height: 48),
+
+                InkWell(
+                  onTap: () async {
+                    languageNotifier.value = 'EN';
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('app_lang', 'EN');
+                    if (mounted) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const TermsScreen()),
+                      );
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 5))],
+                      border: Border.all(color: Colors.black12, width: 1.5),
                     ),
-                    onPressed: () async {
-                      languageNotifier.value = 'EN';
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setString('app_lang', 'EN');
-                      if (mounted) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const TermsScreen()),
-                        );
-                      }
-                    },
-                    child: const Text('🇬🇧   English', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                    child: const Center(
+                      child: Text('🇬🇧   English', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 65,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1A1A1C),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      side: const BorderSide(color: Color(0xFF0D9488), width: 1.5),
-                      elevation: 0,
+                InkWell(
+                  onTap: () async {
+                    languageNotifier.value = 'ID';
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('app_lang', 'ID');
+                    if (mounted) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const TermsScreen()),
+                      );
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 5))],
+                      border: Border.all(color: Colors.black12, width: 1.5),
                     ),
-                    onPressed: () async {
-                      languageNotifier.value = 'ID';
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setString('app_lang', 'ID');
-                      if (mounted) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => const TermsScreen()),
-                        );
-                      }
-                    },
-                    child: const Text('🇮🇩   Bahasa Indonesia', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                    child: const Center(
+                      child: Text('🇮🇩   Bahasa Indonesia', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
+                    ),
                   ),
                 ),
               ],
@@ -281,7 +297,7 @@ class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> with Si
               children: [
                 Text(
                   _staticPart,
-                  style: const TextStyle(color: Color(0xFF0D9488), fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 1.5, height: 1.5),
+                  style: const TextStyle(color: Color(0xFF2563EB), fontSize: 42, fontWeight: FontWeight.w900, letterSpacing: 1.5, height: 1.5),
                 ),
               ],
             ),

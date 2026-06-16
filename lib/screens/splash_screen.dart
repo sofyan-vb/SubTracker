@@ -161,7 +161,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: const Color(0xFF0B101E),
+          backgroundColor: const Color(0xFFF5F7FA),
           resizeToAvoidBottomInset: true, 
           body: Stack(
             children: [
@@ -222,7 +222,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 alignment: Alignment.centerLeft,
                                 child: showTopExitButton
                                     ? IconButton(
-                                        icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                                        icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B), size: 28),
                                         onPressed: () {
                                           if (_state == SplashState.form) {
                                             setState(() {
@@ -250,58 +250,58 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
                                   child: Column(
                                     children: [
-                                      Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
+                                      Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
                                       const SizedBox(height: 8),
-                                      Text(tr('Masukkan nama pengguna', 'Enter username'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                      Text(tr('Masukkan nama pengguna', 'Enter username'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontSize: 14)),
                                       const SizedBox(height: 32),
                                       
                                       TextField(
                                         controller: _nameCtrl,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         decoration: InputDecoration(
                                           labelText: tr('Nama Pengguna', 'Username'),
-                                          labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                          prefixIcon: const Icon(Icons.person, color: Colors.white, size: 22),
-                                          filled: true, fillColor: const Color(0xFF151B2B).withOpacity(0.5),
+                                          labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+                                          prefixIcon: const Icon(Icons.person, color: Color(0xFF1E293B), size: 22),
+                                          filled: true, fillColor: Colors.grey[100],
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
                                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
                                       TextField(
                                         controller: _emailCtrl,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         keyboardType: TextInputType.emailAddress,
                                         decoration: InputDecoration(
                                           labelText: tr('Alamat Email', 'Email Address'),
-                                          labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                          prefixIcon: const Icon(Icons.email, color: Colors.white, size: 22),
-                                          filled: true, fillColor: const Color(0xFF151B2B).withValues(alpha: 0.5),
+                                          labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+                                          prefixIcon: const Icon(Icons.email, color: Color(0xFF1E293B), size: 22),
+                                          filled: true, fillColor: Colors.grey[100],
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
                                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
                                         ),
                                       ),
                                       const SizedBox(height: 16),
                                       TextField(
                                         controller: _budgetCtrl,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         keyboardType: TextInputType.number,
                                         inputFormatters: [FilteringTextInputFormatter.digitsOnly, _BudgetThousandsFormatter()],
                                         decoration: InputDecoration(
                                           labelText: tr('Target Anggaran Per Bulan', 'Monthly Budget Target'),
-                                          labelStyle: const TextStyle(color: Colors.white54, fontSize: 14),
-                                          prefixIcon: const Icon(Icons.account_balance_wallet, color: Colors.white, size: 22),
+                                          labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+                                          prefixIcon: const Icon(Icons.account_balance_wallet, color: Color(0xFF1E293B), size: 22),
                                           prefixText: 'Rp ',
-                                          prefixStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                                          filled: true, fillColor: const Color(0xFF151B2B).withValues(alpha: 0.5),
+                                          prefixStyle: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16),
+                                          filled: true, fillColor: Colors.grey[100],
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
                                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5)),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
                                         ),
                                       ),
                                     ],
@@ -313,9 +313,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
                                   child: Column(
                                     children: [
-                                      Text(tr('Mulai Perjalanan', 'Start Your Journey'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white)),
+                                      Text(tr('Mulai Perjalanan', 'Start Your Journey'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
                                       const SizedBox(height: 8),
-                                      Text(tr('Pilih bagaimana Anda ingin memulai', 'Choose how you want to start'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                                      Text(tr('Pilih bagaimana Anda ingin memulai', 'Choose how you want to start'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontSize: 14)),
                                       const SizedBox(height: 48),
                                       
                                       SizedBox(
@@ -324,12 +324,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           icon: const Icon(Icons.person_add_rounded, size: 24),
                                           label: Text(tr('PENGGUNA BARU', 'NEW USER'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFF0D9488),
+                                            backgroundColor: const Color(0xFF2563EB),
                                             foregroundColor: Colors.white,
                                             padding: const EdgeInsets.symmetric(vertical: 14),
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                             elevation: 8,
-                                            shadowColor: const Color(0xFF0D9488).withOpacity(0.5)
+                                            shadowColor: const Color(0xFF2563EB).withOpacity(0.5)
                                           ),
                                           onPressed: () {
                                             setState(() => _state = SplashState.form);
@@ -343,10 +343,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           icon: const Icon(Icons.restore_rounded, size: 24),
                                           label: Text(tr('PULIHKAN DATA', 'RESTORE DATA'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.white.withOpacity(0.1),
-                                            foregroundColor: Colors.white,
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: const Color(0xFF1E293B),
                                             padding: const EdgeInsets.symmetric(vertical: 14),
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.white.withOpacity(0.2))),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Color(0xFF2563EB))),
                                             elevation: 0,
                                           ),
                                           onPressed: () async {
@@ -410,7 +410,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                     height: 8,
                                     width: _onboardingPageIndex == index ? 24 : 8,
                                     decoration: BoxDecoration(
-                                      color: _onboardingPageIndex == index ? const Color(0xFF0D9488) : Colors.white24,
+                                      color: _onboardingPageIndex == index ? const Color(0xFF2563EB) : Colors.white24,
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   )),
@@ -431,7 +431,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           onPressed: () {
                                             _pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
                                           },
-                                          child: Text(tr('KEMBALI', 'BACK'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white70)),
+                                          child: Text(tr('KEMBALI', 'BACK'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
                                         ),
                                         TextButton(
                                           onPressed: () {
@@ -444,7 +444,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                              Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
                                               const SizedBox(width: 8),
                                               AnimatedBuilder(
                                                 animation: _arrowSlide,
@@ -476,15 +476,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                       ? Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text(tr('Memuat', 'Loading'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                            Text(tr('Memuat', 'Loading'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
                                             const SizedBox(width: 8),
-                                            const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0)),
+                                            const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Color(0xFF1E293B), dotSize: 5.0)),
                                           ],
                                         )
                                       : Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0)),
+                                            Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
                                             const SizedBox(width: 8),
                                             AnimatedBuilder(
                                               animation: _arrowSlide,
@@ -533,9 +533,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             ),
           ),
           const SizedBox(height: 20),
-          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
+          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
           const SizedBox(height: 8),
-          Text(desc, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white54, fontSize: 13, height: 1.5)),
+          Text(desc, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontSize: 13, height: 1.5)),
         ],
       ),
     );
@@ -607,7 +607,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                         Text(
                           tr('Koneksi Gagal', 'Connection Failed'),
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1E293B),
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                           ),
@@ -620,7 +620,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                           ),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: Colors.black54,
                             fontSize: 14,
                             height: 1.4,
                           ),
@@ -702,7 +702,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
       valueListenable: languageNotifier,
       builder: (context, lang, child) {
         return Scaffold(
-          backgroundColor: const Color(0xFF0B101E),
+          backgroundColor: const Color(0xFFF5F7FA),
           body: Stack(
             alignment: Alignment.center,
             children: [
@@ -717,7 +717,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
              
               Positioned.fill(
                 child: Container(
-                  color: const Color(0xFF0B101E).withOpacity(0.90),
+                  color: const Color(0xFFF5F7FA).withOpacity(0.90),
                 ),
               ),
 
@@ -738,7 +738,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                     Text(
                                       tr('Selamat Datang Kembali', 'Welcome Back'),
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: Color(0xFF1E293B),
                                         fontSize: 34,
                                         fontWeight: FontWeight.w900,
                                         letterSpacing: 0.5,
@@ -749,12 +749,12 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       scale: _logoScale,
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white24, width: 2.5)),
+                                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.black12, width: 2.5)),
                                         child: CircleAvatar(
                                           radius: 55,
                                           backgroundColor: Colors.white10,
                                           backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
-                                          child: _base64Image == null ? const Icon(Icons.account_circle, size: 80, color: Colors.white54) : null,
+                                          child: _base64Image == null ? const Icon(Icons.account_circle, size: 80, color: Colors.black54) : null,
                                         ),
                                       ),
                                     ),
@@ -763,7 +763,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       widget.userName.isEmpty ? 'SubTracker' : widget.userName,
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: Color(0xFF1E293B),
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 0.5,
@@ -806,12 +806,12 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                   children: [
                                     Text(
                                       tr('Memuat', 'Loading'),
-                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B), letterSpacing: 1.2),
                                     ),
                                     const SizedBox(width: 8),
                                     const Padding(
                                       padding: EdgeInsets.only(top: 4.0),
-                                      child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0),
+                                      child: WavyDotsProgressIndicator(color: Color(0xFF1E293B), dotSize: 5.0),
                                     ),
                                   ],
                                 )
@@ -820,7 +820,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                   children: [
                                     const Text(
                                       'MASUK',
-                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
+                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B), letterSpacing: 1.2),
                                     ),
                                     const SizedBox(width: 8),
                                     AnimatedBuilder(
@@ -936,7 +936,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF0B101E),
+      color: const Color(0xFFF5F7FA),
       width: double.infinity,
       child: Stack(
         alignment: Alignment.center,
@@ -945,7 +945,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
             top: MediaQuery.of(context).size.height * 0.35,
             child: Container(
               width: 250, height: 250,
-              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF0D9488).withOpacity(0.06), blurRadius: 100, spreadRadius: 50)]),
+              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.06), blurRadius: 100, spreadRadius: 50)]),
             ),
           ),
           
@@ -958,7 +958,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                 delay: const Duration(milliseconds: 500),
                 speed: const Duration(milliseconds: 100),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: Colors.white70, letterSpacing: 1.5),
+                style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: Colors.black54, letterSpacing: 1.5),
               ),
               const SizedBox(height: 8),
 
@@ -972,7 +972,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                   curve: Curves.easeOutBack,
                   child: ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
-                      colors: [Color(0xFF64FFDA), Color(0xFF14B8A6), Color(0xFF0F766E)],
+                      colors: [Color(0xFF2563EB), Color(0xFF1D4ED8), Color(0xFF1E40AF)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ).createShader(bounds),
@@ -1103,7 +1103,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   image: DecorationImage(image: AssetImage(path), fit: BoxFit.cover, alignment: alignment),
-                  border: Border.all(color: Colors.white24, width: 2),
+                  border: Border.all(color: Colors.black12, width: 2),
                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.8), blurRadius: 20, offset: const Offset(0, 10))],
                 ),
               ),
@@ -1190,7 +1190,7 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
         double offset = sin(t + (index * 1.5)) * 4.0; 
         return Transform.translate(
           offset: Offset(0, offset),
-          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 8, height: 8, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+          child: Container(margin: const EdgeInsets.symmetric(horizontal: 4), width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF1E293B), shape: BoxShape.circle)),
         );
       },
     );
@@ -1215,4 +1215,4 @@ class _BudgetThousandsFormatter extends TextInputFormatter {
       selection: TextSelection.collapsed(offset: newText.length),
     );
   }
-}
+}

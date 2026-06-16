@@ -27,7 +27,7 @@ class HistoryScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF1E3A8A),
         elevation: 0,
         centerTitle: true,
         title: ValueListenableBuilder<String>(
@@ -35,12 +35,12 @@ class HistoryScreen extends StatelessWidget {
           builder: (context, lang, child) {
             return Text(
               tr('Riwayat Tagihan', 'Billing History'),
-              style: TextStyle(color: textColor, fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: -0.5),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: -0.5),
             );
           }
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -54,8 +54,8 @@ class HistoryScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 1),
+                  color: Colors.black.withValues(alpha: 0.05),
+                  border: Border.all(color: Colors.black12, width: 1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -63,16 +63,16 @@ class HistoryScreen extends StatelessWidget {
                   children: [
                     Icon(
                       provider.categoryFilter == 'Semua Layanan' ? Icons.apps_rounded : CategoryUtils.getIcon(provider.categoryFilter), 
-                      color: Colors.white, 
+                      color: Color(0xFF1E293B), 
                       size: 16
                     ),
                     const SizedBox(width: 2),
-                    const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
+                    const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1E293B), size: 14),
                     if (provider.categoryFilter != 'Semua Layanan') ...[
                       const SizedBox(width: 6),
                       Text(
                         provider.categoryFilter,
-                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
+                        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 12, fontWeight: FontWeight.bold)
                       )
                     ],
                   ],

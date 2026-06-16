@@ -40,32 +40,26 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    final currentTheme = themeNotifier.value;
-    Color surfaceColor = const Color(0xFF121214);
-    Color onSurfaceColor = Colors.white;
-    if (currentTheme == 'Putih') { surfaceColor = Colors.white; onSurfaceColor = Colors.black87; } 
-    else if (currentTheme == 'Biru') { surfaceColor = const Color(0xFF151B2B); }
+    Color surfaceColor = Colors.white;
+    Color onSurfaceColor = const Color(0xFF1E293B);
 
     final DateTime? picked = await showDatePicker(
       context: context, initialDate: _selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2101),
       builder: (context, child) {
-        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.dark(primary: const Color(0xFF0D9488), onPrimary: Colors.white, surface: surfaceColor, onSurface: onSurfaceColor)), child: child!);
+        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.light(primary: const Color(0xFF2563EB), onPrimary: Colors.white, surface: surfaceColor, onSurface: onSurfaceColor)), child: child!);
       },
     );
     if (picked != null) setState(() => _selectedDate = picked);
   }
 
   Future<void> _selectTime(BuildContext context) async {
-    final currentTheme = themeNotifier.value;
-    Color surfaceColor = const Color(0xFF1A1A1C);
-    Color onSurfaceColor = Colors.white;
-    if (currentTheme == 'Putih') { surfaceColor = Colors.white; onSurfaceColor = Colors.black87; } 
-    else if (currentTheme == 'Biru') { surfaceColor = const Color(0xFF151B2B); }
+    Color surfaceColor = Colors.white;
+    Color onSurfaceColor = const Color(0xFF1E293B);
 
     final TimeOfDay? picked = await showGeneralDialog<TimeOfDay>(
       context: context, barrierDismissible: true, barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel, barrierColor: Colors.black87, transitionDuration: const Duration(milliseconds: 350),
       pageBuilder: (context, anim, secAnim) {
-        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.dark(primary: const Color(0xFF0D9488), onPrimary: Colors.white, surface: surfaceColor, onSurface: onSurfaceColor)), child: TimePickerDialog(initialTime: _selectedTime));
+        return Theme(data: Theme.of(context).copyWith(colorScheme: ColorScheme.light(primary: const Color(0xFF2563EB), onPrimary: Colors.white, surface: surfaceColor, onSurface: onSurfaceColor)), child: TimePickerDialog(initialTime: _selectedTime));
       },
       transitionBuilder: (context, anim, secAnim, child) {
         return FadeTransition(opacity: anim, child: ScaleTransition(scale: CurvedAnimation(parent: anim, curve: Curves.easeOutBack), child: child));
@@ -102,15 +96,15 @@ class _AddScreenState extends State<AddScreen> {
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
       builder: (context, _, child) {
-        const currentTheme = 'Biru';
-        Color scaffoldBg = const Color(0xFF0B101E); Color cardBg = const Color(0xFF151B2B); Color textColor = Colors.white; Color subTextColor = Colors.white; Color hintColor = Colors.white54; Color iconColor = Colors.white;
+        const currentTheme = 'Light';
+        Color scaffoldBg = const Color(0xFFF5F7FA); Color cardBg = Colors.white; Color textColor = const Color(0xFF1E293B); Color subTextColor = Colors.black54; Color hintColor = Colors.black38; Color iconColor = const Color(0xFF1E293B); Color appBarBg = const Color(0xFF1E3A8A);
 
         return Scaffold(
           backgroundColor: scaffoldBg, 
           appBar: AppBar(
-            backgroundColor: scaffoldBg, elevation: 0,
-            leading: IconButton(icon: Icon(Icons.arrow_back, color: iconColor), onPressed: () => Navigator.pop(context)),
-            title: Text(tr('Tambah Langganan', 'Add Subscription'), style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: textColor)),
+            backgroundColor: appBarBg, elevation: 0,
+            leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
+            title: Text(tr('Tambah Langganan', 'Add Subscription'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
           ),
           body: SafeArea(
             child: Column(
@@ -152,7 +146,7 @@ class _AddScreenState extends State<AddScreen> {
                 Container(
                   padding: const EdgeInsets.all(12), width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2563EB), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
                     onPressed: () async { 
                       if (_selectedCategory.isEmpty) {
                         ToastUtils.show(context, tr('Pilih kategori terlebih dahulu', 'Select a category first'), icon: Icons.warning_rounded, iconColor: Colors.redAccent);
@@ -224,14 +218,14 @@ class _AddScreenState extends State<AddScreen> {
       decoration: BoxDecoration(
         color: cardBg.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, color: const Color(0xFF0D9488), size: 18),
+              Icon(Icons.auto_awesome, color: const Color(0xFF2563EB), size: 18),
               const SizedBox(width: 8),
               Text(tr('Pilih Pintasan Kategori', 'Select Category Shortcut'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontWeight: FontWeight.bold, fontSize: 11)),
             ],
@@ -267,9 +261,9 @@ class _AddScreenState extends State<AddScreen> {
                     width: 70,
                     margin: const EdgeInsets.only(right: 14),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF0D9488) : cardBg,
+                      color: isSelected ? const Color(0xFF2563EB) : cardBg,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: isSelected ? Colors.transparent : Colors.white10, width: 1.5),
+                      border: Border.all(color: isSelected ? Colors.transparent : Colors.black12, width: 1.5),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -300,11 +294,11 @@ class _AddScreenState extends State<AddScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0D9488).withValues(alpha: 0.15),
-                      border: Border.all(color: Colors.white10, width: 1.5),
+                      color: const Color(0xFF2563EB).withValues(alpha: 0.15),
+                      border: Border.all(color: Colors.black12, width: 1.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(appName, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Text(appName, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
                 );
               }).toList(),
@@ -316,21 +310,32 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Widget _buildLabel(String text, Color color) { return Padding(padding: const EdgeInsets.only(bottom: 6, left: 4, top: 12), child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold))); }
-  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { return Container(padding: const EdgeInsets.symmetric(horizontal: 4), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: TextField(controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), inputFormatters: formatters, decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(12)))); }
+  Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { 
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4), 
+      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
+      child: TextField(
+        controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, 
+        style: TextStyle(color: textColor, fontWeight: FontWeight.bold), 
+        inputFormatters: formatters, 
+        decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(16))
+      )
+    ); 
+  }
   Widget _buildDropdown(String? value, List<String> items, Function(String?) onChanged, Color bg, Color textColor, {bool disabled = false}) { 
     return IgnorePointer(
       ignoring: disabled,
       child: Opacity(
         opacity: disabled ? 0.4 : 1.0,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12), 
-          decoration: BoxDecoration(color: disabled ? bg.withValues(alpha: 0.5) : bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), 
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), 
+          decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: (value == null || value.isEmpty) ? null : value, 
               hint: Text(tr('Pilih', 'Select'), style: TextStyle(color: textColor.withValues(alpha: 0.5))),
               isExpanded: true, 
-              dropdownColor: bg, 
+              dropdownColor: Colors.white, 
               style: TextStyle(color: textColor, fontWeight: FontWeight.bold), 
               items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(), 
               onChanged: onChanged
@@ -340,8 +345,14 @@ class _AddScreenState extends State<AddScreen> {
       )
     ); 
   }
-  Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { return Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8), border: Border.all(color: bg == Colors.white ? Colors.grey.shade300 : Colors.transparent)), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])); }
-  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)), Switch(value: value, onChanged: onChanged, activeColor: Colors.black, activeTrackColor: const Color(0xFF0D9488), inactiveTrackColor: hintColor)]); }
+  Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { 
+    return Container(
+      padding: const EdgeInsets.all(16), 
+      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])
+    ); 
+  }
+  Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)), Switch(value: value, onChanged: onChanged, activeColor: const Color(0xFF2563EB), activeTrackColor: const Color(0xFF93C5FD), inactiveTrackColor: hintColor)]); }
 }
 
 class ThousandsSeparatorInputFormatter extends TextInputFormatter {

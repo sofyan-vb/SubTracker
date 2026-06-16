@@ -57,12 +57,12 @@ class _DetailScreenState extends State<DetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF121214),
+        backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: Text(tr('Apakah kamu yakin? Catatan yang dihapus tidak bisa dikembalikan.', 'Are you sure? Deleted records cannot be recovered.'), style: const TextStyle(color: Colors.white54)),
+        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)),
+        content: Text(tr('Apakah kamu yakin? Catatan yang dihapus tidak bisa dikembalikan.', 'Are you sure? Deleted records cannot be recovered.'), style: const TextStyle(color: Colors.black54)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Colors.white))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Color(0xFF1E293B)))),
           TextButton(
             onPressed: () {
               context.read<SubProvider>().removeSub(currentSub.id);
@@ -79,12 +79,12 @@ class _DetailScreenState extends State<DetailScreen> {
   void _showCheckOptions() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF151B2B), shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: Colors.white, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(leading: const Icon(Icons.update, color: Color(0xFF0D9488)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
-          ListTile(leading: const Icon(Icons.task_alt, color: Colors.white), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
+          ListTile(leading: const Icon(Icons.update, color: Color(0xFF2563EB)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
+          ListTile(leading: const Icon(Icons.task_alt, color: Color(0xFF1E293B)), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
         ],
       ),
     );
@@ -103,28 +103,28 @@ class _DetailScreenState extends State<DetailScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        scrollable: true, backgroundColor: const Color(0xFF151B2B), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        scrollable: true, backgroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(tr('Berapa bulan kamu ingin memperpanjang?', 'How many months to renew?'), style: const TextStyle(color: Colors.white54, fontSize: 14)),
+            Text(tr('Berapa bulan kamu ingin memperpanjang?', 'How many months to renew?'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
             const SizedBox(height: 16),
             TextField(
-              controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold, fontSize: 14), filled: true, fillColor: const Color(0xFF0B101E), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
+              controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: const TextStyle(color: Color(0xFF1E293B), fontSize: 20, fontWeight: FontWeight.bold),
+              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 14), filled: true, fillColor: const Color(0xFFF5F7FA), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Colors.white54))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Colors.black54))),
           TextButton(
             onPressed: () {
               final int? m = int.tryParse(_monthCtrl.text);
               if (m != null && m > 0) { Navigator.pop(ctx); _processRenewal(m); } 
               else { ToastUtils.show(context, tr('Masukkan angka valid', 'Enter valid number'), icon: Icons.error_outline, iconColor: Colors.redAccent); }
             }, 
-            child: Text(tr('Simpan', 'Save'), style: const TextStyle(color: Color(0xFF0D9488), fontWeight: FontWeight.bold))
+            child: Text(tr('Simpan', 'Save'), style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
           ),
         ],
       )
@@ -143,50 +143,165 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
-    final dateFormat = DateFormat('dd MMMM yyyy, HH:mm'); 
+    final dateFormat = DateFormat('MMMM dd, yyyy'); 
+    final textColor = const Color(0xFF1E293B);
+    final subTextColor = Colors.black54;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0B101E),
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B101E), elevation: 0,
+        backgroundColor: const Color(0xFF1E3A8A), elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
         title: Text(tr('Detail Langganan', 'Subscription Detail'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(icon: const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF0D9488), size: 28), onPressed: _showCheckOptions),
-          IconButton(icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 28), onPressed: _deleteSub),
-          const SizedBox(width: 8),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              Container(padding: const EdgeInsets.all(30), decoration: BoxDecoration(color: const Color(0xFF0D9488).withOpacity(0.1), shape: BoxShape.circle), child: Icon(CategoryUtils.getIcon(currentSub.category), size: 60, color: const Color(0xFF0D9488))),
-              const SizedBox(height: 24),
-              Text(currentSub.name, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w900)),
-              const SizedBox(height: 8),
-              Text(currencyFormat.format(currentSub.price), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 40),
-              Container(
-                width: double.infinity, padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: const Color(0xFF151B2B), borderRadius: BorderRadius.circular(12)),
-                child: Column(
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))]
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // App Logo
+                Container(
+                  padding: const EdgeInsets.all(24), 
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100], 
+                    borderRadius: BorderRadius.circular(20),
+                  ), 
+                  child: Icon(CategoryUtils.getIcon(currentSub.category), size: 48, color: const Color(0xFF2563EB))
+                ),
+                const SizedBox(height: 16),
+                Text(currentSub.name, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900)),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(tr('Status Pembayaran:', 'Payment Status:'), style: const TextStyle(color: Colors.white54, fontSize: 14)),
-                    const SizedBox(height: 8),
-                    Text(_getCountdownText(currentSub.dueDate), style: TextStyle(color: currentSub.isFinished ? Colors.white : (currentSub.dueDate.isBefore(DateTime.now()) ? Colors.redAccent : Colors.white), fontSize: 22, fontWeight: FontWeight.bold)),
-                    const Divider(color: Colors.white12, height: 30),
-                    Text(tr('Jadwal Berikutnya:', 'Next Schedule:'), style: const TextStyle(color: Colors.white54, fontSize: 14)),
-                    const SizedBox(height: 8),
-                    Text(dateFormat.format(currentSub.dueDate), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Container(width: 8, height: 8, decoration: BoxDecoration(color: const Color(0xFF2563EB), shape: BoxShape.circle)),
+                    const SizedBox(width: 6),
+                    Text(tr('LANGGANAN AKTIF', 'ACTIVE SUBSCRIPTION'), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                   ],
                 ),
-              ),
-            ],
+                
+                const SizedBox(height: 32),
+                
+                // Current Plan Box
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade200)
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(tr('PAKET SAAT INI', 'CURRENT PLAN'), style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(currentSub.category, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text('${currencyFormat.format(currentSub.price)}/mo', style: const TextStyle(color: Color(0xFF2563EB), fontSize: 16, fontWeight: FontWeight.w900)),
+                        ],
+                      ),
+                      const Divider(height: 24),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_month_outlined, color: subTextColor, size: 16),
+                          const SizedBox(width: 8),
+                          Text(dateFormat.format(currentSub.dueDate), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.w600)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+                
+                // Payment History
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(tr('Riwayat Pembayaran', 'Payment History'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade200)
+                  ),
+                  child: Column(
+                    children: [
+                      _buildHistoryRow(currentSub.name, dateFormat.format(currentSub.dueDate.subtract(const Duration(days: 30))), currencyFormat.format(currentSub.price), textColor, subTextColor),
+                      const Divider(height: 1),
+                      _buildHistoryRow(currentSub.name, dateFormat.format(currentSub.dueDate.subtract(const Duration(days: 60))), currencyFormat.format(currentSub.price), textColor, subTextColor),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Action Buttons
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB), 
+                      foregroundColor: Colors.white, 
+                      padding: const EdgeInsets.symmetric(vertical: 16), 
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), 
+                      elevation: 0
+                    ),
+                    onPressed: _showCheckOptions,
+                    child: Text(tr('Perpanjang Langganan', 'Renew Plan'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: _deleteSub,
+                  child: Text(tr('Hapus Langganan', 'Cancel Membership'), style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600)),
+                )
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+  
+  Widget _buildHistoryRow(String title, String date, String price, Color textColor, Color subTextColor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: const Color(0xFF2563EB).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+            child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF2563EB), size: 16),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text(date, style: TextStyle(color: subTextColor, fontSize: 10)),
+              ],
+            ),
+          ),
+          Text(price, style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

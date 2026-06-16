@@ -87,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         context, 
         success ? 'Email tes berhasil dikirim ke $email! Cek inbox.' : 'Gagal: $result',
         icon: success ? Icons.check_circle : Icons.error,
-        iconColor: success ? const Color(0xFF0D9488) : Colors.redAccent,
+        iconColor: success ? const Color(0xFF2563EB) : Colors.redAccent,
         duration: const Duration(seconds: 8),
       );
     }
@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(width: 40, height: 4, decoration: BoxDecoration(color: widget.textColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Color(0xFF0D9488)),
+                leading: const Icon(Icons.photo_library, color: Color(0xFF2563EB)),
                 title: Text('Pilih dari Galeri', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.w600)),
                 onTap: () {
                   Navigator.pop(ctx);
@@ -156,10 +156,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: widget.bgColor,
       appBar: AppBar(
-        backgroundColor: widget.bgColor,
+        backgroundColor: const Color(0xFF1E3A8A),
         elevation: 0,
-        iconTheme: IconThemeData(color: widget.textColor),
-        title: Text('Profil Saya', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        title: const Text('Profil & Akun', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -178,8 +182,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: const BoxDecoration(color: Color(0xFF0D9488), shape: BoxShape.circle),
-                    child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                    decoration: const BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle),
+                    child: const Icon(Icons.camera_alt, color: Color(0xFF1E293B), size: 20),
                   ),
                 ],
               ),
@@ -197,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fillColor: widget.cardBg,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
               ),
             ),
             const SizedBox(height: 20),
@@ -213,7 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 fillColor: widget.cardBg,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withValues(alpha: 0.1))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.white)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
               ),
             ),
             const SizedBox(height: 12),
@@ -239,9 +243,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D9488), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2563EB), padding: const EdgeInsets.symmetric(vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)), elevation: 0),
                 onPressed: _saveProfile,
-                child: const Text('Simpan Profil', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                child: const Text('Simpan Profil', style: TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
