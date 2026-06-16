@@ -953,6 +953,12 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
              
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 1000),
+                opacity: _showSubTracker ? 1.0 : 0.0,
+                child: Image.asset('assets/icon.png', height: 80),
+              ),
+              const SizedBox(height: 16),
               TypewriterText(
                 'Welcome to',
                 delay: const Duration(milliseconds: 500),

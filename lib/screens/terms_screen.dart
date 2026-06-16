@@ -59,7 +59,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
         backgroundColor: const Color(0xFF0B101E),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
           onPressed: () => Navigator.pop(context), 
         ),
       ),
@@ -69,20 +69,20 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(tr('Selamat Datang di', 'Welcome to'), style: const TextStyle(fontSize: 18, color: Colors.white54)),
-              const Text('SubTracker', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -1.0)),
+              Text(tr('Selamat Datang di', 'Welcome to'), style: const TextStyle(fontSize: 18, color: Colors.black54)),
+              Text('SubTracker', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: -1.0)),
               const SizedBox(height: 24),
 
-              Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
               const SizedBox(height: 12),
               
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(20), 
                   decoration: BoxDecoration(
-                    color: const Color(0xFF151B2B),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: Colors.black12),
                   ),
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
@@ -91,7 +91,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                       children: [
                         Text(
                           tr('Dengan menggunakan aplikasi SubTracker, Anda secara otomatis menyetujui seluruh ketentuan berikut:', 'By using the SubTracker application, you automatically agree to all of the following terms:'),
-                          style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+                          style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.5),
                         ),
                         const SizedBox(height: 20),
 
@@ -127,16 +127,16 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                         ),
                         
                         const SizedBox(height: 16),
-                        const Divider(color: Colors.white12, thickness: 1),
+                        const Divider(color: Colors.black12, thickness: 1),
                         const SizedBox(height: 16),
                         
-                        Text(tr('Aplikasi ini dirancang dan dikembangkan secara independen.', 'This application is designed and developed independently.'), style: const TextStyle(color: Colors.white54, fontSize: 12, height: 1.5)),
+                        Text(tr('Aplikasi ini dirancang dan dikembangkan secara independen.', 'This application is designed and developed independently.'), style: const TextStyle(color: Colors.black54, fontSize: 12, height: 1.5)),
                         const SizedBox(height: 4),
-                        Text(tr('Dibuat oleh: Sofyan Ibnu', 'Created by: Sofyan Ibnu'), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+                        Text(tr('Dibuat oleh: Sofyan Ibnu', 'Created by: Sofyan Ibnu'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 13, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 2),
-                        Text(tr('Tahun Rilis: 2026', 'Release Year: 2026'), style: const TextStyle(color: Colors.white54, fontSize: 12)),
+                        Text(tr('Tahun Rilis: 2026', 'Release Year: 2026'), style: const TextStyle(color: Colors.black54, fontSize: 12)),
                         const SizedBox(height: 16),
-                        const Divider(color: Colors.white12, thickness: 1),
+                        const Divider(color: Colors.black12, thickness: 1),
                         const SizedBox(height: 16),
                         
 
@@ -167,7 +167,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     Expanded(
                       child: Text(
                         tr('Saya telah membaca dan menyetujui Syarat & Ketentuan', 'I have read and agree to the Terms & Conditions'),
-                        style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -179,12 +179,12 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                 children: [
                   TextButton(
                     onPressed: _isLoading ? null : _declineTerms,
-                    child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),
+                    child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
                   ),
                   TextButton(
                     onPressed: (_isLoading || !_isAgreed) ? null : () => _acceptTerms(context),
                     child: _isLoading 
-                        ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
+                        ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Color(0xFF1E293B), dotSize: 5.0))
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -196,12 +196,12 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                                   builder: (context, child) {
                                     return Transform.translate(
                                       offset: Offset(_arrowSlide.value, 0),
-                                      child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
+                                      child: const Icon(Icons.arrow_forward_rounded, color: Color(0xFF1E293B), size: 20),
                                     );
                                   },
                                 )
                               else
-                                const Icon(Icons.arrow_forward_rounded, color: Colors.white30, size: 20),
+                                const Icon(Icons.arrow_forward_rounded, color: Colors.black38, size: 20),
                             ],
                           ),
                   ),
@@ -220,15 +220,15 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$number.', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('$number.', style: const TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                Text(title, style: const TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                 const SizedBox(height: 6),
-                Text(description, style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.5)),
+                Text(description, style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.5)),
               ],
             ),
           ),

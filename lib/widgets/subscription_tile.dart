@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:provider/provider.dart';
+import '../providers/subscription_provider.dart';
 import 'package:intl/intl.dart';
 import '../models/subscription.dart';
 import '../screens/detail_screen.dart';
@@ -55,39 +58,129 @@ class _SubTileState extends State<SubTile> {
     final catColor = CategoryUtils.getColor(widget.sub.category);
     final catIcon = CategoryUtils.getIcon(widget.sub.category);
 
+    final textColor = const Color(0xFF1E293B);
+    final subTextColor = Colors.black54;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF0D9488), Color(0xFF0B101E)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
       ),
-      child: Material(
-        color: Colors.transparent, borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(sub: widget.sub))); },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Row(
-              children: [
-                Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle), child: Icon(catIcon, color: Colors.white, size: 16)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.sub.name, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 2),
-                      isFinished
-                          ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600))
-                          : isDue 
-                              ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.w600))
-                              : Text(countdownText, style: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Slidable(
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            children: [
+              if (!isFinished)
+                SlidableAction(
+                  onPressed: (context) {
+                    final provider = context.read<SubProvider>();
+                    provider.markAsPaid(widget.sub);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(tr('Langganan ditandai selesai', 'Subscription marked as paid'), style: const TextStyle(color: Color(0xFF1E293B))),
+                      backgroundColor: Colors.white,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ));
+                  },
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  icon: Icons.check_circle_outline,
+                  label: tr('Selesai', 'Done'),
+                )
+              else
+                SlidableAction(
+                  onPressed: (context) {
+                    final provider = context.read<SubProvider>();
+                    final updated = widget.sub.copyWith(
+                      dueDate: DateTime(widget.sub.dueDate.year, widget.sub.dueDate.month + 1, widget.sub.dueDate.day),
+                      isFinished: false
+                    );
+                    provider.updateSub(updated);
+                    provider.addHistory(widget.sub.name, widget.sub.price, DateTime.now());
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(tr('Langganan diperpanjang', 'Subscription renewed'), style: const TextStyle(color: Color(0xFF1E293B))),
+                      backgroundColor: Colors.white,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ));
+                  },
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  icon: Icons.autorenew,
+                  label: tr('Perpanjang', 'Renew'),
                 ),
-                Text(currencyFormat.format(widget.sub.price), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w900)),
-              ],
+              SlidableAction(
+                onPressed: (context) {
+                  final provider = context.read<SubProvider>();
+                  provider.deleteSub(widget.sub.id);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(tr('Langganan dihapus', 'Subscription deleted'), style: const TextStyle(color: Color(0xFF1E293B))),
+                    backgroundColor: Colors.white,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ));
+                },
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+                icon: Icons.delete_outline,
+                label: tr('Hapus', 'Delete'),
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent, 
+            child: InkWell(
+              onTap: () { Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(sub: widget.sub))); },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10), 
+                      decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(12)), 
+                      child: Icon(catIcon, color: const Color(0xFF2563EB), size: 24)
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(widget.sub.name, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 4),
+                          isFinished
+                              ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600))
+                              : isDue 
+                                  ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
+                                  : Text(countdownText, style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.w500)),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(currencyFormat.format(widget.sub.price), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900)),
+                        const SizedBox(height: 4),
+                        if (isFinished)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                            child: const Text('PAID', style: TextStyle(color: Color(0xFF10B981), fontSize: 8, fontWeight: FontWeight.bold)),
+                          )
+                        else
+                           Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                            child: Text(DateFormat('MMM dd').format(widget.sub.dueDate), style: const TextStyle(color: Colors.orange, fontSize: 8, fontWeight: FontWeight.bold)),
+                          )
+                      ],
+                    )
+                  ],
+                ),
+              ),
             ),
           ),
         ),

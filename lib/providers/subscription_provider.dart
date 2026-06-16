@@ -135,6 +135,46 @@ class SubProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void deleteSub(String id) {
+    removeSub(id);
+  }
+
+  void markAsPaid(Subscription sub) {
+    final index = _subs.indexWhere((s) => s.id == sub.id);
+    if (index != -1) {
+      _subs[index] = _subs[index].copyWith(isFinished: true);
+      _saveData();
+      notifyListeners();
+    }
+  }
+
+  void updateSub(Subscription updated) {
+    final index = _subs.indexWhere((s) => s.id == updated.id);
+    if (index != -1) {
+      _subs[index] = updated;
+      _saveData();
+      notifyListeners();
+    }
+  }
+
+  void addHistory(String name, double price, DateTime date) {
+    // Add to history could be implemented by adding a finished subscription
+    // Since we just updated the existing one to isFinished=false (renewed),
+    // we can add a new finished record for the history.
+    final historySub = Subscription(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: name,
+      price: price,
+      dueDate: date,
+      category: 'History',
+      isFinished: true,
+      dateAdded: date,
+    );
+    _subs.add(historySub);
+    _saveData();
+    notifyListeners();
+  }
+
   Future<void> _saveData() async {
     final prefs = await SharedPreferences.getInstance();
     final String encodedData = jsonEncode(

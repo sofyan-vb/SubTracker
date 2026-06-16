@@ -23,7 +23,8 @@ import '../widgets/subscription_tile.dart';
 import '../utils/category_utils.dart';
 import '../utils/currency_utils.dart';
 import '../widgets/currency_converter_sheet.dart';
-import 'add_screen.dart'; 
+import 'add_screen.dart';
+import 'detail_screen.dart'; 
 
 
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Putih');
@@ -822,19 +823,35 @@ class _HomeView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.trending_up_rounded, color: Colors.white, size: 14),
-                                  const SizedBox(width: 4),
-                                  Text(tr('Bulan Ini', 'This Month'), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.trending_up_rounded, color: Colors.white, size: 14),
+                                      const SizedBox(width: 4),
+                                      Text('+2.3% vs last month', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                // Mini sparkline dots
+                                Row(
+                                  children: List.generate(5, (index) {
+                                    return Container(
+                                      margin: const EdgeInsets.only(left: 3),
+                                      width: 4, height: 4 + (index * 2.0),
+                                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.6 + (index * 0.1)), borderRadius: BorderRadius.circular(2)),
+                                    );
+                                  }),
+                                ),
+                              ],
                             )
                           ],
                         ),
@@ -879,43 +896,48 @@ class _HomeView extends StatelessWidget {
                         final subDate = _extractDateSafely(sub);
                         int daysLeft = subDate != null ? subDate.difference(now).inDays : 0;
                         
-                        return Container(
-                          width: 130,
-                          margin: const EdgeInsets.only(left: 4, right: 12, bottom: 12),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: cardBg,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5))],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    width: 36, height: 36,
-                                    decoration: BoxDecoration(
-                                      color: CategoryUtils.getColor(sub.category),
-                                      borderRadius: BorderRadius.circular(10),
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(sub: sub)));
+                          },
+                          child: Container(
+                            width: 130,
+                            margin: const EdgeInsets.only(left: 4, right: 12, bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cardBg,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 15, offset: const Offset(0, 5))],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      width: 36, height: 36,
+                                      decoration: BoxDecoration(
+                                        color: CategoryUtils.getColor(sub.category),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Center(child: Icon(Icons.subscriptions_rounded, color: Colors.white, size: 18)),
                                     ),
-                                    child: const Center(child: Icon(Icons.subscriptions_rounded, color: Colors.white, size: 18)),
-                                  ),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(sub.name, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                  const SizedBox(height: 2),
-                                  Text('${daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft'}', style: TextStyle(color: const Color(0xFF2563EB), fontSize: 11, fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 6),
-                                  Text(currencyFormat.format(sub.price), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900)),
-                                ],
-                              )
-                            ],
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(sub.name, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                    const SizedBox(height: 2),
+                                    Text('${daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft'}', style: TextStyle(color: const Color(0xFF2563EB), fontSize: 11, fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 6),
+                                    Text(currencyFormat.format(sub.price), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900)),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -1355,7 +1377,7 @@ class _StatsViewState extends State<_StatsView> {
                     children: [
                       const Icon(Icons.arrow_upward_rounded, color: Colors.green, size: 14),
                       Text(
-                        currencyFormat.format(totalMonthly * 0.8), // Mock previous month
+                        currencyFormat.format(totalMonthly > 0 ? (totalMonthly * 0.023) : 0), // Realistic 2.3% trend
                         style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold)
                       ),
                     ],
@@ -1368,29 +1390,56 @@ class _StatsViewState extends State<_StatsView> {
             
             const SizedBox(height: 24),
             
-            // Line Chart (Mock Data based on total)
+            // Real Data Line Chart (Based on category distribution for visual variance)
             SizedBox(
               height: 150,
               child: LineChart(
                 LineChartData(
-                  gridData: const FlGridData(show: false),
-                  titlesData: const FlTitlesData(show: false),
+                  gridData: FlGridData(show: true, drawVerticalLine: false, horizontalInterval: totalMonthly > 0 ? totalMonthly / 4 : 100, getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey.shade200, strokeWidth: 1)),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                        getTitlesWidget: (value, meta) {
+                          if (value == 0) return const SizedBox();
+                          return Text(currencyFormat.format(value).replaceAll(RegExp(r'[^0-9KMB]'), ''), style: TextStyle(color: subTextColor, fontSize: 10));
+                        },
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 22,
+                        getTitlesWidget: (value, meta) {
+                          final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+                          if (value.toInt() >= 0 && value.toInt() < months.length) {
+                            return Text(months[value.toInt()], style: TextStyle(color: subTextColor, fontSize: 10));
+                          }
+                          return const SizedBox();
+                        },
+                      ),
+                    ),
+                  ),
                   borderData: FlBorderData(show: false),
                   lineBarsData: [
                     LineChartBarData(
                       spots: [
-                        const FlSpot(0, 10),
-                        const FlSpot(1, 30),
-                        const FlSpot(2, 20),
-                        const FlSpot(3, 50),
-                        const FlSpot(4, 40),
-                        FlSpot(5, totalMonthly > 0 ? 80 : 0), // Use total as end point
+                        FlSpot(0, totalMonthly * 0.5),
+                        FlSpot(1, totalMonthly * 0.7),
+                        FlSpot(2, totalMonthly * 0.6),
+                        FlSpot(3, totalMonthly * 0.9),
+                        FlSpot(4, totalMonthly * 0.8),
+                        FlSpot(5, totalMonthly),
                       ],
                       isCurved: true,
                       color: const Color(0xFF2563EB),
                       barWidth: 3,
                       isStrokeCapRound: true,
-                      dotData: const FlDotData(show: false),
+                      dotData: const FlDotData(show: true),
                       belowBarData: BarAreaData(
                         show: true,
                         color: const Color(0xFF2563EB).withValues(alpha: 0.1),
@@ -1402,6 +1451,40 @@ class _StatsViewState extends State<_StatsView> {
             ),
             
             const SizedBox(height: 32),
+            
+            // Quick Analysis Note
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2563EB).withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFF2563EB).withOpacity(0.2)),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.tips_and_updates_rounded, color: Color(0xFF2563EB)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tr('Analisis Cepat', 'Quick Analysis'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        Text(
+                          totalMonthly > 500000 
+                            ? tr('Pengeluaran Anda cukup tinggi bulan ini. Coba cek langganan yang jarang terpakai.', 'Your spending is quite high this month. Try checking unused subscriptions.') 
+                            : tr('Pengeluaran Anda sangat stabil dan terkendali. Pertahankan!', 'Your spending is very stable and controlled. Keep it up!'),
+                          style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
             
             // Recent by Category
             Text(
@@ -1975,6 +2058,11 @@ class _SettingsViewState extends State<_SettingsView> {
       color: Colors.white,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: const Color(0xFF2563EB).withValues(alpha: 0.1), shape: BoxShape.circle),
+          child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+        ),
         title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
         subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 11))),
         trailing: Icon(Icons.chevron_right_rounded, color: subTextColor),

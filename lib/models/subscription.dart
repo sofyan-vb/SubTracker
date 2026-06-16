@@ -36,4 +36,24 @@ class Subscription {
     isFinished: json['isFinished'] ?? false, 
     dateAdded: json['dateAdded'] != null ? DateTime.parse(json['dateAdded']) : DateTime.now(),
   );
+
+  Subscription copyWith({
+    String? id,
+    String? name,
+    double? price,
+    DateTime? dueDate,
+    String? category,
+    bool? isFinished,
+    DateTime? dateAdded,
+  }) {
+    return Subscription(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      dueDate: dueDate ?? this.dueDate,
+      category: category ?? this.category,
+      isFinished: isFinished ?? this.isFinished,
+      dateAdded: dateAdded ?? this.dateAdded,
+    );
+  }
 }
