@@ -362,7 +362,7 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
     String cleanText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (cleanText.isEmpty) return oldValue;
     final intValue = int.tryParse(cleanText);
-    if (intValue == null) return oldValue;
+    if (intValue == null || intValue > 1000000000) return oldValue;
     final String newText = NumberFormat.decimalPattern('id').format(intValue);
     return TextEditingValue(
       text: newText,

@@ -136,7 +136,42 @@ class SubProvider extends ChangeNotifier {
   }
 
   void deleteSub(String id) {
-    removeSub(id);
+    final index = _subs.indexWhere((s) => s.id == id);
+    if (index != -1) {
+      _subs[index] = _subs[index].copyWith(isFinished: true);
+      _saveData();
+      notifyListeners();
+    }
+  }
+
+  void renewSub(String id) {
+    final index = _subs.indexWhere((s) => s.id == id);
+    if (index != -1) {
+      final oldSub = _subs[index];
+      // Create a history record for the paid bill
+      final historySub = Subscription(
+        id: DateTime.now().millisecondsSinceEpoch.toString() + '_history',
+        name: oldSub.name,
+        price: oldSub.price,
+        dueDate: oldSub.dueDate,
+        category: oldSub.category,
+        isFinished: true,
+        dateAdded: DateTime.now(),
+      );
+      _subs.add(historySub);
+      
+      // Update current subscription due date to next month
+      DateTime nextDue;
+      if (oldSub.dueDate.month == 12) {
+        nextDue = DateTime(oldSub.dueDate.year + 1, 1, oldSub.dueDate.day);
+      } else {
+        nextDue = DateTime(oldSub.dueDate.year, oldSub.dueDate.month + 1, oldSub.dueDate.day);
+      }
+      
+      _subs[index] = oldSub.copyWith(dueDate: nextDue);
+      _saveData();
+      notifyListeners();
+    }
   }
 
   void markAsPaid(Subscription sub) {

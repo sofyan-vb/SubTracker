@@ -65,9 +65,10 @@ class _DetailScreenState extends State<DetailScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Color(0xFF1E293B)))),
           TextButton(
             onPressed: () {
-              context.read<SubProvider>().removeSub(currentSub.id);
-              Navigator.pop(ctx); Navigator.pop(context); 
+              context.read<SubProvider>().deleteSub(currentSub.id);
               ToastUtils.show(context, tr('Catatan berhasil dihapus', 'Record deleted successfully'));
+              Navigator.pop(ctx); 
+              Navigator.pop(context); 
             }, 
             child: Text(tr('Hapus', 'Delete'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
           ),

@@ -956,7 +956,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 1000),
                 opacity: _showSubTracker ? 1.0 : 0.0,
-                child: Image.asset('assets/icon.png', height: 80),
+                child: Image.asset('assets/icon.png', height: 180),
               ),
               const SizedBox(height: 16),
               TypewriterText(

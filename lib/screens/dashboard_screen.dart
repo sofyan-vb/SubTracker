@@ -96,74 +96,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return null;
   }
 
-  void _showNotificationsSheet(BuildContext context, Color bgColor, Color textColor) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: bgColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (sheetContext) {
-        return Consumer<SubProvider>(
-          builder: (context, provider, child) {
-            final now = DateTime.now();
-            final upcomingSubs = provider.activeSubs.where((sub) {
-              final date = _extractDateSafely(sub);
-              if (date == null) return false;
-              return date.isAfter(now.subtract(const Duration(days: 1))) && date.isBefore(now.add(const Duration(days: 7)));
-            }).toList();
 
-            upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
-
-            return Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E293B)),
-                      const SizedBox(width: 12),
-                      Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                    upcomingSubs.isEmpty 
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Center(child: Text(tr('Tidak ada tagihan saat ini', 'No bills currently'), style: TextStyle(color: textColor.withValues(alpha: 0.5)))),
-                        )
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: upcomingSubs.length,
-                        itemBuilder: (ctx, i) {
-                          final sub = upcomingSubs[i];
-                          final subDate = _extractDateSafely(sub);
-                          int daysLeft = subDate != null ? subDate.difference(now).inDays : 0;
-                          String daysLeftStr = daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft';
-
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.15), shape: BoxShape.circle),
-                              child: const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 20),
-                            ),
-                            title: Text(sub.name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                            subtitle: Text(tr('Sekarang waktunya tagihan', 'Now its bill time'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 10)),
-                            trailing: Text(daysLeftStr, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
-                          );
-                        }
-                      ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            );
-          }
-        );
-      }
-    );
-  }
 
   void _showFilterSheet(BuildContext context, Color bgColor, Color textColor) {
     showModalBottomSheet(
@@ -454,7 +387,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.home_filled, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
+                            Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
                           ],
                         ),
                       ),
@@ -464,7 +397,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.calendar_today_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.grey[400], size: 26),
+                            Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
                           ],
                         ),
                       ),
@@ -475,7 +408,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.pie_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
+                            Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
                           ],
                         ),
                       ),
@@ -485,7 +418,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.settings_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
+                            Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
                           ],
                         ),
                       ),
@@ -511,9 +444,130 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-class _HomeView extends StatelessWidget {
+class _HomeView extends StatefulWidget {
   final String theme;
   const _HomeView({super.key, required this.theme});
+
+  @override
+  State<_HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<_HomeView> {
+  String _selectedCategory = 'Semua';
+
+  void _showCategoryFilterSheet(BuildContext context, Color bgColor, Color textColor) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetContext) {
+        final categories = ['Semua', 'Hiburan', 'Utilitas', 'Pendidikan', 'Kesehatan', 'Lainnya'];
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(tr('Pilih Kategori', 'Select Category'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10, runSpacing: 10,
+                children: categories.map((cat) {
+                  final isSelected = _selectedCategory == cat;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => _selectedCategory = cat);
+                      Navigator.pop(sheetContext);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(cat == 'Semua' ? tr('Semua Layanan', 'All Services') : cat, style: TextStyle(color: isSelected ? Colors.white : textColor, fontWeight: FontWeight.bold, fontSize: 13)),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      }
+    );
+  }
+
+
+
+  void _showNotificationsSheet(BuildContext context, Color bgColor, Color textColor) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: bgColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (sheetContext) {
+        return Consumer<SubProvider>(
+          builder: (context, provider, child) {
+            final now = DateTime.now();
+            final upcomingSubs = provider.activeSubs.where((sub) {
+              final date = _extractDateSafely(sub);
+              if (date == null) return false;
+              return date.isAfter(now.subtract(const Duration(days: 1))) && date.isBefore(now.add(const Duration(days: 7)));
+            }).toList();
+
+            upcomingSubs.sort((a, b) => _extractDateSafely(a)!.compareTo(_extractDateSafely(b)!));
+
+            return Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E293B)),
+                      const SizedBox(width: 12),
+                      Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                    upcomingSubs.isEmpty 
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Center(child: Text(tr('Tidak ada tagihan saat ini', 'No bills currently'), style: TextStyle(color: textColor.withValues(alpha: 0.5)))),
+                        )
+                    : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: upcomingSubs.length,
+                        itemBuilder: (ctx, i) {
+                          final sub = upcomingSubs[i];
+                          final subDate = _extractDateSafely(sub);
+                          int daysLeft = subDate != null ? subDate.difference(now).inDays : 0;
+                          String daysLeftStr = daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft';
+
+                          return ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.15), shape: BoxShape.circle),
+                              child: const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 20),
+                            ),
+                            title: Text(sub.name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                            subtitle: Text(tr('Sekarang waktunya tagihan', 'Now its bill time'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 10)),
+                            trailing: Text(daysLeftStr, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                          );
+                        }
+                      ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          }
+        );
+      }
+    );
+  }
 
   DateTime? _extractDateSafely(dynamic sub) {
     try { return sub.date as DateTime; } catch (_) {}
@@ -537,6 +591,7 @@ class _HomeView extends StatelessWidget {
     else if (hour >= 15 && hour < 18) greeting = tr('Selamat Sore', 'Good Evening');
     else if (hour >= 18 || hour < 4) greeting = tr('Selamat Malam', 'Good Night');
 
+    Color bgColor = const Color(0xFFF5F7FA);
     Color cardBg = Colors.white;
     Color textColor = const Color(0xFF1E293B);
     Color subTextColor = Colors.black54;
@@ -579,7 +634,7 @@ class _HomeView extends StatelessWidget {
           PieChartSectionData(
             color: color,
             value: percentage,
-            title: '',
+            title: '${percentage.toStringAsFixed(0)}%',
             radius: 20,
           )
         );
@@ -616,96 +671,135 @@ class _HomeView extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         slivers: [
           // GREETING
+          // GREETING HEADER
           SliverToBoxAdapter(
             child: FadeInSlide(delay: Duration.zero,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+              child: Container(
+                padding: const EdgeInsets.only(bottom: 24, top: 10),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF2563EB), Color(0xFF1E3A8A)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(32),
+                    bottomRight: Radius.circular(32),
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: Colors.white, textColor: textColor, cardBg: Colors.white)));
-                          },
-                          child: ValueListenableBuilder<String?>(
-                            valueListenable: userPhotoNotifier,
-                            builder: (context, photo, child) {
-                              return CircleAvatar(
-                                radius: 24,
-                                backgroundColor: Colors.grey[200],
-                                backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
-                                child: photo == null ? Icon(Icons.account_circle, size: 30, color: textColor.withValues(alpha: 0.5)) : null,
-                              );
-                            }
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
                           children: [
-                            Text(
-                              tr('Selamat datang kembali,', 'Welcome back,'), 
-                              style: TextStyle(color: subTextColor, fontSize: 13, fontWeight: FontWeight.w500)
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: Colors.white, textColor: const Color(0xFF1E293B), cardBg: Colors.white)));
+                              },
+                              child: ValueListenableBuilder<String?>(
+                                valueListenable: userPhotoNotifier,
+                                builder: (context, photo, child) {
+                                  return Container(
+                                    padding: photo == null ? const EdgeInsets.all(10) : EdgeInsets.zero,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: photo == null 
+                                      ? const Icon(Icons.person, size: 24, color: Colors.white)
+                                      : CircleAvatar(radius: 22, backgroundImage: MemoryImage(base64Decode(photo))),
+                                  );
+                                }
+                              ),
                             ),
-                            const SizedBox(height: 2),
-                            ValueListenableBuilder<String>(
-                              valueListenable: userNameNotifier,
-                              builder: (context, name, child) {
-                                return Text(
-                                  name.isEmpty ? 'User' : name, 
-                                  style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)
+                            const SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tr('Selamat datang kembali,', 'Welcome back,'), 
+                                  style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)
+                                ),
+                                const SizedBox(height: 2),
+                                ValueListenableBuilder<String>(
+                                  valueListenable: userNameNotifier,
+                                  builder: (context, name, child) {
+                                    return Text(
+                                      name.isEmpty ? 'User' : name, 
+                                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)
+                                    );
+                                  }
+                                ),
+                              ],
+                            ),
+                          ]
+                        ),
+                        
+                        // Header Icons
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                ToastUtils.show(context, tr('Fitur pencarian segera hadir!', 'Search feature coming soon!'), icon: Icons.search, iconColor: Colors.blue);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.search_rounded, color: Colors.white, size: 22),
+                              ),
+                            ),
+                            Consumer<SubProvider>(
+                              builder: (context, provider, child) {
+                                final now = DateTime.now();
+                                final urgentCount = provider.subs.where((sub) {
+                                  if (sub.isFinished) return false;
+                                  final date = sub.dueDate;
+                                  final today = DateTime(now.year, now.month, now.day);
+                                  final subDate = DateTime(date.year, date.month, date.day);
+                                  return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
+                                }).length;
+                                return GestureDetector(
+                                  onTap: () {
+                                    _showNotificationsSheet(context, bgColor, textColor);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 24),
+                                        if (urgentCount > 0)
+                                          Positioned(
+                                            right: -2, top: -2,
+                                            child: Container(
+                                              padding: const EdgeInsets.all(4),
+                                              decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
+                                              child: Text('$urgentCount', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                                            ),
+                                          )
+                                      ],
+                                    ),
+                                  ),
                                 );
                               }
                             ),
                           ],
                         ),
-                      ]
+                      ],
                     ),
-                    
-                    // Notification Bell (moved from appbar)
-                    Consumer<SubProvider>(
-                      builder: (context, provider, child) {
-                        final now = DateTime.now();
-                        final urgentCount = provider.subs.where((sub) {
-                          if (sub.isFinished) return false;
-                          final date = sub.dueDate;
-                          final today = DateTime(now.year, now.month, now.day);
-                          final subDate = DateTime(date.year, date.month, date.day);
-                          return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
-                        }).length;
-                        return GestureDetector(
-                          onTap: () {
-                            // Show notifications
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                Icon(Icons.notifications_none_rounded, color: textColor, size: 24),
-                                if (urgentCount > 0)
-                                  Positioned(
-                                    right: -2, top: -2,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
-                                      child: Text('$urgentCount', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
-                                    ),
-                                  )
-                              ],
-                            ),
-                          ),
-                        );
-                      }
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -729,10 +823,95 @@ class _HomeView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(tr('Analitik Pengeluaran', 'Spending Analytics'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-                          child: Text(tr('Bulan Ini', 'This Month'), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold)),
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                final deletedSubs = provider.subs.where((s) => s.isFinished).toList();
+                                showDialog(
+                                  context: context,
+                                  builder: (ctx) => Dialog(
+                                    backgroundColor: Colors.transparent,
+                                    insetPadding: const EdgeInsets.all(20),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(20),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.9),
+                                        borderRadius: BorderRadius.circular(24),
+                                        border: Border.all(color: Colors.white.withOpacity(0.5)),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    padding: const EdgeInsets.all(8),
+                                                    decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), shape: BoxShape.circle),
+                                                    child: const Icon(Icons.history_rounded, color: Color(0xFF2563EB), size: 18),
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  Text(tr('Layanan Dihapus', 'Deleted Services'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.bold)),
+                                                ],
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.close_rounded, color: Colors.black54),
+                                                onPressed: () => Navigator.pop(ctx),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          if (deletedSubs.isEmpty)
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 20),
+                                              child: Text(tr('Belum ada layanan yang dihapus', 'No deleted services yet'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
+                                            )
+                                          else
+                                            Flexible(
+                                              child: ListView.separated(
+                                                shrinkWrap: true,
+                                                itemCount: deletedSubs.length,
+                                                separatorBuilder: (c, i) => Divider(color: Colors.grey.shade200),
+                                                itemBuilder: (c, i) {
+                                                  final s = deletedSubs[i];
+                                                  return ListTile(
+                                                    contentPadding: EdgeInsets.zero,
+                                                    title: Text(s.name, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 14)),
+                                                    subtitle: Text(DateFormat('dd MMM yyyy').format(s.dueDate), style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                                                    trailing: Text(currencyFormat.format(s.price), style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 14)),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                margin: const EdgeInsets.only(right: 8),
+                                decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), shape: BoxShape.circle),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.info_outline_rounded, color: Color(0xFF2563EB), size: 16),
+                                    const SizedBox(width: 4),
+                                    Text('${provider.subs.where((s) => s.isFinished).length}', style: const TextStyle(color: Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold)),
+                                    const SizedBox(width: 4),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                              child: Text(tr('Bulan Ini', 'This Month'), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
                         )
                       ],
                     ),
@@ -741,16 +920,22 @@ class _HomeView extends StatelessWidget {
                       children: [
                         // PIE CHART
                         SizedBox(
-                          height: 100,
-                          width: 100,
+                          height: 120,
+                          width: 120,
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
                               PieChart(
                                 PieChartData(
                                   sectionsSpace: 2,
-                                  centerSpaceRadius: 28, // 28 + 20 = 48 (safe for 100/2 = 50)
-                                  sections: pieSections,
+                                  centerSpaceRadius: 30, 
+                                  sections: pieSections.map((s) {
+                                    // Add percentage titles to slices
+                                    return s.copyWith(
+                                      titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                                      radius: 25,
+                                    );
+                                  }).toList(),
                                   startDegreeOffset: -90,
                                 )
                               ),
@@ -771,7 +956,7 @@ class _HomeView extends StatelessWidget {
                           ),
                         )
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -809,7 +994,18 @@ class _HomeView extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Total Tagihan Bulanan', 'Total Monthly Spending'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+                        Row(
+                          children: [
+                            Text(tr('Total Tagihan Bulanan', 'Total Monthly Spending'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () {
+                                ToastUtils.show(context, tr('Total dari seluruh tagihan langganan aktif Anda', 'Total of all your active subscription bills'), icon: Icons.info_outline, iconColor: Colors.blueAccent);
+                              },
+                              child: const Icon(Icons.info_outline_rounded, color: Colors.white70, size: 16),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 12),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -818,7 +1014,7 @@ class _HomeView extends StatelessWidget {
                               child: FittedBox(
                                 fit: BoxFit.scaleDown, alignment: Alignment.centerLeft,
                                 child: Text(
-                                  currencyFormat.format(provider.totalMonthly),
+                                  provider.totalMonthly > 99000000000 ? '${currencyFormat.format(99000000000)}+' : currencyFormat.format(provider.totalMonthly),
                                   style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.w900, letterSpacing: -1.0),
                                 ),
                               ),
@@ -836,7 +1032,12 @@ class _HomeView extends StatelessWidget {
                                     children: [
                                       const Icon(Icons.trending_up_rounded, color: Colors.white, size: 14),
                                       const SizedBox(width: 4),
-                                      Text('+2.3% vs last month', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                      Builder(builder: (context) {
+                                        final lastMonthTotal = provider.subs.where((s) => !s.isFinished && s.dateAdded != null && s.dateAdded!.month < DateTime.now().month).fold(0.0, (sum, item) => sum + item.price);
+                                        final thisMonthAdded = provider.subs.where((s) => !s.isFinished && s.dateAdded != null && s.dateAdded!.month == DateTime.now().month).fold(0.0, (sum, item) => sum + item.price);
+                                        final isUp = thisMonthAdded > 0;
+                                        return Text(isUp ? '+${currencyFormat.format(thisMonthAdded).replaceAll(RegExp(r'[^0-9KMB]'), '')} (Baru)' : 'Stabil', style: TextStyle(color: isUp ? Colors.greenAccent : Colors.white, fontSize: 10, fontWeight: FontWeight.bold));
+                                      }),
                                     ],
                                   ),
                                 ),
@@ -863,16 +1064,64 @@ class _HomeView extends StatelessWidget {
             ),
           ),
 
-          // UPCOMING BILLS TITLE
+          // CATEGORY FILTER & UPCOMING BILLS TITLE
           SliverToBoxAdapter(
             child: FadeInSlide(delay: const Duration(milliseconds: 300),
               child: Padding(
-                padding: const EdgeInsets.only(left: 20, right: 20, top: 20, bottom: 12),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 12),
+                child: Column(
                   children: [
-                    Text(tr('Tagihan Mendatang', 'Upcoming Bills'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text(tr('Lihat Semua', 'See All'), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 12, fontWeight: FontWeight.bold)),
+                    // Category Filter
+                    Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => _showCategoryFilterSheet(context, bgColor, textColor),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: Colors.grey.shade200),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.category_rounded, color: const Color(0xFF2563EB), size: 16),
+                                const SizedBox(width: 6),
+                                Text(_selectedCategory == 'Semua' ? tr('Semua Layanan', 'All Services') : _selectedCategory, style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                                const SizedBox(width: 4),
+                                Icon(Icons.keyboard_arrow_down_rounded, color: textColor, size: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(tr('Tagihan Mendatang', 'Upcoming Bills'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(bgColor: bgColor, textColor: textColor, cardBg: cardBg)));
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.history_rounded, color: textColor, size: 14),
+                                const SizedBox(width: 4),
+                                Text(tr('Riwayat', 'History'), style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -1018,6 +1267,7 @@ class _CalendarViewState extends State<_CalendarView> {
       return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
     }).toList();
 
+    Color bgColor = const Color(0xFFF5F7FA);
     Color cardBg = Colors.white;
     Color textColor = const Color(0xFF1E293B);
     Color subTextColor = Colors.black54;
@@ -1352,12 +1602,10 @@ class _StatsViewState extends State<_StatsView> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(icon: Icon(Icons.chevron_left, color: subTextColor), onPressed: () {}),
                 Text(
                   '${languageNotifier.value == 'ID' ? 'Bulan Ini' : 'This Month'}', 
                   style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)
                 ),
-                IconButton(icon: Icon(Icons.chevron_right, color: subTextColor), onPressed: () {}),
               ],
             ),
             const SizedBox(height: 16),
@@ -1486,6 +1734,32 @@ class _StatsViewState extends State<_StatsView> {
               ),
             ),
             
+            // Category Pie Chart
+            if (breakdown.isNotEmpty) ...[
+              Text(tr('Distribusi Kategori', 'Category Distribution'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 200,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 50,
+                    sections: breakdown.entries.map((entry) {
+                      final percentage = totalMonthly > 0 ? (entry.value / totalMonthly * 100) : 0.0;
+                      return PieChartSectionData(
+                        color: CategoryUtils.getColor(entry.key),
+                        value: entry.value,
+                        title: '${percentage.toStringAsFixed(0)}%',
+                        radius: 40,
+                        titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+
             // Recent by Category
             Text(
               tr('Kategori Pengeluaran', 'Recent by Category'),
@@ -1826,6 +2100,7 @@ class _SettingsViewState extends State<_SettingsView> {
 
   @override
   Widget build(BuildContext context) {
+    Color bgColor = const Color(0xFFF5F7FA);
     Color cardBg = Colors.white;
     Color textColor = const Color(0xFF1E293B);
     Color subTextColor = Colors.black54;
@@ -2060,8 +2335,8 @@ class _SettingsViewState extends State<_SettingsView> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: const Color(0xFF2563EB).withValues(alpha: 0.1), shape: BoxShape.circle),
-          child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+          decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle),
+          child: Icon(icon, color: Colors.black, size: 24),
         ),
         title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
         subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 11))),
