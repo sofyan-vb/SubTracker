@@ -190,14 +190,7 @@ class _GateKeeperState extends State<GateKeeper> {
                           );
                         }
                       },
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(_selectedLanguage == 'EN' ? 'NEXT' : 'LANJUT', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 20),
-                        ],
-                      ),
+                      child: Text(_selectedLanguage == 'EN' ? 'NEXT' : 'LANJUT', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
                     ),
                   ),
               ],

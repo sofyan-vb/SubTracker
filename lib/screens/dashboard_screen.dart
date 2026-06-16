@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:provider/provider.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
+import 'splash_screen.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:math';
@@ -70,8 +71,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     
     final savedName = prefs.getString('user_name');
     if (savedName != null) userNameNotifier.value = savedName;
-    final savedPhoto = prefs.getString('profile_image');
-    if (savedPhoto != null) userPhotoNotifier.value = savedPhoto;
+    final bool isManualLogin = prefs.getBool('login_mode_manual') ?? false;
+    final savedPhoto = isManualLogin ? prefs.getString('profile_image') : (prefs.getString('user_photo_${savedName ?? ""}') ?? prefs.getString('profile_image'));
+    if (savedPhoto != null) {
+      userPhotoNotifier.value = savedPhoto;
+    } else {
+      userPhotoNotifier.value = null;
+    }
 
     final savedLang = prefs.getString('app_lang');
     if (savedLang != null) languageNotifier.value = savedLang;
@@ -359,7 +365,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   elevation: 0, hoverElevation: 0, highlightElevation: 0, focusElevation: 0,
                   backgroundColor: Colors.transparent, 
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                  child: _isLoadingAdd ? const WavyDotsProgressIndicator(color: Colors.white, dotSize: 4.0) : const Icon(Icons.add_rounded, size: 36, color: Colors.white), 
+                  child: _isLoadingAdd ? WavyDotsProgressIndicator(color: Colors.white, dotSize: 4.0) : const Icon(Icons.add_rounded, size: 36, color: Colors.white), 
                   onPressed: _isLoadingAdd
                       ? null
                       : () async {
@@ -436,15 +442,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-            if (_isLoadingAdd)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black87,
-                  child: const Center(
-                    child: WaveDotLoading(),
-                  ),
-                ),
-              ),
+
 
           ],
         );
@@ -685,13 +683,22 @@ class _HomeViewState extends State<_HomeView> {
         if (colorIndex < 4) { // Show top 4 in legends
           legendWidgets.add(
             Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
                   Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
                   const SizedBox(width: 8),
-                  Expanded(child: Text(entry.key, style: TextStyle(color: subTextColor, fontSize: 11), overflow: TextOverflow.ellipsis)),
-                  Text('${percentage.toStringAsFixed(0)}%', style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(entry.key, style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 2),
+                        Text(currencyFormat.format(entry.value), style: TextStyle(color: subTextColor, fontSize: 9)),
+                      ],
+                    ),
+                  ),
+                  Text('${percentage.toStringAsFixed(0)}%', style: TextStyle(color: const Color(0xFF2563EB), fontSize: 12, fontWeight: FontWeight.bold)),
                 ],
               ),
             )
@@ -1015,11 +1022,24 @@ class _HomeViewState extends State<_HomeView> {
                                   startDegreeOffset: -90,
                                 )
                               ),
-                              Text(
-                                '${filteredSubsForPie.length}\n${tr('Subs', 'Subs')}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w900),
-                              )
+                              Builder(builder: (context) {
+                                if (categoryTotals.isEmpty || filteredTotalForPie == 0) {
+                                  return Text(
+                                    '0%\nData',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.w900),
+                                  );
+                                }
+                                final topCategory = categoryTotals.entries.reduce((a, b) => a.value > b.value ? a : b);
+                                final percentage = (topCategory.value / filteredTotalForPie * 100).toStringAsFixed(0);
+                                String catName = topCategory.key;
+                                if (catName.length > 7) catName = '${catName.substring(0, 7)}.';
+                                return Text(
+                                  '$percentage%\n$catName',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900),
+                                );
+                              })
                             ],
                           ),
                         ),
@@ -1055,17 +1075,7 @@ class _HomeViewState extends State<_HomeView> {
                 ),
                 child: Stack(
                   children: [
-                    // Glass reflection effect
-                    Positioned(
-                      top: -20, right: -20,
-                      child: Container(
-                        width: 100, height: 100,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                      ),
-                    ),
+                    // Removed overlapping glass reflection
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1162,37 +1172,44 @@ class _HomeViewState extends State<_HomeView> {
                                 ),
                               ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Builder(builder: (context) {
-                                  final thisMonthAdded = provider.subs.where((s) => !s.isFinished && s.dateAdded != null && s.dateAdded!.month == DateTime.now().month && s.dateAdded!.year == DateTime.now().year).fold(0.0, (sum, item) => sum + item.price);
-                                  final deletedSubsTotal = provider.subs.where((s) => s.isFinished).fold(0.0, (sum, item) => sum + item.price);
-                                  
-                                  final diff = thisMonthAdded - deletedSubsTotal;
-                                  final isUp = diff > 0;
-                                  final isDown = diff < 0;
-                                  
-                                  return Row(
-                                    children: [
-                                      Icon(isUp ? Icons.trending_up_rounded : isDown ? Icons.trending_down_rounded : Icons.trending_flat_rounded, color: isUp ? Colors.redAccent : isDown ? Colors.greenAccent : Colors.white, size: 14),
-                                      const SizedBox(width: 4),
-                                      Text(isUp ? '+${currencyFormat.format(diff.abs()).replaceAll(RegExp(r'[^0-9KMB]'), '')}' : isDown ? '-${currencyFormat.format(diff.abs()).replaceAll(RegExp(r'[^0-9KMB]'), '')}' : 'Stabil', style: TextStyle(color: isUp ? Colors.redAccent : isDown ? Colors.greenAccent : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-                                    ],
-                                  );
-                                }),
-                                const SizedBox(height: 8),
-                                // Mini sparkline dots
-                                Row(
-                                  children: List.generate(5, (index) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(left: 3),
-                                      width: 4, height: 4 + (index * 2.0),
-                                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.6 + (index * 0.1)), borderRadius: BorderRadius.circular(2)),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Builder(builder: (context) {
+                                    final thisMonthAdded = provider.subs.where((s) => !s.isFinished && s.dateAdded != null && s.dateAdded!.month == DateTime.now().month && s.dateAdded!.year == DateTime.now().year).fold(0.0, (sum, item) => sum + item.price);
+                                    final deletedSubsTotal = provider.subs.where((s) => s.isFinished).fold(0.0, (sum, item) => sum + item.price);
+                                    
+                                    final diff = thisMonthAdded - deletedSubsTotal;
+                                    final isUp = diff > 0;
+                                    final isDown = diff < 0;
+                                    
+                                    return Row(
+                                      children: [
+                                        Icon(isUp ? Icons.trending_up_rounded : isDown ? Icons.trending_down_rounded : Icons.ssid_chart_rounded, color: isUp ? Colors.greenAccent : isDown ? Colors.redAccent : Colors.white, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(isUp ? '+${currencyFormat.format(diff.abs()).replaceAll(RegExp(r'[^0-9KMB]'), '')}' : isDown ? '-${currencyFormat.format(diff.abs()).replaceAll(RegExp(r'[^0-9KMB]'), '')}' : 'Stabil', style: TextStyle(color: isUp ? Colors.greenAccent : isDown ? Colors.redAccent : Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                      ],
                                     );
                                   }),
-                                ),
-                              ],
+                                  const SizedBox(height: 8),
+                                  // Mini sparkline dots
+                                  Row(
+                                    children: List.generate(5, (index) {
+                                      return Container(
+                                        margin: const EdgeInsets.only(left: 3),
+                                        width: 4, height: 4 + (index * 2.0),
+                                        decoration: BoxDecoration(color: Colors.white.withOpacity(0.6 + (index * 0.1)), borderRadius: BorderRadius.circular(2)),
+                                      );
+                                    }),
+                                  ),
+                                ],
+                              ),
                             )
                           ],
                         ),
@@ -1203,6 +1220,59 @@ class _HomeViewState extends State<_HomeView> {
               ),
             ),
           ),
+
+          // QUICK INSIGHTS CARD
+            SliverToBoxAdapter(
+              child: FadeInSlide(delay: const Duration(milliseconds: 250),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), shape: BoxShape.circle),
+                        child: const Icon(Icons.lightbulb_outline_rounded, color: Color(0xFF2563EB), size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(tr('Insight Cepat', 'Quick Insight'), style: const TextStyle(color: Colors.black45, fontSize: 11, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Builder(builder: (context) {
+                              if (provider.activeSubs.isEmpty || categoryTotals.isEmpty) {
+                                return Text('Belum ada data insight yang bisa ditampilkan. Tambahkan layanan berlangganan Anda terlebih dahulu.', style: TextStyle(color: textColor.withValues(alpha: 0.6), fontSize: 12, height: 1.4));
+                              }
+                              var topCategory = categoryTotals.entries.reduce((a, b) => a.value > b.value ? a : b);
+                              return RichText(
+                                text: TextSpan(
+                                  style: TextStyle(color: textColor, fontSize: 13, height: 1.4),
+                                  children: [
+                                    const TextSpan(text: 'Pengeluaran terbesar Anda ada di kategori '),
+                                    TextSpan(text: topCategory.key, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2563EB))),
+                                    TextSpan(text: ' sejumlah '),
+                                    TextSpan(text: currencyFormat.format(topCategory.value), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    const TextSpan(text: '.'),
+                                  ]
+                                )
+                              );
+                            }),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
           // CATEGORY FILTER & UPCOMING BILLS TITLE
           SliverToBoxAdapter(
@@ -1947,6 +2017,53 @@ class _StatsViewState extends State<_StatsView> {
               );
             }).toList(),
             
+            const SizedBox(height: 32),
+            if (provider.activeSubs.isNotEmpty) ...[
+              Text(
+                tr('Layanan Termahal', 'Most Expensive Services'),
+                style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)
+              ),
+              const SizedBox(height: 16),
+              ...() {
+                final activeSubs = List.from(provider.activeSubs);
+                activeSubs.sort((a, b) => (b as Subscription).price.compareTo((a as Subscription).price));
+                final top3 = activeSubs.take(3).toList();
+                
+                return top3.map((sub) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(color: CategoryUtils.getColor(sub.category).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
+                          child: Icon(Icons.subscriptions_rounded, color: CategoryUtils.getColor(sub.category)),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(sub.name, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 4),
+                              Text(sub.category, style: TextStyle(color: subTextColor, fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                        Text(currencyFormat.format(sub.price), style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                  );
+                }).toList();
+              }()
+            ],
+
             const SizedBox(height: 80),
           ],
         ),

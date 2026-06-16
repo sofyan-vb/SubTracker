@@ -483,22 +483,8 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         }
                                       },
                                       child: _isFormLoading 
-                                      ? Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(tr('Memuat', 'Loading'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
-                                            const SizedBox(width: 8),
-                                            const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0)),
-                                          ],
-                                        )
-                                      : Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
-                                            const SizedBox(width: 8),
-                                            const Icon(Icons.arrow_forward_rounded, size: 20),
-                                          ],
-                                        ),
+                                      ? WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0)
+                                      : Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
                                     ),
                                   );
                                 },
@@ -529,9 +515,15 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(imagePath, width: double.infinity, fit: BoxFit.cover, alignment: alignment),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.black12, width: 1.5),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(imagePath, width: double.infinity, fit: BoxFit.cover, alignment: alignment),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -567,6 +559,11 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
   late Animation<double> _arrowSlide;
 
   bool _isLoading = false; 
+  String _activeUserName = '';
+  List<String> _savedUsers = [];
+  bool _isManualLogin = false;
+  Map<String, String?> _userPhotos = {};
+  late TextEditingController _nameCtrl;
 
 
   void _showNoInternetDialog(BuildContext context) {
@@ -660,15 +657,88 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
     );
   }
 
-  Future<void> _loadPhoto() async {
+  Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
-    if (mounted) setState(() { _base64Image = prefs.getString('profile_image'); });
+    if (mounted) {
+      setState(() { 
+        _isManualLogin = prefs.getBool('login_mode_manual') ?? false;
+        _activeUserName = widget.userName;
+        _nameCtrl.text = _activeUserName;
+        _savedUsers = prefs.getStringList('saved_users') ?? [];
+        if (_activeUserName.isNotEmpty && !_savedUsers.contains(_activeUserName)) {
+           _savedUsers.insert(0, _activeUserName);
+        }
+        for (var user in _savedUsers) {
+          _userPhotos[user] = prefs.getString('user_photo_$user');
+        }
+        _base64Image = _isManualLogin ? prefs.getString('profile_image') : _userPhotos[_activeUserName] ?? prefs.getString('profile_image');
+      });
+    }
+  }
+
+  void _showUserSelector() {
+    if (_savedUsers.isEmpty) return;
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.black12, borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              const Text('Pilih Pengguna', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+              const SizedBox(height: 16),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _savedUsers.length,
+                itemBuilder: (context, index) {
+                  final name = _savedUsers[index];
+                  final photoBase64 = _userPhotos[name];
+                  final isSelected = name == _activeUserName;
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: isSelected ? const Color(0xFF2563EB) : Colors.grey[200],
+                      backgroundImage: photoBase64 != null ? MemoryImage(base64Decode(photoBase64)) : null,
+                      child: photoBase64 == null ? Icon(Icons.person, color: isSelected ? Colors.white : Colors.black54) : null,
+                    ),
+                    title: Text(name, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, color: const Color(0xFF1E293B))),
+                    trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: Colors.green) : null,
+                    onTap: () async {
+                      Navigator.pop(ctx);
+                      setState(() {
+                        _activeUserName = name;
+                        _base64Image = _userPhotos[name];
+                        _nameCtrl.text = name;
+                      });
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('user_name', name);
+                      if (context.mounted) {
+                        Provider.of<SubProvider>(context, listen: false).loadData();
+                      }
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      }
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    _loadPhoto();
+    _activeUserName = widget.userName;
+    _nameCtrl = TextEditingController(text: _activeUserName);
+    _loadData();
     _logoCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut));
 
@@ -692,6 +762,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
 
   @override
   void dispose() {
+    _nameCtrl.dispose();
     _logoCtrl.dispose();
     _textCtrl.dispose();
     _arrowCtrl.dispose();
@@ -704,141 +775,228 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
       valueListenable: languageNotifier,
       builder: (context, lang, child) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F7FA),
+          backgroundColor: Colors.white,
           body: Stack(
             alignment: Alignment.center,
             children: [
-              // 1. Gambar Background Estetis (welcome3.jpg)
               Positioned.fill(
-                child: Image.asset(
-                  'assets/welcome3.jpg',
-                  fit: BoxFit.cover,
+                child: Container(
+                  color: const Color(0xFFF5F7FA).withOpacity(0.5),
                 ),
               ),
               
-             
-              Positioned.fill(
+              // Elemen Desain Abstrak di Latar Belakang
+              Positioned(
+                top: -100,
+                right: -50,
                 child: Container(
-                  color: const Color(0xFFF5F7FA).withOpacity(0.90),
+                  width: 300,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF2563EB).withOpacity(0.15),
+                  ),
                 ),
               ),
-
-            
+              Positioned(
+                top: 50,
+                left: -80,
+                child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFF2563EB).withOpacity(0.10),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -150,
+                left: -50,
+                child: Container(
+                  width: 400,
+                  height: 400,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFFFD700).withOpacity(0.35),
+                  ),
+                ),
+              ),
+              
               SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SlideTransition(
-                      position: _textSlide,
-                      child: FadeTransition(
-                        opacity: _textOpacity,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      tr('Selamat Datang Kembali', 'Welcome Back'),
-                                      style: const TextStyle(
-                                        color: Color(0xFF1E293B),
-                                        fontSize: 34,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 30),
-                                    ScaleTransition(
-                                      scale: _logoScale,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.black12, width: 2.5)),
-                                        child: CircleAvatar(
-                                          radius: 55,
-                                          backgroundColor: Colors.white10,
-                                          backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
-                                          child: _base64Image == null ? const Icon(Icons.account_circle, size: 80, color: Colors.black54) : null,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 20),
-                                    Text(
-                                      widget.userName.isEmpty ? 'SubTracker' : widget.userName,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: Color(0xFF1E293B),
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 30),
+                      SlideTransition(
+                        position: _textSlide,
+                        child: FadeTransition(
+                          opacity: _textOpacity,
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.asset(
+                                  'assets/icon.png',
+                                  height: 60,
+                                  width: 60,
+                                  fit: BoxFit.cover,
                                 ),
                               ),
-                            ),
-                          ),
-                  ],
-                ),
-              ),
-
-              SafeArea(
-                child: Align(
-                  alignment: Alignment.bottomRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0, right: 16.0),
-                    child: SlideTransition(
-                      position: _textSlide,
-                      child: FadeTransition(
-                        opacity: _textOpacity,
-                        child: TextButton(
-                          onPressed: _isLoading
-                              ? null
-                              : () async {
-                                  setState(() {
-                                    _isLoading = true;
-                                  });
-                                  await context.read<SubProvider>().ensureLoaded();
-                                  await Future.delayed(const Duration(milliseconds: 800));
-                                  if (mounted) {
-                                    widget.onEnter();
-                                  }
-                                },
-                          child: _isLoading
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      tr('Memuat', 'Loading'),
-                                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B), letterSpacing: 1.2),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Padding(
-                                      padding: EdgeInsets.only(top: 4.0),
-                                      child: WavyDotsProgressIndicator(color: Color(0xFF1E293B), dotSize: 5.0),
-                                    ),
-                                  ],
-                                )
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      'MASUK',
-                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1E293B), letterSpacing: 1.2),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    AnimatedBuilder(
-                                      animation: _arrowSlide,
-                                      builder: (context, child) {
-                                        return Transform.translate(
-                                          offset: Offset(_arrowSlide.value, 0),
-                                          child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                                        );
-                                      },
-                                    ),
-                                  ],
+                              const SizedBox(width: 12),
+                              const Text(
+                                'SubTracker',
+                                style: TextStyle(
+                                  color: Color(0xFF1E293B),
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.5,
                                 ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
+                      
+                      const SizedBox(height: 60),
+                      
+                      SlideTransition(
+                        position: _textSlide,
+                        child: FadeTransition(
+                          opacity: _textOpacity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(tr('Halo,', 'Hello,'), style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Selamat', 'Welcome'), style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Datang Kembali', 'Back'), style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), height: 1.1, letterSpacing: -1.0)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 48),
+                      
+                      SlideTransition(
+                        position: _textSlide,
+                        child: FadeTransition(
+                          opacity: _textOpacity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(tr('Masuk sebagai', 'Sign in as'), style: const TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 8),
+                              if (_isManualLogin)
+                                TextField(
+                                  controller: _nameCtrl,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _activeUserName = val;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.grey[100],
+                                    hintText: tr('Masukkan nama Anda', 'Enter your name'),
+                                    hintStyle: TextStyle(color: Colors.black.withOpacity(0.3), fontWeight: FontWeight.normal),
+                                    prefixIcon: const Icon(Icons.person, color: Colors.black54),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12, width: 1)),
+                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12, width: 1)),
+                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
+                                  ),
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                )
+                              else
+                                GestureDetector(
+                                  onTap: _showUserSelector,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: Colors.black12, width: 1),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        ScaleTransition(
+                                          scale: _logoScale,
+                                          child: CircleAvatar(
+                                            radius: 24,
+                                            backgroundColor: Colors.white,
+                                            backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
+                                            child: _base64Image == null ? const Icon(Icons.person_rounded, size: 30, color: Colors.black54) : null,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Text(
+                                            _activeUserName.isEmpty ? 'SubTracker User' : _activeUserName,
+                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        Icon(
+                                          _savedUsers.length > 1 ? Icons.expand_more_rounded : Icons.check_circle_rounded, 
+                                          color: _savedUsers.length > 1 ? Colors.black54 : Colors.green, 
+                                          size: 24
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const Spacer(),
+                      
+                      SlideTransition(
+                        position: _textSlide,
+                        child: FadeTransition(
+                          opacity: _textOpacity,
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 18),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                elevation: 0,
+                              ),
+                              onPressed: _isLoading
+                                  ? null
+                                  : () async {
+                                      setState(() {
+                                        _isLoading = true;
+                                      });
+                                      if (_isManualLogin) {
+                                        final prefs = await SharedPreferences.getInstance();
+                                        await prefs.setString('user_name', _nameCtrl.text.trim());
+                                        if (context.mounted) {
+                                          Provider.of<SubProvider>(context, listen: false).loadData();
+                                        }
+                                      }
+                                      await context.read<SubProvider>().ensureLoaded();
+                                      await Future.delayed(const Duration(milliseconds: 800));
+                                      if (mounted) {
+                                        widget.onEnter();
+                                      }
+                                    },
+                              child: _isLoading
+                                  ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
+                                  : Text(tr('Masuk', 'Enter'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
               ),

@@ -174,9 +174,9 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                       child: Checkbox(
                         value: _isAgreed,
                         onChanged: _hasScrolledToBottom ? (value) => setState(() => _isAgreed = value ?? false) : null,
-                        activeColor: const Color(0xFF0D9488),
+                        activeColor: const Color(0xFF2563EB),
                         checkColor: Colors.white,
-                        side: BorderSide(color: _hasScrolledToBottom ? (_isAgreed ? const Color(0xFF0D9488) : Colors.black54) : Colors.black26, width: 2),
+                        side: BorderSide(color: _hasScrolledToBottom ? (_isAgreed ? const Color(0xFF2563EB) : Colors.black54) : Colors.black26, width: 2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
                     ),
@@ -208,16 +208,11 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     ),
                     onPressed: (_isLoading || !_isAgreed) ? null : () => _acceptTerms(context),
                     child: _isLoading 
-                        ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
+                        ? Padding(padding: const EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: TextStyle(color: _isAgreed ? Colors.white : Colors.white30, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
-                              const SizedBox(width: 8),
-                              if (_isAgreed)
-                                const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20)
-                              else
-                                const Icon(Icons.arrow_forward_rounded, color: Colors.white30, size: 20),
                             ],
                           ),
                   ),

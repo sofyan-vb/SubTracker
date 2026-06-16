@@ -31,13 +31,38 @@ class SubProvider extends ChangeNotifier {
 
   Future<void> loadData() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? savedData = prefs.getString('saved_subs');
+    final String userName = prefs.getString('user_name') ?? '';
+    final bool isManualMode = prefs.getBool('login_mode_manual') ?? false;
+    final String dataKey = (!isManualMode && userName.isNotEmpty) ? 'saved_subs_$userName' : 'saved_subs';
+
+    // Migrasi data lama jika pengguna belum memiliki data khusus namanya, tapi data global ada
+    if (userName.isNotEmpty && !prefs.containsKey(dataKey) && prefs.containsKey('saved_subs')) {
+      final String? globalData = prefs.getString('saved_subs');
+      if (globalData != null) {
+        await prefs.setString(dataKey, globalData);
+      }
+    }
+
+    final String? savedData = prefs.getString(dataKey);
 
     if (savedData != null) {
       final List<dynamic> decodedData = jsonDecode(savedData);
       _subs = decodedData.map((item) => Subscription.fromJson(item)).toList();
+    } else {
+      _subs = [];
     }
     _isLoaded = true;
+    notifyListeners();
+  }
+
+  Future<void> resetData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String userName = prefs.getString('user_name') ?? '';
+    final bool isManualMode = prefs.getBool('login_mode_manual') ?? false;
+    final String dataKey = (!isManualMode && userName.isNotEmpty) ? 'saved_subs_$userName' : 'saved_subs';
+    
+    await prefs.remove(dataKey);
+    _subs.clear();
     notifyListeners();
   }
 
@@ -212,21 +237,18 @@ class SubProvider extends ChangeNotifier {
 
   Future<void> _saveData() async {
     final prefs = await SharedPreferences.getInstance();
+    final String userName = prefs.getString('user_name') ?? '';
+    final bool isManualMode = prefs.getBool('login_mode_manual') ?? false;
+    final String dataKey = (!isManualMode && userName.isNotEmpty) ? 'saved_subs_$userName' : 'saved_subs';
+    
     final String encodedData = jsonEncode(
       _subs.map((sub) => sub.toJson()).toList(),
     );
-    await prefs.setString('saved_subs', encodedData);
+    await prefs.setString(dataKey, encodedData);
   }
 
   Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? savedData = prefs.getString('saved_subs');
-
-    if (savedData != null) {
-      final List<dynamic> decodedData = jsonDecode(savedData);
-      _subs = decodedData.map((item) => Subscription.fromJson(item)).toList();
-      notifyListeners();
-    }
+    await loadData();
   }
 
   Future<String> exportBackup() async {
