@@ -63,16 +63,16 @@ class HistoryScreen extends StatelessWidget {
                   children: [
                     Icon(
                       provider.categoryFilter == 'Semua Layanan' ? Icons.apps_rounded : CategoryUtils.getIcon(provider.categoryFilter), 
-                      color: Color(0xFF1E293B), 
+                      color: Colors.white, 
                       size: 16
                     ),
                     const SizedBox(width: 2),
-                    const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF1E293B), size: 14),
+                    const Icon(Icons.keyboard_arrow_down_rounded, color: Colors.white, size: 14),
                     if (provider.categoryFilter != 'Semua Layanan') ...[
                       const SizedBox(width: 6),
                       Text(
                         provider.categoryFilter,
-                        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 12, fontWeight: FontWeight.bold)
+                        style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)
                       )
                     ],
                   ],

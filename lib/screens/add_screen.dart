@@ -169,8 +169,8 @@ class _AddScreenState extends State<AddScreen> {
 
                         
                         final notifTitle = savedName.isEmpty 
-                            ? tr('Pengingat: Tagihan ${newSub.name} 💸', 'Reminder: ${newSub.name} Bill 💸')
-                            : tr('Halo $savedName! Pengingat: Tagihan ${newSub.name} 💸', 'Hi $savedName! Reminder: ${newSub.name} Bill 💸');
+                            ? tr('Tagihan ${newSub.name} 💸', '${newSub.name} Bill 💸')
+                            : tr('Halo $savedName! Tagihan ${newSub.name} 💸', 'Hi $savedName! ${newSub.name} Bill 💸');
                         
                         final notifBody = tr('Pembayaran layanan sebesar Rp ${_priceCtrl.text} telah tiba waktunya.', 'Your service payment of \$${_priceCtrl.text} is due.');
                         final bool isUsingAlarm = _selectedNotifType == tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)');

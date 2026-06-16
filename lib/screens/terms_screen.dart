@@ -17,16 +17,30 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
   bool _isAgreed = false;
   late AnimationController _arrowCtrl;
   late Animation<double> _arrowSlide;
+  final ScrollController _scrollController = ScrollController();
+  bool _hasScrolledToBottom = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     _arrowCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
     _arrowSlide = Tween<double>(begin: 0.0, end: 6.0).animate(CurvedAnimation(parent: _arrowCtrl, curve: Curves.easeInOut));
   }
 
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 20) {
+      if (!_hasScrolledToBottom) {
+        setState(() {
+          _hasScrolledToBottom = true;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _scrollController.dispose();
     _arrowCtrl.dispose();
     super.dispose();
   }
@@ -85,6 +99,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     border: Border.all(color: Colors.black12),
                   ),
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     physics: const BouncingScrollPhysics(),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,7 +162,9 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
               ),
               const SizedBox(height: 12),
               GestureDetector(
-                onTap: () => setState(() => _isAgreed = !_isAgreed),
+                onTap: _hasScrolledToBottom ? () => setState(() => _isAgreed = !_isAgreed) : () {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Harap scroll sampai ke bawah terlebih dahulu', 'Please scroll to the bottom first')), behavior: SnackBarBehavior.floating));
+                },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -156,10 +173,10 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                       width: 24,
                       child: Checkbox(
                         value: _isAgreed,
-                        onChanged: (value) => setState(() => _isAgreed = value ?? false),
+                        onChanged: _hasScrolledToBottom ? (value) => setState(() => _isAgreed = value ?? false) : null,
                         activeColor: const Color(0xFF0D9488),
                         checkColor: Colors.white,
-                        side: BorderSide(color: _isAgreed ? const Color(0xFF0D9488) : Colors.white54, width: 2),
+                        side: BorderSide(color: _hasScrolledToBottom ? (_isAgreed ? const Color(0xFF0D9488) : Colors.black54) : Colors.black26, width: 2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
                     ),
@@ -167,7 +184,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     Expanded(
                       child: Text(
                         tr('Saya telah membaca dan menyetujui Syarat & Ketentuan', 'I have read and agree to the Terms & Conditions'),
-                        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: _hasScrolledToBottom ? const Color(0xFF1E293B) : Colors.black38, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -181,27 +198,26 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     onPressed: _isLoading ? null : _declineTerms,
                     child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
                   ),
-                  TextButton(
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      elevation: 4,
+                    ),
                     onPressed: (_isLoading || !_isAgreed) ? null : () => _acceptTerms(context),
                     child: _isLoading 
-                        ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Color(0xFF1E293B), dotSize: 5.0))
+                        ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: TextStyle(color: _isAgreed ? Colors.white : Colors.white30, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                               const SizedBox(width: 8),
                               if (_isAgreed)
-                                AnimatedBuilder(
-                                  animation: _arrowSlide,
-                                  builder: (context, child) {
-                                    return Transform.translate(
-                                      offset: Offset(_arrowSlide.value, 0),
-                                      child: const Icon(Icons.arrow_forward_rounded, color: Color(0xFF1E293B), size: 20),
-                                    );
-                                  },
-                                )
+                                const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20)
                               else
-                                const Icon(Icons.arrow_forward_rounded, color: Colors.black38, size: 20),
+                                const Icon(Icons.arrow_forward_rounded, color: Colors.white30, size: 20),
                             ],
                           ),
                   ),

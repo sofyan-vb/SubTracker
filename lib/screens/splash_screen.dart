@@ -192,7 +192,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             ),
 
           
-          if (_state == SplashState.form || _state == SplashState.choice || _state == SplashState.loading) ...[
+          if (_state == SplashState.choice || _state == SplashState.form || _state == SplashState.loading) ...[
             const Positioned.fill(
               child: StaggeredAlbumBackground(
                 img1: 'assets/welcome1.jpg', 
@@ -200,6 +200,10 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 img3: 'assets/welcome2.jpg', 
               ),
             ),
+            if (_state == SplashState.form || _state == SplashState.loading)
+              Positioned.fill(
+                child: Container(color: Colors.white.withOpacity(0.65)), // Overlay for form readability
+              ),
           ],
 
         
@@ -433,7 +437,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           },
                                           child: Text(tr('KEMBALI', 'BACK'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
                                         ),
-                                        TextButton(
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: const Color(0xFF2563EB),
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                            elevation: 4,
+                                          ),
                                           onPressed: () {
                                             if (_onboardingPageIndex < 2) {
                                               _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
@@ -444,17 +455,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
+                                              Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
                                               const SizedBox(width: 8),
-                                              AnimatedBuilder(
-                                                animation: _arrowSlide,
-                                                builder: (context, child) {
-                                                  return Transform.translate(
-                                                    offset: Offset(_arrowSlide.value, 0),
-                                                    child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                                                  );
-                                                },
-                                              ),
+                                              const Icon(Icons.arrow_forward_rounded, size: 20),
                                             ],
                                           ),
                                         ),
@@ -464,7 +467,14 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   
                                   return Align(
                                     alignment: Alignment.centerRight,
-                                    child: TextButton(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF2563EB),
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                        elevation: 4,
+                                      ),
                                       onPressed: _state == SplashState.loading ? null : () {
                                         if (_state == SplashState.onboarding) {
                                           _pageController.nextPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
@@ -476,25 +486,17 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                       ? Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text(tr('Memuat', 'Loading'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
+                                            Text(tr('Memuat', 'Loading'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
                                             const SizedBox(width: 8),
-                                            const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Color(0xFF1E293B), dotSize: 5.0)),
+                                            const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0)),
                                           ],
                                         )
                                       : Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
+                                            Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
                                             const SizedBox(width: 8),
-                                            AnimatedBuilder(
-                                              animation: _arrowSlide,
-                                              builder: (context, child) {
-                                                return Transform.translate(
-                                                  offset: Offset(_arrowSlide.value, 0),
-                                                  child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
-                                                );
-                                              },
-                                            ),
+                                            const Icon(Icons.arrow_forward_rounded, size: 20),
                                           ],
                                         ),
                                     ),

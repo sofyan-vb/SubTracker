@@ -33,13 +33,13 @@ class ToastUtils {
                 );
               },
               child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 40),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: bgColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, 10))
+                    BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 8))
                   ],
                 ),
                 child: Row(

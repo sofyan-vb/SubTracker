@@ -74,6 +74,7 @@ class GateKeeper extends StatefulWidget {
 
 class _GateKeeperState extends State<GateKeeper> {
   bool _showLanguageSelect = false;
+  String? _selectedLanguage;
 
   @override
   void initState() {
@@ -96,7 +97,7 @@ class _GateKeeperState extends State<GateKeeper> {
       }
     } else {
       
-      await Future.delayed(const Duration(milliseconds: 5100));
+      await Future.delayed(const Duration(milliseconds: 6500));
       if (mounted) {
         if (hasAccepted) {
           Navigator.of(context).pushReplacement(
@@ -119,68 +120,86 @@ class _GateKeeperState extends State<GateKeeper> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(28.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Stack(
               children: [
-                const Icon(Icons.language_rounded, size: 80, color: Color(0xFF2563EB)),
-                const SizedBox(height: 24),
-                const Text('Choose Language', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
-                const Text('Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54)),
-                const SizedBox(height: 48),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.language_rounded, size: 80, color: Color(0xFF2563EB)),
+                    const SizedBox(height: 24),
+                    const Text('Choose Language', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
+                    const Text('Pilih Bahasa', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black54)),
+                    const SizedBox(height: 48),
 
-                InkWell(
-                  onTap: () async {
-                    languageNotifier.value = 'EN';
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('app_lang', 'EN');
-                    if (mounted) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => const TermsScreen()),
-                      );
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+                    InkWell(
+                      onTap: () => setState(() => _selectedLanguage = 'EN'),
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 5))],
-                      border: Border.all(color: Colors.black12, width: 1.5),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                          color: _selectedLanguage == 'EN' ? const Color(0xFF2563EB) : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 5))],
+                          border: Border.all(color: _selectedLanguage == 'EN' ? const Color(0xFF2563EB) : Colors.black12, width: 1.5),
+                        ),
+                        child: Center(
+                          child: Text('🇬🇧   English', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: _selectedLanguage == 'EN' ? Colors.white : const Color(0xFF1E293B), letterSpacing: 1.0)),
+                        ),
+                      ),
                     ),
-                    child: const Center(
-                      child: Text('🇬🇧   English', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
+                    const SizedBox(height: 16),
+                    InkWell(
+                      onTap: () => setState(() => _selectedLanguage = 'ID'),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                          color: _selectedLanguage == 'ID' ? const Color(0xFF2563EB) : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 5))],
+                          border: Border.all(color: _selectedLanguage == 'ID' ? const Color(0xFF2563EB) : Colors.black12, width: 1.5),
+                        ),
+                        child: Center(
+                          child: Text('🇮🇩   Bahasa Indonesia', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: _selectedLanguage == 'ID' ? Colors.white : const Color(0xFF1E293B), letterSpacing: 1.0)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 48),
+                  ],
+                ),
+                if (_selectedLanguage != null)
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 4,
+                      ),
+                      onPressed: () async {
+                        languageNotifier.value = _selectedLanguage!;
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('app_lang', _selectedLanguage!);
+                        if (mounted) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (context) => const TermsScreen()),
+                          );
+                        }
+                      },
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_selectedLanguage == 'EN' ? 'NEXT' : 'LANJUT', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_forward_rounded, size: 20),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                InkWell(
-                  onTap: () async {
-                    languageNotifier.value = 'ID';
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('app_lang', 'ID');
-                    if (mounted) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => const TermsScreen()),
-                      );
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 5))],
-                      border: Border.all(color: Colors.black12, width: 1.5),
-                    ),
-                    child: const Center(
-                      child: Text('🇮🇩   Bahasa Indonesia', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: 1.0)),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
