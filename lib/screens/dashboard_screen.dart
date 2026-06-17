@@ -482,7 +482,99 @@ class _HomeViewState extends State<_HomeView> {
     }
   }
 
-  
+
+  void _showProfileDetails(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          backgroundColor: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                
+                ValueListenableBuilder<String?>(
+                  valueListenable: userPhotoNotifier,
+                  builder: (context, photo, child) {
+                    return Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF2563EB), width: 3),
+                      ),
+                      child: CircleAvatar(
+                        radius: 45,
+                        backgroundColor: Colors.grey.shade100,
+                        backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
+                        child: photo == null ? const Icon(Icons.person, size: 45, color: Colors.grey) : null,
+                      ),
+                    );
+                  }
+                ),
+                const SizedBox(height: 16),
+               
+                ValueListenableBuilder<String>(
+                  valueListenable: userNameNotifier,
+                  builder: (context, name, child) {
+                    return Text(
+                      name.isEmpty ? 'SubTracker User' : name,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                    );
+                  }
+                ),
+                const SizedBox(height: 6),
+                Text(tr('Pengguna Aktif', 'Active User'), style: const TextStyle(color: Colors.black54, fontSize: 13)),
+                const SizedBox(height: 24),
+                
+                Consumer<SubProvider>(
+                  builder: (context, provider, child) {
+                    final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                          children: [
+                            Text('${provider.activeSubs.length}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF2563EB))),
+                            Text(tr('Langganan', 'Subscriptions'), style: const TextStyle(fontSize: 11, color: Colors.black54)),
+                          ],
+                        ),
+                        Container(width: 1, height: 30, color: Colors.grey.shade200),
+                        Column(
+                          children: [
+                            Text(currencyFormat.format(provider.totalMonthly), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.redAccent)),
+                            Text(tr('Pengeluaran', 'Expenses'), style: const TextStyle(fontSize: 11, color: Colors.black54)),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                ),
+                const SizedBox(height: 30),
+                
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade100,
+                      foregroundColor: const Color(0xFF1E293B),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
+                    ),
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text(tr('Tutup', 'Close'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                )
+              ],
+            ),
+          ),
+        );
+      }
+    );
+  }
 
   void _showCategoryFilterSheet(BuildContext context, Color bgColor, Color textColor) {
     showModalBottomSheet(
@@ -526,7 +618,6 @@ class _HomeViewState extends State<_HomeView> {
       }
     );
   }
-
 
 
   void _showNotificationsSheet(BuildContext context, Color bgColor, Color textColor) {
@@ -747,7 +838,7 @@ class _HomeViewState extends State<_HomeView> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: Colors.white, textColor: const Color(0xFF1E293B), cardBg: Colors.white)));
+                                _showProfileDetails(context);
                               },
                               child: ValueListenableBuilder<String?>(
                                 valueListenable: userPhotoNotifier,
@@ -757,6 +848,7 @@ class _HomeViewState extends State<_HomeView> {
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.2),
                                       shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 2.0),
                                     ),
                                     child: photo == null 
                                       ? const Icon(Icons.person, size: 24, color: Colors.white)

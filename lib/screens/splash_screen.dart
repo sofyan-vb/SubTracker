@@ -785,7 +785,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                 ),
               ),
               
-              // Elemen Desain Abstrak di Latar Belakang
+              
               Positioned(
                 top: -100,
                 right: -50,
@@ -818,7 +818,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                   height: 400,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFFFFD700).withOpacity(0.35),
+                    color: const Color(0xFF2563EB).withOpacity(0.35),
                   ),
                 ),
               ),

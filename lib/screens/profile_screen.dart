@@ -97,8 +97,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
     if (confirm == true && mounted) {
+     
       await Provider.of<SubProvider>(context, listen: false).resetData();
-      ToastUtils.show(context, 'Data berhasil direset', icon: Icons.check_circle, iconColor: Colors.green);
+      ToastUtils.show(context, 'Data layanan berhasil direset', icon: Icons.check_circle, iconColor: Colors.green);
+     
     }
   }
 
