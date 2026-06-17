@@ -386,13 +386,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
 
               bottomNavigationBar: BottomAppBar(
-                color: bottomNavBg, 
+                color: Colors.transparent, // Dibuat transparan agar gradasi terlihat
                 elevation: 10,
                 shadowColor: Colors.black26,
                 shape: const CircularNotchedRectangle(),
                 notchMargin: 8,
-                child: SizedBox(
+                clipBehavior: Clip.antiAlias, // Sangat penting agar gradasi tidak menutupi lengkungan tombol tambah
+                padding: EdgeInsets.zero, // Menghilangkan batas agar warna penuh
+                child: Container(
                   height: 60,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFDBEAFE), Colors.white], // Gradasi biru sangat lembut (Soft Pastel Blue) ke Putih
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround, 
                     children: [
@@ -402,7 +411,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
+                            Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
                           ],
                         ),
                       ),
@@ -412,18 +421,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
+                            Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 48), // Space for FAB
+                      const SizedBox(width: 48), // Ruang kosong untuk tombol Tambah (FAB) di tengah
                       InkWell(
                         onTap: () => setState(() => _currentIndex = 2),
                         borderRadius: BorderRadius.circular(12),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
+                            Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
                           ],
                         ),
                       ),
@@ -433,7 +442,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.grey[400], size: 28),
+                            Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
                           ],
                         ),
                       ),
@@ -1899,7 +1908,7 @@ class _StatsViewState extends State<_StatsView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Month Selector
+           
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1911,7 +1920,7 @@ class _StatsViewState extends State<_StatsView> {
             ),
             const SizedBox(height: 16),
             
-            // Total Spending
+            
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -1939,7 +1948,7 @@ class _StatsViewState extends State<_StatsView> {
             
             const SizedBox(height: 24),
             
-            // Real Data Line Chart (Based on category distribution for visual variance)
+            
             SizedBox(
               height: 150,
               child: LineChart(
@@ -2001,7 +2010,7 @@ class _StatsViewState extends State<_StatsView> {
             
             const SizedBox(height: 32),
             
-            // Quick Analysis Note
+         
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -2035,37 +2044,128 @@ class _StatsViewState extends State<_StatsView> {
               ),
             ),
             
-            // Detail by Service Pie Chart
+            
             if (provider.activeSubs.isNotEmpty) ...[
               Text(tr('Distribusi Layanan', 'Service Distribution'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 24),
-              SizedBox(
-                height: 220,
-                child: PieChart(
-                  PieChartData(
-                    sectionsSpace: 2,
-                    centerSpaceRadius: 50,
-                    sections: () {
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 180,
+                      child: PieChart(
+                        PieChartData(
+                          sectionsSpace: 2,
+                          centerSpaceRadius: 40,
+                          sections: () {
+                            final activeSubs = List.from(provider.activeSubs);
+                            activeSubs.sort((a, b) => (b as Subscription).price.compareTo((a as Subscription).price));
+                            return activeSubs.map((sub) {
+                              final percentage = totalMonthly > 0 ? ((sub as Subscription).price / totalMonthly * 100) : 0.0;
+                              
+                              final isLarge = percentage > 5; 
+                              return PieChartSectionData(
+                                color: CategoryUtils.getColor(sub.category),
+                                value: sub.price,
+                                title: isLarge ? '${percentage.toStringAsFixed(0)}%' : '',
+                                radius: 50,
+                                titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white, shadows: [Shadow(color: Colors.black26, blurRadius: 2)]),
+                              );
+                            }).toList();
+                          }(),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                   
+                    ...(() {
                       final activeSubs = List.from(provider.activeSubs);
                       activeSubs.sort((a, b) => (b as Subscription).price.compareTo((a as Subscription).price));
                       return activeSubs.map((sub) {
                         final percentage = totalMonthly > 0 ? ((sub as Subscription).price / totalMonthly * 100) : 0.0;
-                        return PieChartSectionData(
-                          color: CategoryUtils.getColor(sub.category),
-                          value: sub.price,
-                          title: '${sub.name}\n${percentage.toStringAsFixed(0)}%',
-                          radius: 50,
-                          titleStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 14, height: 14,
+                                decoration: BoxDecoration(color: CategoryUtils.getColor(sub.category), shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(sub.name, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
+                              ),
+                              Text(currencyFormat.format(sub.price), style: TextStyle(color: subTextColor, fontSize: 13, fontWeight: FontWeight.w500)),
+                              const SizedBox(width: 12),
+                              SizedBox(
+                                width: 45,
+                                child: Text('${percentage.toStringAsFixed(1)}%', textAlign: TextAlign.right, style: const TextStyle(color: const Color(0xFF2563EB), fontSize: 13, fontWeight: FontWeight.w900)),
+                              ),
+                            ],
+                          ),
                         );
                       }).toList();
-                    }(),
-                  ),
+                    }())
+                  ],
                 ),
               ),
               const SizedBox(height: 32),
             ],
 
-            // Recent by Category
+            
+            if (provider.activeSubs.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)], // Gradasi Biru Cerah ke Biru Gelap
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                      child: const Icon(Icons.event_repeat_rounded, color: Colors.white, size: 28),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tr('Proyeksi Tagihan Tahunan', 'Annual Billing Projection'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              currencyFormat.format(totalMonthly * 12), 
+                              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(tr('Total biaya yang akan Anda keluarkan jika seluruh langganan saat ini berlanjut selama 1 tahun penuh.', 'Total cost if your current subscriptions continue for a full year.'), style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11, height: 1.4)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+
+    
             Text(
               tr('Kategori Pengeluaran', 'Recent by Category'),
               style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)

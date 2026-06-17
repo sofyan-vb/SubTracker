@@ -745,7 +745,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Text(
-                                          _activeUserName.isEmpty ? 'SubTracker User' : _activeUserName,
+                                          _activeUserName.isEmpty ? tr('Pengguna SubTracker', 'SubTracker User') : _activeUserName,
                                           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                                           maxLines: 1, overflow: TextOverflow.ellipsis,
                                         ),
