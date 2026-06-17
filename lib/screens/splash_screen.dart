@@ -561,109 +561,13 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
   bool _isLoading = false; 
   String _activeUserName = '';
   List<String> _savedUsers = [];
-  bool _isManualLogin = false;
   Map<String, String?> _userPhotos = {};
-  late TextEditingController _nameCtrl;
-
-
-  void _showNoInternetDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Center(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 32),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 16.0, sigmaY: 16.0),
-                child: Container(
-                  padding: const EdgeInsets.all(28),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withOpacity(0.12), width: 1.5),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF3B30).withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.wifi_off_rounded,
-                            color: Color(0xFFFF3B30),
-                            size: 40,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          tr('Koneksi Gagal', 'Connection Failed'),
-                          style: const TextStyle(
-                            color: Color(0xFF1E293B),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          tr(
-                            'Koneksi internet aktif diperlukan untuk masuk ke dashboard. Silakan periksa jaringan Anda.',
-                            'An active internet connection is required to enter the dashboard. Please check your network connection.'
-                          ),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 14,
-                            height: 1.4,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white.withOpacity(0.1),
-                              foregroundColor: Colors.white,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(color: Colors.white.withOpacity(0.15)),
-                              ),
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(
-                              tr('COBA LAGI', 'TRY AGAIN'),
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() { 
-        _isManualLogin = prefs.getBool('login_mode_manual') ?? false;
         _activeUserName = widget.userName;
-        _nameCtrl.text = _activeUserName;
         _savedUsers = prefs.getStringList('saved_users') ?? [];
         if (_activeUserName.isNotEmpty && !_savedUsers.contains(_activeUserName)) {
            _savedUsers.insert(0, _activeUserName);
@@ -671,7 +575,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
         for (var user in _savedUsers) {
           _userPhotos[user] = prefs.getString('user_photo_$user');
         }
-        _base64Image = _isManualLogin ? prefs.getString('profile_image') : _userPhotos[_activeUserName] ?? prefs.getString('profile_image');
+        _base64Image = _userPhotos[_activeUserName] ?? prefs.getString('profile_image');
       });
     }
   }
@@ -714,7 +618,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                       setState(() {
                         _activeUserName = name;
                         _base64Image = _userPhotos[name];
-                        _nameCtrl.text = name;
                       });
                       final prefs = await SharedPreferences.getInstance();
                       await prefs.setString('user_name', name);
@@ -737,7 +640,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
   void initState() {
     super.initState();
     _activeUserName = widget.userName;
-    _nameCtrl = TextEditingController(text: _activeUserName);
     _loadData();
     _logoCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200));
     _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _logoCtrl, curve: Curves.elasticOut));
@@ -745,10 +647,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
     _textCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 900));
     _textOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeIn));
     _textSlide = Tween<Offset>(begin: const Offset(0, 0.25), end: Offset.zero).animate(CurvedAnimation(parent: _textCtrl, curve: Curves.easeOutCubic));
-
-    // Animasi panah bergeser lembut pada tombol masuk
-    _arrowCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
-    _arrowSlide = Tween<double>(begin: 0.0, end: 6.0).animate(CurvedAnimation(parent: _arrowCtrl, curve: Curves.easeInOut));
 
     _startAnimations();
   }
@@ -762,10 +660,8 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
 
   @override
   void dispose() {
-    _nameCtrl.dispose();
     _logoCtrl.dispose();
     _textCtrl.dispose();
-    _arrowCtrl.dispose();
     super.dispose();
   }
 
@@ -779,49 +675,10 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
           body: Stack(
             alignment: Alignment.center,
             children: [
-              Positioned.fill(
-                child: Container(
-                  color: const Color(0xFFF5F7FA).withOpacity(0.5),
-                ),
-              ),
-              
-              
-              Positioned(
-                top: -100,
-                right: -50,
-                child: Container(
-                  width: 300,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF2563EB).withOpacity(0.15),
-                  ),
-                ),
-              ),
-              Positioned(
-                top: 50,
-                left: -80,
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF2563EB).withOpacity(0.10),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -150,
-                left: -50,
-                child: Container(
-                  width: 400,
-                  height: 400,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: const Color(0xFF2563EB).withOpacity(0.35),
-                  ),
-                ),
-              ),
+              Positioned.fill(child: Container(color: const Color(0xFFF5F7FA).withOpacity(0.5))),
+              Positioned(top: -100, right: -50, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.15)))),
+              Positioned(top: 50, left: -80, child: Container(width: 200, height: 200, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.10)))),
+              Positioned(top: MediaQuery.of(context).size.height - 250, left: -50, child: Container(width: 400, height: 400, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.15)))),
               
               SafeArea(
                 child: Padding(
@@ -836,32 +693,15 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                           opacity: _textOpacity,
                           child: Row(
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.asset(
-                                  'assets/icon.png',
-                                  height: 60,
-                                  width: 60,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                              ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset('assets/icon.png', height: 60, width: 60, fit: BoxFit.cover)),
                               const SizedBox(width: 12),
-                              const Text(
-                                'SubTracker',
-                                style: TextStyle(
-                                  color: Color(0xFF1E293B),
-                                  fontSize: 26,
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: -0.5,
-                                ),
-                              ),
+                              const Text('SubTracker', style: TextStyle(color: Color(0xFF1E293B), fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
                             ],
                           ),
                         ),
                       ),
                       
                       const SizedBox(height: 60),
-                      
                       SlideTransition(
                         position: _textSlide,
                         child: FadeTransition(
@@ -878,7 +718,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                       ),
                       
                       const SizedBox(height: 48),
-                      
                       SlideTransition(
                         position: _textSlide,
                         child: FadeTransition(
@@ -888,72 +727,40 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                             children: [
                               Text(tr('Masuk sebagai', 'Sign in as'), style: const TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
                               const SizedBox(height: 8),
-                              if (_isManualLogin)
-                                TextField(
-                                  controller: _nameCtrl,
-                                  onChanged: (val) {
-                                    setState(() {
-                                      _activeUserName = val;
-                                    });
-                                  },
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.grey[100],
-                                    hintText: tr('Masukkan nama Anda', 'Enter your name'),
-                                    hintStyle: TextStyle(color: Colors.black.withOpacity(0.3), fontWeight: FontWeight.normal),
-                                    prefixIcon: const Icon(Icons.person, color: Colors.black54),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12, width: 1)),
-                                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Colors.black12, width: 1)),
-                                    focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
-                                  ),
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
-                                )
-                              else
-                                GestureDetector(
-                                  onTap: _showUserSelector,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[100],
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: Colors.black12, width: 1),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        ScaleTransition(
-                                          scale: _logoScale,
-                                          child: CircleAvatar(
-                                            radius: 24,
-                                            backgroundColor: Colors.white,
-                                            backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
-                                            child: _base64Image == null ? const Icon(Icons.person_rounded, size: 30, color: Colors.black54) : null,
-                                          ),
+                              GestureDetector(
+                                onTap: _showUserSelector,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.black12, width: 1)),
+                                  child: Row(
+                                    children: [
+                                      ScaleTransition(
+                                        scale: _logoScale,
+                                        child: CircleAvatar(
+                                          radius: 24, backgroundColor: Colors.white,
+                                          backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
+                                          child: _base64Image == null ? const Icon(Icons.person_rounded, size: 30, color: Colors.black54) : null,
                                         ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: Text(
-                                            _activeUserName.isEmpty ? 'SubTracker User' : _activeUserName,
-                                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
-                                            maxLines: 1, overflow: TextOverflow.ellipsis,
-                                          ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Text(
+                                          _activeUserName.isEmpty ? 'SubTracker User' : _activeUserName,
+                                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                          maxLines: 1, overflow: TextOverflow.ellipsis,
                                         ),
-                                        Icon(
-                                          _savedUsers.length > 1 ? Icons.expand_more_rounded : Icons.check_circle_rounded, 
-                                          color: _savedUsers.length > 1 ? Colors.black54 : Colors.green, 
-                                          size: 24
-                                        ),
-                                      ],
-                                    ),
+                                      ),
+                                      Icon(_savedUsers.length > 1 ? Icons.expand_more_rounded : Icons.check_circle_rounded, color: _savedUsers.length > 1 ? Colors.black54 : Colors.green, size: 24),
+                                    ],
                                   ),
                                 ),
+                              ),
                             ],
                           ),
                         ),
                       ),
-                      
+      
                       const Spacer(),
-                      
                       SlideTransition(
                         position: _textSlide,
                         child: FadeTransition(
@@ -962,30 +769,16 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                             width: double.infinity,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 18),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                elevation: 0,
+                                backgroundColor: const Color(0xFF2563EB), foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 18), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), elevation: 0,
                               ),
                               onPressed: _isLoading
                                   ? null
                                   : () async {
-                                      setState(() {
-                                        _isLoading = true;
-                                      });
-                                      if (_isManualLogin) {
-                                        final prefs = await SharedPreferences.getInstance();
-                                        await prefs.setString('user_name', _nameCtrl.text.trim());
-                                        if (context.mounted) {
-                                          Provider.of<SubProvider>(context, listen: false).loadData();
-                                        }
-                                      }
+                                      setState(() { _isLoading = true; });
                                       await context.read<SubProvider>().ensureLoaded();
                                       await Future.delayed(const Duration(milliseconds: 800));
-                                      if (mounted) {
-                                        widget.onEnter();
-                                      }
+                                      if (mounted) widget.onEnter();
                                     },
                               child: _isLoading
                                   ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
@@ -994,7 +787,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                           ),
                         ),
                       ),
-                      
                       const SizedBox(height: 32),
                     ],
                   ),
@@ -1007,7 +799,6 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
     );
   }
 }
-
 
 class WavyDotsProgressIndicator extends StatefulWidget {
   final Color color;
