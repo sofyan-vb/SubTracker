@@ -54,15 +54,16 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void _deleteSub() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)),
-        content: Text(tr('Apakah kamu yakin? Catatan yang dihapus tidak bisa dikembalikan.', 'Are you sure? Deleted records cannot be recovered.'), style: const TextStyle(color: Colors.black54)),
+        title: Text(tr('Hapus Catatan?', 'Delete Record?'), style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontWeight: FontWeight.bold)),
+        content: Text(tr('Apakah kamu yakin? Catatan yang dihapus tidak bisa dikembalikan.', 'Are you sure? Deleted records cannot be recovered.'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Color(0xFF1E293B)))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B)))),
           TextButton(
             onPressed: () {
               context.read<SubProvider>().deleteSub(currentSub.id);
@@ -78,14 +79,15 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   void _showCheckOptions() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white, shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(leading: const Icon(Icons.update, color: Color(0xFF2563EB)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
-          ListTile(leading: const Icon(Icons.task_alt, color: Color(0xFF1E293B)), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
+          ListTile(leading: const Icon(Icons.update, color: Color(0xFF2563EB)), title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _showRenewInput(); }),
+          ListTile(leading: Icon(Icons.task_alt, color: isDark ? Colors.white : const Color(0xFF1E293B)), title: Text(tr('Tandai Sudah Selesai', 'Mark as Completed'), style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontWeight: FontWeight.bold)), onTap: () { Navigator.pop(ctx); _markAsFinished(); }),
         ],
       ),
     );
@@ -101,24 +103,25 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void _showRenewInput() {
     _monthCtrl.clear(); 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        scrollable: true, backgroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)),
+        scrollable: true, backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text(tr('Perpanjang Langganan', 'Renew Subscription'), style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(tr('Berapa bulan kamu ingin memperpanjang?', 'How many months to renew?'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
+            Text(tr('Berapa bulan kamu ingin memperpanjang?', 'How many months to renew?'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14)),
             const SizedBox(height: 16),
             TextField(
-              controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: const TextStyle(color: Color(0xFF1E293B), fontSize: 20, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(hintText: '1', suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 14), filled: true, fillColor: const Color(0xFFF5F7FA), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
+              controller: _monthCtrl, autofocus: true, keyboardType: TextInputType.number, style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontSize: 20, fontWeight: FontWeight.bold),
+              decoration: InputDecoration(hintText: '1', hintStyle: TextStyle(color: isDark ? Colors.white38 : Colors.black26), suffixText: tr('Bulan', 'Month(s)'), suffixStyle: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 14), filled: true, fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA), border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none)),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: const TextStyle(color: Colors.black54))),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black54))),
           TextButton(
             onPressed: () {
               final int? m = int.tryParse(_monthCtrl.text);

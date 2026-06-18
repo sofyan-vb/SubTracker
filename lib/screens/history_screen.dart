@@ -4,9 +4,11 @@ import 'package:provider/provider.dart';
 import '../providers/subscription_provider.dart';
 import '../widgets/category_filter_menu.dart';
 import '../widgets/subscription_tile.dart';
-import 'dashboard_screen.dart'; // untuk mengambil languageNotifier dan fungsi tr()
-
+import 'dashboard_screen.dart';
 import '../utils/category_utils.dart';
+import '../services/export_service.dart';
+import '../utils/toast_utils.dart';
+import '../main.dart';
 
 class HistoryScreen extends StatelessWidget {
 
@@ -44,6 +46,40 @@ class HistoryScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.download_rounded, color: Colors.white),
+            onSelected: (value) async {
+              final subs = provider.subs;
+              final userName = userNameNotifier.value;
+              if (value == 'csv') {
+                await ExportService.exportToCSV(subs, userName);
+              } else if (value == 'pdf') {
+                await ExportService.exportToPDF(subs, userName);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'csv',
+                child: Row(
+                  children: [
+                    const Icon(Icons.table_chart_rounded, color: Colors.green),
+                    const SizedBox(width: 8),
+                    Text(tr('Ekspor CSV', 'Export CSV')),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'pdf',
+                child: Row(
+                  children: [
+                    const Icon(Icons.picture_as_pdf_rounded, color: Colors.redAccent),
+                    const SizedBox(width: 8),
+                    Text(tr('Ekspor PDF', 'Export PDF')),
+                  ],
+                ),
+              ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: InkWell(

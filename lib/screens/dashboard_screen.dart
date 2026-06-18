@@ -18,9 +18,12 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart'; 
+import '../services/cloud_sync_service.dart';
+import '../services/notification_service.dart';
 import '../providers/subscription_provider.dart';
 import '../models/subscription.dart';
 import '../widgets/category_filter_menu.dart';
+import '../main.dart';
 import '../widgets/subscription_tile.dart';
 import '../utils/category_utils.dart';
 import '../utils/currency_utils.dart';
@@ -316,6 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (context, _, child) {
         const currentTheme = 'Biru';
         // Use Theme values for Dark Mode support
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         Color scaffoldBg = Theme.of(context).scaffoldBackgroundColor; 
         Color bottomNavBg = Theme.of(context).colorScheme.surface;
         Color textColor = Theme.of(context).colorScheme.onSurface; 
@@ -395,11 +399,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: EdgeInsets.zero, 
                 child: Container(
                   height: 60,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [Color(0xFFDBEAFE), Colors.white], 
+                      colors: isDark 
+                        ? [const Color(0xFF1E3A8A).withOpacity(0.9), const Color(0xFF0F172A)]
+                        : [const Color(0xFFDBEAFE), Colors.white], 
                     ),
                   ),
                   child: Row(
@@ -493,18 +499,22 @@ class _HomeViewState extends State<_HomeView> {
 
 
   void _showProfileDetails(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textCol = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextCol = isDark ? Colors.white70 : Colors.black54;
+
     showDialog(
       context: context,
       builder: (ctx) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          backgroundColor: Colors.white,
+          backgroundColor: dialogBg,
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                
                 ValueListenableBuilder<String?>(
                   valueListenable: userPhotoNotifier,
                   builder: (context, photo, child) {
@@ -516,26 +526,25 @@ class _HomeViewState extends State<_HomeView> {
                       ),
                       child: CircleAvatar(
                         radius: 45,
-                        backgroundColor: Colors.grey.shade100,
+                        backgroundColor: isDark ? Colors.white10 : Colors.grey.shade100,
                         backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
-                        child: photo == null ? const Icon(Icons.person, size: 45, color: Colors.grey) : null,
+                        child: photo == null ? Icon(Icons.person, size: 45, color: subTextCol) : null,
                       ),
                     );
                   }
                 ),
                 const SizedBox(height: 16),
-               
                 ValueListenableBuilder<String>(
                   valueListenable: userNameNotifier,
                   builder: (context, name, child) {
                     return Text(
                       name.isEmpty ? 'SubTracker User' : name,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol),
                     );
                   }
                 ),
                 const SizedBox(height: 6),
-                Text(tr('Pengguna Aktif', 'Active User'), style: const TextStyle(color: Colors.black54, fontSize: 13)),
+                Text(tr('Pengguna Aktif', 'Active User'), style: TextStyle(color: subTextCol, fontSize: 13)),
                 const SizedBox(height: 24),
                 
                 Consumer<SubProvider>(
@@ -547,14 +556,14 @@ class _HomeViewState extends State<_HomeView> {
                         Column(
                           children: [
                             Text('${provider.activeSubs.length}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF2563EB))),
-                            Text(tr('Langganan', 'Subscriptions'), style: const TextStyle(fontSize: 11, color: Colors.black54)),
+                            Text(tr('Langganan', 'Subscriptions'), style: TextStyle(fontSize: 11, color: subTextCol)),
                           ],
                         ),
-                        Container(width: 1, height: 30, color: Colors.grey.shade200),
+                        Container(width: 1, height: 30, color: isDark ? Colors.white24 : Colors.grey.shade200),
                         Column(
                           children: [
                             Text(currencyFormat.format(provider.totalMonthly), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.redAccent)),
-                            Text(tr('Pengeluaran', 'Expenses'), style: const TextStyle(fontSize: 11, color: Colors.black54)),
+                            Text(tr('Pengeluaran', 'Expenses'), style: TextStyle(fontSize: 11, color: subTextCol)),
                           ],
                         ),
                       ],
@@ -562,14 +571,13 @@ class _HomeViewState extends State<_HomeView> {
                   }
                 ),
                 const SizedBox(height: 30),
-                
 
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade100,
-                      foregroundColor: const Color(0xFF1E293B),
+                      backgroundColor: isDark ? Colors.white10 : Colors.grey.shade100,
+                      foregroundColor: textCol,
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
                     ),
@@ -586,9 +594,10 @@ class _HomeViewState extends State<_HomeView> {
   }
 
   void _showCategoryFilterSheet(BuildContext context, Color bgColor, Color textColor) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (sheetContext) {
         final categories = ['Semua', ...CategoryUtils.categoriesID];
@@ -654,7 +663,7 @@ class _HomeViewState extends State<_HomeView> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E293B)),
+                      Icon(Icons.notifications_active_rounded, color: textColor),
                       const SizedBox(width: 12),
                       Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                     ],
@@ -721,10 +730,11 @@ class _HomeViewState extends State<_HomeView> {
     else if (hour >= 15 && hour < 18) greeting = tr('Selamat Sore', 'Good Evening');
     else if (hour >= 18 || hour < 4) greeting = tr('Selamat Malam', 'Good Night');
 
-    Color bgColor = const Color(0xFFF5F7FA);
-    Color cardBg = Colors.white;
-    Color textColor = const Color(0xFF1E293B);
-    Color subTextColor = Colors.black54;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    Color cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    Color textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    Color subTextColor = isDark ? Colors.white70 : Colors.black54;
 
     final now = DateTime.now();
     final upcomingSubs = provider.activeSubs.where((sub) {
@@ -843,50 +853,56 @@ class _HomeViewState extends State<_HomeView> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                _showProfileDetails(context);
-                              },
-                              child: ValueListenableBuilder<String?>(
-                                valueListenable: userPhotoNotifier,
-                                builder: (context, photo, child) {
-                                  return Container(
-                                    padding: photo == null ? const EdgeInsets.all(10) : EdgeInsets.zero,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(color: Colors.white, width: 2.0),
-                                    ),
-                                    child: photo == null 
-                                      ? const Icon(Icons.person, size: 24, color: Colors.white)
-                                      : CircleAvatar(radius: 22, backgroundImage: MemoryImage(base64Decode(photo))),
-                                  );
-                                }
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _isFirstLaunch ? tr('Selamat datang', 'Welcome') : tr('Selamat datang kembali', 'Welcome back'), 
-                                  style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)
-                                ),
-                                const SizedBox(height: 2),
-                                ValueListenableBuilder<String>(
-                                  valueListenable: userNameNotifier,
-                                  builder: (context, name, child) {
-                                    return Text(
-                                      name.isEmpty ? 'User' : name, 
-                                      style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5)
+                        Expanded(
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  _showProfileDetails(context);
+                                },
+                                child: ValueListenableBuilder<String?>(
+                                  valueListenable: userPhotoNotifier,
+                                  builder: (context, photo, child) {
+                                    return Container(
+                                      padding: photo == null ? const EdgeInsets.all(10) : EdgeInsets.zero,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.2),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: Colors.white, width: 2.0),
+                                      ),
+                                      child: photo == null 
+                                        ? const Icon(Icons.person, size: 24, color: Colors.white)
+                                        : CircleAvatar(radius: 22, backgroundImage: MemoryImage(base64Decode(photo))),
                                     );
                                   }
                                 ),
-                              ],
-                            ),
-                          ]
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _isFirstLaunch ? tr('Selamat datang', 'Welcome') : tr('Selamat datang kembali', 'Welcome back'), 
+                                      style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)
+                                    ),
+                                    const SizedBox(height: 2),
+                                    ValueListenableBuilder<String>(
+                                      valueListenable: userNameNotifier,
+                                      builder: (context, name, child) {
+                                        return Text(
+                                          name.isEmpty ? 'User' : name, 
+                                          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        );
+                                      }
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ]
+                          ),
                         ),
                         
                         // Header Icons
@@ -912,12 +928,10 @@ class _HomeViewState extends State<_HomeView> {
                             Consumer<SubProvider>(
                               builder: (context, provider, child) {
                                 final now = DateTime.now();
-                                final urgentCount = provider.subs.where((sub) {
-                                  if (sub.isFinished) return false;
-                                  final date = sub.dueDate;
-                                  final today = DateTime(now.year, now.month, now.day);
-                                  final subDate = DateTime(date.year, date.month, date.day);
-                                  return subDate.isBefore(today) || subDate.isAtSameMomentAs(today);
+                                final urgentCount = provider.activeSubs.where((sub) {
+                                  final date = _extractDateSafely(sub);
+                                  if (date == null) return false;
+                                  return date.isBefore(now) || DateUtils.isSameDay(date, now);
                                 }).length;
                                 return GestureDetector(
                                   onTap: () {
@@ -947,6 +961,71 @@ class _HomeViewState extends State<_HomeView> {
                                   ),
                                 );
                               }
+                            ),
+                            PopupMenuButton<String>(
+                              icon: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 22),
+                              ),
+                              offset: const Offset(0, 50),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white,
+                              onSelected: (value) async {
+                                final subs = context.read<SubProvider>().subs;
+                                if (value == 'dark_mode') {
+                                  final newMode = themeModeNotifier.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                                  themeModeNotifier.value = newMode;
+                                  final prefs = await SharedPreferences.getInstance();
+                                  await prefs.setString('app_theme_mode', newMode == ThemeMode.dark ? 'Dark' : 'Light');
+                                } else if (value == 'sync_drive') {
+                                  final result = await CloudSyncService.syncWithGoogleDrive(subs);
+                                  ToastUtils.show(context, result);
+                                } else if (value == 'sync_firebase') {
+                                  final result = await CloudSyncService.syncWithFirebase(subs);
+                                  ToastUtils.show(context, result);
+                                }
+                              },
+                              itemBuilder: (context) {
+                                final isDark = themeModeNotifier.value == ThemeMode.dark;
+                                final popupTextColor = isDark ? Colors.white : const Color(0xFF1E293B);
+                                return [
+                                  PopupMenuItem(
+                                    value: 'dark_mode',
+                                    child: Row(
+                                      children: [
+                                        Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: const Color(0xFF2563EB)),
+                                        const SizedBox(width: 8),
+                                        Text(isDark ? 'Mode Terang' : 'Mode Gelap', style: TextStyle(fontWeight: FontWeight.bold, color: popupTextColor)),
+                                      ],
+                                    ),
+                                  ),
+                                  const PopupMenuDivider(),
+                                  PopupMenuItem(
+                                    value: 'sync_drive',
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.cloud_sync_rounded, color: Colors.green),
+                                        const SizedBox(width: 8),
+                                        Text(tr('Sinkronisasi Google Drive', 'Sync Google Drive'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: popupTextColor)),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    value: 'sync_firebase',
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.local_fire_department_rounded, color: Colors.orange),
+                                        const SizedBox(width: 8),
+                                        Text(tr('Sinkronisasi Firebase', 'Sync Firebase'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: popupTextColor)),
+                                      ],
+                                    ),
+                                  ),
+                                ];
+                              },
                             ),
                           ],
                         ),
@@ -1060,7 +1139,7 @@ class _HomeViewState extends State<_HomeView> {
                             ),
                             PopupMenuButton<DateTime>(
                               offset: const Offset(0, 30),
-                              color: Colors.white,
+                              color: isDark ? const Color(0xFF1E293B) : Colors.white,
                               constraints: const BoxConstraints(maxHeight: 250),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               onSelected: (month) {
@@ -1329,9 +1408,9 @@ class _HomeViewState extends State<_HomeView> {
                   margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
                     boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
                   ),
                   child: Row(
@@ -1346,7 +1425,7 @@ class _HomeViewState extends State<_HomeView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(tr('Insight Cepat', 'Quick Insight'), style: const TextStyle(color: Colors.black45, fontSize: 11, fontWeight: FontWeight.bold)),
+                            Text(tr('Insight Cepat', 'Quick Insight'), style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
                             Builder(builder: (context) {
                               if (provider.activeSubs.isEmpty || categoryTotals.isEmpty) {
@@ -1390,9 +1469,9 @@ class _HomeViewState extends State<_HomeView> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: cardBg,
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.grey.shade200),
+                              border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
                             ),
                             child: Row(
                               children: [
@@ -1419,7 +1498,7 @@ class _HomeViewState extends State<_HomeView> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
+                              border: Border.all(color: isDark ? Colors.white24 : Colors.grey.shade300),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Row(
@@ -1577,10 +1656,11 @@ class _CalendarViewState extends State<_CalendarView> {
       return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
     }).toList();
 
-    Color bgColor = const Color(0xFFF5F7FA);
-    Color cardBg = Colors.white;
-    Color textColor = const Color(0xFF1E293B);
-    Color subTextColor = Colors.black54;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    Color cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    Color textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    Color subTextColor = isDark ? Colors.white70 : Colors.black54;
 
     final isID = languageNotifier.value == 'ID';
     String stringBulanTahunKini = '${(isID ? namaBulanPenuhID : namaBulanPenuhEN)[_currentDate.month - 1]} ${_currentDate.year}';
@@ -1726,7 +1806,7 @@ class _CalendarViewState extends State<_CalendarView> {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: const TextStyle(color: Colors.black38, fontSize: 12, fontWeight: FontWeight.bold))),
+                    child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: subTextColor.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.bold))),
                     ),
                   )
                 else
@@ -1770,9 +1850,9 @@ class _CalendarViewState extends State<_CalendarView> {
                     margin: const EdgeInsets.symmetric(horizontal: 12),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white, 
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white, 
                       borderRadius: BorderRadius.circular(16), 
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: isDark ? Colors.white12 : Colors.grey.shade200),
                     ),
                     child: Column(
                       children: [
@@ -1863,7 +1943,7 @@ class _CalendarViewState extends State<_CalendarView> {
                 
                 Expanded(
                   child: subsOnSelectedDate.isEmpty
-                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: const TextStyle(color: Colors.black38, fontSize: 12, fontWeight: FontWeight.bold)))
+                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: subTextColor.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.bold)))
                       : ListView.builder(
                           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100), 
                           physics: const BouncingScrollPhysics(),
@@ -1898,8 +1978,9 @@ class _StatsViewState extends State<_StatsView> {
     final totalMonthly = provider.totalMonthly;
     final breakdown = provider.categoryBreakdown;
     
-    Color textColor = const Color(0xFF1E293B);
-    Color subTextColor = Colors.black54;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    Color subTextColor = isDark ? Colors.white70 : Colors.black54;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -2051,9 +2132,9 @@ class _StatsViewState extends State<_StatsView> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey.shade200),
                   boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: Column(
@@ -2272,9 +2353,9 @@ class _StatsViewState extends State<_StatsView> {
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.shade200),
+                      border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white12 : Colors.grey.shade200),
                     ),
                     child: Row(
                       children: [
@@ -2367,8 +2448,9 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showCurrencySelector() {
-    final dialogBg = Colors.white;
-    final textColor = const Color(0xFF1E293B);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
 
     showModalBottomSheet(
       context: context,
@@ -2401,16 +2483,17 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showLanguageSelector() {
-    final dialogBg = Colors.white;
-    final textColor = const Color(0xFF1E293B);
-    final unselectedRadioColor = Colors.black54; 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final unselectedRadioColor = isDark ? Colors.white70 : Colors.black54;
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
-        title: Row(children: [const Icon(Icons.language, color: Color(0xFF1E293B)), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300)),
+        title: Row(children: [Icon(Icons.language, color: textColor), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
         
         content: Theme(
           data: Theme.of(context).copyWith(
@@ -2451,9 +2534,10 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showPrivacySheet() {
-    final sheetBg = Colors.white;
-    final textColor = const Color(0xFF1E293B);
-    final subTextColor = Colors.black54;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
 
     showModalBottomSheet(
       context: context,
@@ -2482,7 +2566,7 @@ class _SettingsViewState extends State<_SettingsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
+                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12)),
                         const SizedBox(height: 8),
                         Text(tr('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTracker, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
@@ -2513,7 +2597,7 @@ class _SettingsViewState extends State<_SettingsView> {
                                     context: context,
                                     builder: (confirmCtx) => AlertDialog(
                                       backgroundColor: sheetBg,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300)),
                                       title: Text(tr('Reboot Sistem?', 'System Reboot?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                                       content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?'), style: TextStyle(color: subTextColor)),
                                       actions: [
@@ -2598,12 +2682,13 @@ class _SettingsViewState extends State<_SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    Color bgColor = const Color(0xFFF5F7FA);
-    Color cardBg = Colors.white;
-    Color textColor = const Color(0xFF1E293B);
-    Color subTextColor = Colors.black54;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    Color cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    Color textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    Color subTextColor = isDark ? Colors.white70 : Colors.black54;
 
-    Color scaffoldBg = const Color(0xFFF5F7FA);
+    Color scaffoldBg = bgColor;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -2733,16 +2818,17 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showRingtoneSelector() {
-    final dialogBg = Colors.white;
-    final textColor = const Color(0xFF1E293B);
-    final unselectedRadioColor = Colors.black54; 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final unselectedRadioColor = isDark ? Colors.white70 : Colors.black54; 
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
-        title: Row(children: [const Icon(Icons.notifications_active_rounded, color: Color(0xFF1E293B)), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 12))]),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade300)),
+        title: Row(children: [Icon(Icons.notifications_active_rounded, color: textColor), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 12))]),
         contentPadding: const EdgeInsets.symmetric(vertical: 20),
         content: Theme(
           data: Theme.of(context).copyWith(unselectedWidgetColor: unselectedRadioColor),
@@ -2757,7 +2843,7 @@ class _SettingsViewState extends State<_SettingsView> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 11)),
+                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)),
                       ),
                       ...['ringtone_default', 'ringtone_chime', 'ringtone_alert', 'ringtone_synth'].map((r) {
                         return RadioListTile<String>(
@@ -2811,7 +2897,7 @@ class _SettingsViewState extends State<_SettingsView> {
               FlutterLocalNotificationsPlugin().cancel(8888);
               Navigator.pop(ctx);
             },
-            child: const Text('Tutup', style: TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold))
+            child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold))
           )
         ],
       )
@@ -2821,19 +2907,19 @@ class _SettingsViewState extends State<_SettingsView> {
   Widget _buildGroupHeader(IconData icon, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 8, top: 16),
-      child: Text(title, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16)),
+      child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 
   Widget _buildSettingTile(IconData icon, String title, String subtitle, VoidCallback onTap, Color cardBg, Color textColor, Color subTextColor, String currentTheme, {Color? iconColor, Color? titleColor}) {
     return Container(
-      color: Colors.white,
+      color: Colors.transparent,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle),
-          child: Icon(icon, color: iconColor ?? Colors.black, size: 24),
+          child: Icon(icon, color: iconColor ?? textColor, size: 24),
         ),
         title: Text(title, style: TextStyle(color: titleColor ?? textColor, fontWeight: FontWeight.bold, fontSize: 14)),
         subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 11))),

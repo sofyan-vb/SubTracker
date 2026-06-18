@@ -158,10 +158,13 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Widget build(BuildContext context) {
     bool showTopExitButton = _state == SplashState.form || _state == SplashState.choice;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+
     return Stack(
       children: [
         Scaffold(
-          backgroundColor: const Color(0xFFF5F7FA),
+          backgroundColor: bgColor,
           resizeToAvoidBottomInset: true, 
           body: Stack(
             children: [
@@ -670,15 +673,22 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.grey[100];
+    final borderCol = isDark ? Colors.white24 : Colors.black12;
+
     return ValueListenableBuilder<String>(
       valueListenable: languageNotifier,
       builder: (context, lang, child) {
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: bgColor,
           body: Stack(
             alignment: Alignment.center,
             children: [
-              Positioned.fill(child: Container(color: const Color(0xFFF5F7FA).withOpacity(0.5))),
+              Positioned.fill(child: Container(color: (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA)).withOpacity(0.5))),
               Positioned(top: -100, right: -50, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.15)))),
               Positioned(top: 50, left: -80, child: Container(width: 200, height: 200, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.10)))),
               Positioned(top: MediaQuery.of(context).size.height - 250, left: -50, child: Container(width: 400, height: 400, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.15)))),
@@ -698,7 +708,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                             children: [
                               ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset('assets/icon.png', height: 60, width: 60, fit: BoxFit.cover)),
                               const SizedBox(width: 12),
-                              const Text('SubTracker', style: TextStyle(color: Color(0xFF1E293B), fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                              Text('SubTracker', style: TextStyle(color: textColor, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
                             ],
                           ),
                         ),
@@ -712,9 +722,9 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(tr('Halo,', 'Hello,'), style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), height: 1.1, letterSpacing: -1.0)),
-                              Text(tr('Selamat', 'Welcome'), style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), height: 1.1, letterSpacing: -1.0)),
-                              Text(tr('Datang Kembali', 'Back'), style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Halo,', 'Hello,'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Selamat', 'Welcome'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Datang Kembali', 'Back'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
                             ],
                           ),
                         ),
@@ -728,32 +738,32 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(tr('Masuk sebagai', 'Sign in as'), style: const TextStyle(fontSize: 14, color: Colors.black54, fontWeight: FontWeight.w600)),
+                              Text(tr('Masuk sebagai', 'Sign in as'), style: TextStyle(fontSize: 14, color: subTextColor, fontWeight: FontWeight.w600)),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: _showUserSelector,
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                  decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.black12, width: 1)),
+                                  decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(20), border: Border.all(color: borderCol, width: 1)),
                                   child: Row(
                                     children: [
                                       ScaleTransition(
                                         scale: _logoScale,
                                         child: CircleAvatar(
-                                          radius: 24, backgroundColor: Colors.white,
+                                          radius: 24, backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
                                           backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
-                                          child: _base64Image == null ? const Icon(Icons.person_rounded, size: 30, color: Colors.black54) : null,
+                                          child: _base64Image == null ? Icon(Icons.person_rounded, size: 30, color: subTextColor) : null,
                                         ),
                                       ),
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Text(
                                           _activeUserName.isEmpty ? tr('Pengguna SubTracker', 'SubTracker User') : _activeUserName,
-                                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
                                           maxLines: 1, overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      Icon(_savedUsers.length > 1 ? Icons.expand_more_rounded : Icons.check_circle_rounded, color: _savedUsers.length > 1 ? Colors.black54 : Colors.green, size: 24),
+                                      Icon(_savedUsers.length > 1 ? Icons.expand_more_rounded : Icons.check_circle_rounded, color: _savedUsers.length > 1 ? subTextColor : Colors.green, size: 24),
                                     ],
                                   ),
                                 ),
@@ -889,11 +899,17 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.grey[100];
+    final borderCol = isDark ? Colors.white24 : Colors.black12;
+
     return Container(
       color: Colors.transparent,
       width: double.infinity,
       child: Stack(
-        alignment: Alignment.center,
         children: [
           Positioned(
             top: MediaQuery.of(context).size.height * 0.35,
@@ -918,7 +934,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                 delay: const Duration(milliseconds: 500),
                 speed: const Duration(milliseconds: 100),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: Colors.black54, letterSpacing: 1.5),
+                style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: subTextColor, letterSpacing: 1.5),
               ),
               const SizedBox(height: 8),
 

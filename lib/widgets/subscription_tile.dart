@@ -82,8 +82,8 @@ class _SubTileState extends State<SubTile> {
                     final provider = context.read<SubProvider>();
                     provider.markAsPaid(widget.sub);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr('Langganan ditandai selesai', 'Subscription marked as paid'), style: const TextStyle(color: Color(0xFF1E293B))),
-                      backgroundColor: Colors.white,
+                      content: Text(tr('Langganan ditandai selesai', 'Subscription marked as paid'), style: TextStyle(color: textColor)),
+                      backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ));
@@ -104,8 +104,8 @@ class _SubTileState extends State<SubTile> {
                     provider.updateSub(updated);
                     provider.addHistory(widget.sub.name, widget.sub.price, DateTime.now());
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr('Langganan diperpanjang', 'Subscription renewed'), style: const TextStyle(color: Color(0xFF1E293B))),
-                      backgroundColor: Colors.white,
+                      content: Text(tr('Langganan diperpanjang', 'Subscription renewed'), style: TextStyle(color: textColor)),
+                      backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ));
@@ -120,8 +120,8 @@ class _SubTileState extends State<SubTile> {
                   final provider = context.read<SubProvider>();
                   provider.togglePause(widget.sub.id);
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(widget.sub.isPaused ? 'Langganan dilanjutkan' : 'Langganan di-pause', style: const TextStyle(color: Color(0xFF1E293B))),
-                    backgroundColor: Colors.white,
+                    content: Text(widget.sub.isPaused ? 'Langganan dilanjutkan' : 'Langganan di-pause', style: TextStyle(color: textColor)),
+                    backgroundColor: cardBg,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ));
@@ -136,8 +136,8 @@ class _SubTileState extends State<SubTile> {
                   final provider = context.read<SubProvider>();
                   provider.deleteSub(widget.sub.id);
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(tr('Langganan dihapus', 'Subscription deleted'), style: const TextStyle(color: Color(0xFF1E293B))),
-                    backgroundColor: Colors.white,
+                    content: Text(tr('Langganan dihapus', 'Subscription deleted'), style: TextStyle(color: textColor)),
+                    backgroundColor: cardBg,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ));

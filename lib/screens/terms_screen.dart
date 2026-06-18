@@ -67,13 +67,20 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final borderCol = isDark ? Colors.white24 : Colors.black12;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B)),
+          icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.pop(context), 
         ),
       ),
@@ -83,20 +90,20 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(tr('Selamat Datang di', 'Welcome to'), style: const TextStyle(fontSize: 18, color: Colors.black54)),
-              Text('SubTracker', style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF1E293B), letterSpacing: -1.0)),
+              Text(tr('Selamat Datang di', 'Welcome to'), style: TextStyle(fontSize: 18, color: subTextColor)),
+              Text('SubTracker', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -1.0)),
               const SizedBox(height: 24),
 
-              Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+              Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
               const SizedBox(height: 12),
               
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(20), 
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardBg,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.black12),
+                    border: Border.all(color: borderCol),
                   ),
                   child: SingleChildScrollView(
                     controller: _scrollController,
@@ -106,7 +113,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                       children: [
                         Text(
                           tr('Dengan menggunakan aplikasi SubTracker, Anda secara otomatis menyetujui seluruh ketentuan berikut:', 'By using the SubTracker application, you automatically agree to all of the following terms:'),
-                          style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.5),
+                          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, height: 1.5),
                         ),
                         const SizedBox(height: 20),
 
@@ -114,44 +121,49 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                           '1', 
                           tr('PENYIMPANAN DATA LOKAL', 'LOCAL DATA STORAGE'), 
                           tr('Semua data yang Anda masukkan ke dalam aplikasi ini (termasuk nama langganan, harga, tenggat waktu, dan pengaturan lainnya) disimpan secara eksklusif di dalam memori internal perangkat Anda. Kami tidak memiliki akses ke data tersebut, tidak mencadangkannya di cloud, dan tidak membagikannya ke pihak ketiga manapun.', 
-                             'All data you enter into this app (including subscription names, prices, deadlines, and other settings) is stored exclusively in your device\'s internal memory. We do not have access to this data, do not back it up to the cloud, and do not share it with any third parties.')
+                             'All data you enter into this app (including subscription names, prices, deadlines, and other settings) is stored exclusively in your device\'s internal memory. We do not have access to this data, do not back it up to the cloud, and do not share it with any third parties.'),
+                          isDark
                         ),
                         _buildTermItem(
                           '2', 
                           tr('IZIN SISTEM PERANGKAT', 'DEVICE SYSTEM PERMISSIONS'), 
                           tr('Untuk memastikan fitur pengingat berjalan dengan sempurna, aplikasi ini mewajibkan pengguna untuk memberikan izin akses Notifikasi dan Alarm Tepat Waktu (Exact Alarms). Anda bertanggung jawab untuk memastikan bahwa pengaturan penghemat baterai (Battery Saver) di perangkat Anda tidak memblokir aplikasi ini berjalan di latar belakang.', 
-                             'To ensure the reminder feature runs perfectly, this app requires users to grant access to Notifications and Exact Alarms. You are responsible for ensuring that the Battery Saver settings on your device do not block this app from running in the background.')
+                             'To ensure the reminder feature runs perfectly, this app requires users to grant access to Notifications and Exact Alarms. You are responsible for ensuring that the Battery Saver settings on your device do not block this app from running in the background.'),
+                          isDark
                         ),
                         _buildTermItem(
                           '3', 
                           tr('PEMBATASAN TANGGUNG JAWAB', 'LIMITATION OF LIABILITY'), 
                           tr('SubTracker dirancang sebagai alat bantu produktivitas semata. Segala bentuk kerugian finansial, denda keterlambatan pembayaran langganan, atau pemutusan layanan yang disebabkan oleh kelalaian pengguna, kegagalan perangkat dalam memunculkan notifikasi, atau bug sistem, berada sepenuhnya di luar tanggung jawab pengembang.', 
-                             'SubTracker is designed solely as a productivity tool. Any form of financial loss, subscription late payment fines, or service termination caused by user negligence, device failure to show notifications, or system bugs, are entirely beyond the developer\'s responsibility.')
+                             'SubTracker is designed solely as a productivity tool. Any form of financial loss, subscription late payment fines, or service termination caused by user negligence, device failure to show notifications, or system bugs, are entirely beyond the developer\'s responsibility.'),
+                          isDark
                         ),
                         _buildTermItem(
                           '4', 
                           tr('PENGHAPUSAN APLIKASI', 'APP UNINSTALLATION'), 
                           tr('Karena data disimpan secara lokal, menghapus (uninstall) aplikasi dari perangkat Anda akan mengakibatkan hilangnya seluruh data catatan langganan secara permanen tanpa kemungkinan pemulihan.', 
-                             'Because data is stored locally, uninstalling the app from your device will result in the permanent loss of all subscription record data without the possibility of recovery.')
+                             'Because data is stored locally, uninstalling the app from your device will result in the permanent loss of all subscription record data without the possibility of recovery.'),
+                          isDark
                         ),
                         _buildTermItem(
                           '5', 
                           tr('PEMBARUAN KETENTUAN', 'TERMS UPDATE'), 
                           tr('Pengembang berhak untuk mengubah, memodifikasi, atau memperbarui Syarat & Ketentuan ini kapan saja tanpa pemberitahuan sebelumnya, demi menyesuaikan dengan kebijakan keamanan atau penambahan fitur baru.', 
-                             'The developer reserves the right to change, modify, or update these Terms & Conditions at any time without prior notice, to adapt to security policies or the addition of new features.')
+                             'The developer reserves the right to change, modify, or update these Terms & Conditions at any time without prior notice, to adapt to security policies or the addition of new features.'),
+                          isDark
                         ),
                         
                         const SizedBox(height: 16),
-                        const Divider(color: Colors.black12, thickness: 1),
+                        Divider(color: borderCol, thickness: 1),
                         const SizedBox(height: 16),
                         
-                        Text(tr('Aplikasi ini dirancang dan dikembangkan secara independen.', 'This application is designed and developed independently.'), style: const TextStyle(color: Colors.black54, fontSize: 12, height: 1.5)),
+                        Text(tr('Aplikasi ini dirancang dan dikembangkan secara independen.', 'This application is designed and developed independently.'), style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5)),
                         const SizedBox(height: 4),
-                        Text(tr('Dibuat oleh: Sofyan Ibnu', 'Created by: Sofyan Ibnu'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 13, fontWeight: FontWeight.bold)),
+                        Text(tr('Dibuat oleh: Sofyan Ibnu', 'Created by: Sofyan Ibnu'), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 2),
-                        Text(tr('Tahun Rilis: 2026', 'Release Year: 2026'), style: const TextStyle(color: Colors.black54, fontSize: 12)),
+                        Text(tr('Tahun Rilis: 2026', 'Release Year: 2026'), style: TextStyle(color: subTextColor, fontSize: 12)),
                         const SizedBox(height: 16),
-                        const Divider(color: Colors.black12, thickness: 1),
+                        Divider(color: borderCol, thickness: 1),
                         const SizedBox(height: 16),
                         
 
@@ -176,7 +188,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                         onChanged: _hasScrolledToBottom ? (value) => setState(() => _isAgreed = value ?? false) : null,
                         activeColor: const Color(0xFF2563EB),
                         checkColor: Colors.white,
-                        side: BorderSide(color: _hasScrolledToBottom ? (_isAgreed ? const Color(0xFF2563EB) : Colors.black54) : Colors.black26, width: 2),
+                        side: BorderSide(color: _hasScrolledToBottom ? (_isAgreed ? const Color(0xFF2563EB) : subTextColor) : borderCol, width: 2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
                     ),
@@ -184,7 +196,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     Expanded(
                       child: Text(
                         tr('Saya telah membaca dan menyetujui Syarat & Ketentuan', 'I have read and agree to the Terms & Conditions'),
-                        style: TextStyle(color: _hasScrolledToBottom ? const Color(0xFF1E293B) : Colors.black38, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: _hasScrolledToBottom ? textColor : subTextColor, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ],
@@ -196,7 +208,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                 children: [
                   TextButton(
                     onPressed: _isLoading ? null : _declineTerms,
-                    child: Text(tr('Tolak', 'Decline'), style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+                    child: Text(tr('Tolak', 'Decline'), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -225,21 +237,21 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
     );
   }
 
-  Widget _buildTermItem(String number, String title, String description) {
+  Widget _buildTermItem(String number, String title, String description, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20.0), 
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$number.', style: const TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold)),
+          Text('$number.', style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                Text(title, style: TextStyle(color: isDark ? Colors.white : const Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                 const SizedBox(height: 6),
-                Text(description, style: const TextStyle(color: Colors.black87, fontSize: 13, height: 1.5)),
+                Text(description, style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, height: 1.5)),
               ],
             ),
           ),

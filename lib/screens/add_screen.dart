@@ -42,8 +42,9 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
-    Color surfaceColor = Colors.white;
-    Color onSurfaceColor = const Color(0xFF1E293B);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color surfaceColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    Color onSurfaceColor = isDark ? Colors.white : const Color(0xFF1E293B);
 
     final DateTime? picked = await showDatePicker(
       context: context, initialDate: _selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2101),
@@ -55,8 +56,9 @@ class _AddScreenState extends State<AddScreen> {
   }
 
   Future<void> _selectTime(BuildContext context) async {
-    Color surfaceColor = Colors.white;
-    Color onSurfaceColor = const Color(0xFF1E293B);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    Color surfaceColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    Color onSurfaceColor = isDark ? Colors.white : const Color(0xFF1E293B);
 
     final TimeOfDay? picked = await showGeneralDialog<TimeOfDay>(
       context: context, barrierDismissible: true, barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel, barrierColor: Colors.black87, transitionDuration: const Duration(milliseconds: 350),
@@ -305,10 +307,10 @@ class _AddScreenState extends State<AddScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
                       color: const Color(0xFF2563EB).withValues(alpha: 0.15),
-                      border: Border.all(color: Colors.black12, width: 1.5),
+                      border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black12, width: 1.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(appName, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
+                    child: Text(appName, style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
                   ),
                 );
               }).toList(),
@@ -323,7 +325,7 @@ class _AddScreenState extends State<AddScreen> {
   Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4), 
-      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
       child: TextField(
         controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, 
         style: TextStyle(color: textColor, fontWeight: FontWeight.bold), 
@@ -339,13 +341,13 @@ class _AddScreenState extends State<AddScreen> {
         opacity: disabled ? 0.4 : 1.0,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), 
-          decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
+          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: (value == null || value.isEmpty) ? null : value, 
               hint: Text(tr('Pilih', 'Select'), style: TextStyle(color: textColor.withValues(alpha: 0.5))),
               isExpanded: true, 
-              dropdownColor: Colors.white, 
+              dropdownColor: bg, 
               style: TextStyle(color: textColor, fontWeight: FontWeight.bold), 
               items: items.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(), 
               onChanged: onChanged
@@ -358,7 +360,7 @@ class _AddScreenState extends State<AddScreen> {
   Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { 
     return Container(
       padding: const EdgeInsets.all(16), 
-      decoration: BoxDecoration(color: bg == Colors.white ? Colors.grey[100] : bg.withOpacity(0.5), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])
     ); 
   }

@@ -9,8 +9,6 @@ import '../providers/subscription_provider.dart';
 import 'dashboard_screen.dart';
 import '../utils/toast_utils.dart';
 import '../services/email_service.dart';
-import '../services/export_service.dart';
-import '../services/cloud_sync_service.dart';
 import '../main.dart'; // Untuk themeModeNotifier
 
 class ProfileScreen extends StatefulWidget {
@@ -359,98 +357,117 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: widget.cardBg,
+                    backgroundColor: currentCardBg,
                     backgroundImage: _base64Image != null ? MemoryImage(base64Decode(_base64Image!)) : null,
-                    child: _base64Image == null ? Icon(Icons.account_circle, size: 80, color: widget.textColor.withOpacity(0.5)) : null,
+                    child: _base64Image == null ? Icon(Icons.account_circle, size: 80, color: currentTextColor.withOpacity(0.5)) : null,
                   ),
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: const BoxDecoration(color: Color(0xFF2563EB), shape: BoxShape.circle),
-                    child: const Icon(Icons.camera_alt, color: Color(0xFF1E293B), size: 20),
+                    child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            Text('Ketuk foto untuk mengubah', style: TextStyle(color: widget.textColor.withOpacity(0.5), fontSize: 13)),
+            Text('Ketuk foto untuk mengubah', style: TextStyle(color: currentTextColor.withOpacity(0.5), fontSize: 13)),
             
             const SizedBox(height: 40),
             
             // --- BAGIAN 1: PROFIL AKTIF SAAT INI ---
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Profil Aktif Saat Ini', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.bold, fontSize: 16)),
-            ),
-            const SizedBox(height: 6),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('Ini adalah profil yang sedang Anda gunakan sekarang. Anda bisa mengatur nama atau alamat email notifikasinya di bawah ini.', style: TextStyle(color: widget.textColor.withOpacity(0.6), fontSize: 12, height: 1.4)),
-            ),
-            const SizedBox(height: 16),
-
-            TextField(
-              controller: _nameCtrl,
-              style: TextStyle(color: widget.textColor),
-              decoration: InputDecoration(
-                labelText: 'Ubah Nama Profil',
-                labelStyle: TextStyle(color: widget.textColor.withOpacity(0.6)),
-                filled: true, fillColor: widget.cardBg,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withOpacity(0.1))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withOpacity(0.1))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _emailCtrl,
-              style: TextStyle(color: widget.textColor),
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                labelStyle: TextStyle(color: widget.textColor.withOpacity(0.6)),
-                prefixIcon: Icon(Icons.email_outlined, color: widget.textColor.withOpacity(0.5)),
-                filled: true, fillColor: widget.cardBg,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withOpacity(0.1))),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withOpacity(0.1))),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF1E293B))),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                icon: _isSendingTest 
-                    ? SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: widget.textColor))
-                    : Icon(Icons.send_rounded, size: 18, color: widget.textColor),
-                label: Text(
-                  _isSendingTest ? 'Mengirim...' : 'Tes Kirim Email',
-                  style: TextStyle(color: widget.textColor, fontWeight: FontWeight.w600, fontSize: 13),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: widget.textColor.withOpacity(0.2)),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: _isSendingTest ? null : _testSendEmail,
-              ),
-            ),
-            const SizedBox(height: 36),
-
-            // --- BAGIAN 2: MANAJEMEN PROFIL LAIN ---
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: widget.cardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: widget.textColor.withOpacity(0.1)),
+                color: currentCardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: currentTextColor.withOpacity(0.08)),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 5))],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Daftar Profil Tersimpan', style: TextStyle(color: widget.textColor, fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 8),
-                  Text('Ketuk salah satu nama di bawah ini untuk beralih profil dan mengatur email/catatannya secara terpisah.', style: TextStyle(color: widget.textColor.withOpacity(0.6), fontSize: 12, height: 1.4)),
+                  Row(
+                    children: [
+                      Icon(Icons.person_pin_rounded, color: const Color(0xFF2563EB), size: 22),
+                      const SizedBox(width: 10),
+                      Text('Profil Aktif Saat Ini', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text('Ini adalah profil utama yang sedang aktif. Anda bisa mengatur nama atau alamat email notifikasinya di bawah ini.', style: TextStyle(color: currentTextColor.withOpacity(0.6), fontSize: 12, height: 1.5)),
+                  const SizedBox(height: 20),
+
+                  TextField(
+                    controller: _nameCtrl,
+                    style: TextStyle(color: currentTextColor, fontWeight: FontWeight.bold),
+                    decoration: InputDecoration(
+                      labelText: 'Ubah Nama Profil',
+                      labelStyle: TextStyle(color: currentTextColor.withOpacity(0.5)),
+                      filled: true, fillColor: currentTextColor.withOpacity(0.03),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
+                    ),
+                  ),
                   const SizedBox(height: 16),
+                  TextField(
+                    controller: _emailCtrl,
+                    style: TextStyle(color: currentTextColor, fontWeight: FontWeight.bold),
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      labelStyle: TextStyle(color: currentTextColor.withOpacity(0.5)),
+                      prefixIcon: Icon(Icons.email_rounded, color: const Color(0xFF2563EB).withOpacity(0.8)),
+                      filled: true, fillColor: currentTextColor.withOpacity(0.03),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: _isSendingTest 
+                          ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: currentTextColor))
+                          : Icon(Icons.send_rounded, size: 16, color: currentTextColor.withOpacity(0.8)),
+                      label: Text(
+                        _isSendingTest ? 'Mengirim...' : 'Tes Kirim Email',
+                        style: TextStyle(color: currentTextColor.withOpacity(0.9), fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: currentTextColor.withOpacity(0.15)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      onPressed: _isSendingTest ? null : _testSendEmail,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // --- BAGIAN 2: MANAJEMEN PROFIL LAIN ---
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: currentCardBg,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: currentTextColor.withOpacity(0.08)),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 5))],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.people_alt_rounded, color: Colors.orange, size: 22),
+                      const SizedBox(width: 10),
+                      Text('Daftar Profil Tersimpan', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text('Ketuk salah satu nama di bawah ini untuk beralih profil secara instan. Profil yang berbeda dapat mengatur emailnya secara terpisah.', style: TextStyle(color: currentTextColor.withOpacity(0.6), fontSize: 12, height: 1.5)),
+                  const SizedBox(height: 20),
                   
                   if (_savedUsers.isNotEmpty)
                     ListView.builder(
@@ -481,23 +498,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             leading: GestureDetector(
                               onTap: () => _pickImageForUser(name),
                               child: CircleAvatar(
-                                backgroundColor: isActive ? const Color(0xFF2563EB) : widget.textColor.withOpacity(0.1),
+                                backgroundColor: isActive ? const Color(0xFF2563EB) : currentTextColor.withOpacity(0.1),
                                 backgroundImage: photoBase64 != null ? MemoryImage(base64Decode(photoBase64)) : null,
-                                child: photoBase64 == null ? Icon(Icons.add_a_photo_rounded, color: isActive ? Colors.white : widget.textColor.withOpacity(0.6), size: 16) : null,
+                                child: photoBase64 == null ? Icon(Icons.add_a_photo_rounded, color: isActive ? Colors.white : currentTextColor.withOpacity(0.6), size: 16) : null,
                               ),
                             ),
-                            title: Text(name, style: TextStyle(color: widget.textColor, fontWeight: isActive ? FontWeight.bold : FontWeight.w600)),
+                            title: Text(name, style: TextStyle(color: currentTextColor, fontWeight: isActive ? FontWeight.bold : FontWeight.w600)),
                             subtitle: Text(
                               (userEmail != null && userEmail.isNotEmpty) ? userEmail : 'Email belum diatur', 
                               style: TextStyle(
-                                color: widget.textColor.withOpacity(0.5), 
+                                color: currentTextColor.withOpacity(0.5), 
                                 fontSize: 11, 
                                 fontStyle: (userEmail != null && userEmail.isNotEmpty) ? FontStyle.normal : FontStyle.italic
                               )
                             ),
                             trailing: isActive 
                                 ? const Text('Sedang Dipakai', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, fontSize: 11))
-                                : const Icon(Icons.touch_app_rounded, color: Colors.black26, size: 20),
+                                : Icon(Icons.touch_app_rounded, color: currentTextColor.withOpacity(0.3), size: 20),
                           ),
                         );
                       },
@@ -509,17 +526,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Expanded(
                         child: TextField(
                           controller: _newUserCtrl,
-                          style: TextStyle(color: widget.textColor, fontSize: 14),
+                          style: TextStyle(color: currentTextColor, fontWeight: FontWeight.bold, fontSize: 13),
                           decoration: InputDecoration(
                             hintText: 'Ketik nama profil baru...',
-                            hintStyle: TextStyle(color: widget.textColor.withOpacity(0.4)),
+                            hintStyle: TextStyle(color: currentTextColor.withOpacity(0.4)),
+                            filled: true, fillColor: currentTextColor.withOpacity(0.03),
                             isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: widget.textColor.withOpacity(0.2))),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.orange, width: 1.5)),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 12),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF2563EB),
@@ -538,96 +557,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             
             const SizedBox(height: 24),
             
-            // --- BAGIAN 3: PENGATURAN TAMBAHAN (TEMA & EKSPOR) ---
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: currentCardBg,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: currentTextColor.withOpacity(0.1)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Pengaturan Lanjutan', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.bold, fontSize: 16)),
-                  const SizedBox(height: 16),
-                  
-                  // Dark Mode Switch
-                  ValueListenableBuilder<ThemeMode>(
-                    valueListenable: themeModeNotifier,
-                    builder: (context, currentMode, _) {
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Icon(currentMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode, color: const Color(0xFF2563EB)),
-                        title: Text('Mode Gelap (Dark Mode)', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
-                        trailing: Switch(
-                          value: currentMode == ThemeMode.dark,
-                          onChanged: (val) async {
-                            final newMode = val ? ThemeMode.dark : ThemeMode.light;
-                            themeModeNotifier.value = newMode;
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setString('app_theme_mode', val ? 'Dark' : 'Light');
-                          },
-                          activeColor: const Color(0xFF2563EB),
-                        ),
-                      );
-                    }
-                  ),
-                  const Divider(),
-                  
-                  // Export CSV
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.table_chart, color: Colors.green),
-                    title: Text('Ekspor Laporan CSV', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
-                    onTap: () async {
-                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
-                      await ExportService.exportToCSV(subs);
-                    },
-                  ),
-                  
-                  // Export PDF
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
-                    title: Text('Ekspor Laporan PDF', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
-                    onTap: () async {
-                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
-                      await ExportService.exportToPDF(subs);
-                    },
-                  ),
-                  const Divider(),
-                  
-                  // Cloud Sync
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.cloud_sync, color: Color(0xFF2563EB)),
-                    title: Text('Sinkronisasi Google Drive', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
-                    onTap: () async {
-                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
-                      final result = await CloudSyncService.syncWithGoogleDrive(subs);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
-                      }
-                    },
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.local_fire_department, color: Colors.orange),
-                    title: Text('Sinkronisasi Firebase', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
-                    onTap: () async {
-                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
-                      final result = await CloudSyncService.syncWithFirebase(subs);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 40),
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
