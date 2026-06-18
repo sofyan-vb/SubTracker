@@ -2175,7 +2175,7 @@ class _StatsViewState extends State<_StatsView> {
                     end: Alignment.bottomLeft,
                   ),
                   borderRadius: BorderRadius.circular(24),
-                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+                  boxShadow: [BoxShadow(color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
                 ),
                 child: Row(
                   children: [
@@ -2611,8 +2611,6 @@ class _SettingsViewState extends State<_SettingsView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            
-            
 
 
             FadeInSlide(delay: Duration.zero,
