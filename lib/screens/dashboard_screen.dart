@@ -386,19 +386,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
 
               bottomNavigationBar: BottomAppBar(
-                color: Colors.transparent, // Dibuat transparan agar gradasi terlihat
+                color: Colors.transparent, 
                 elevation: 10,
                 shadowColor: Colors.black26,
                 shape: const CircularNotchedRectangle(),
                 notchMargin: 8,
-                clipBehavior: Clip.antiAlias, // Sangat penting agar gradasi tidak menutupi lengkungan tombol tambah
-                padding: EdgeInsets.zero, // Menghilangkan batas agar warna penuh
+                clipBehavior: Clip.antiAlias, 
+                padding: EdgeInsets.zero, 
                 child: Container(
                   height: 60,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Color(0xFFDBEAFE), Colors.white], // Gradasi biru sangat lembut (Soft Pastel Blue) ke Putih
-                      begin: Alignment.topCenter,
+                      colors: [Color(0xFFDBEAFE), Colors.white], 
                       end: Alignment.bottomCenter,
                     ),
                   ),
@@ -425,7 +424,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 48), // Ruang kosong untuk tombol Tambah (FAB) di tengah
+                      const SizedBox(width: 48), 
                       InkWell(
                         onTap: () => setState(() => _currentIndex = 2),
                         borderRadius: BorderRadius.circular(12),
@@ -2166,6 +2165,52 @@ class _StatsViewState extends State<_StatsView> {
             ],
 
     
+            if (provider.activeSubs.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF0EA5E9), Color(0xFF2563EB)], // Gradasi Cyan ke Biru Cerah agar menonjol
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(16)),
+                      child: const Icon(Icons.coffee_rounded, color: Colors.white, size: 28),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(tr('Beban Langganan Harian', 'Daily Subscription Burden'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 4),
+                          FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              
+                              currencyFormat.format(totalMonthly / DateUtils.getDaysInMonth(DateTime.now().year, DateTime.now().month)),
+                              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(tr('Tanpa sadar, ini adalah jumlah uang Anda yang terus mengalir keluar setiap harinya.', 'Without realizing it, this is the amount of your money flowing out every single day.'), style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11, height: 1.4)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+
             Text(
               tr('Kategori Pengeluaran', 'Recent by Category'),
               style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)
@@ -2646,7 +2691,7 @@ class _SettingsViewState extends State<_SettingsView> {
             const SizedBox(height: 8),
             _buildGroupHeader(Icons.security_rounded, tr('Sistem & Privasi', 'System & Privacy')),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme, iconColor: Colors.red, titleColor: Colors.red),
             ),
             FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(
@@ -2658,7 +2703,8 @@ class _SettingsViewState extends State<_SettingsView> {
                   applicationLegalese: 'Developed carefully.\n© 2026 Copyright.',
                   applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.white)),
                 ),
-                cardBg, textColor, subTextColor, widget.theme
+                cardBg, textColor, subTextColor, widget.theme,
+                iconColor: Colors.amber, titleColor: Colors.amber
               ),
             ),
           ],
@@ -2780,7 +2826,7 @@ class _SettingsViewState extends State<_SettingsView> {
     );
   }
 
-  Widget _buildSettingTile(IconData icon, String title, String subtitle, VoidCallback onTap, Color cardBg, Color textColor, Color subTextColor, String currentTheme) {
+  Widget _buildSettingTile(IconData icon, String title, String subtitle, VoidCallback onTap, Color cardBg, Color textColor, Color subTextColor, String currentTheme, {Color? iconColor, Color? titleColor}) {
     return Container(
       color: Colors.white,
       child: ListTile(
@@ -2788,9 +2834,9 @@ class _SettingsViewState extends State<_SettingsView> {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(color: Colors.transparent, shape: BoxShape.circle),
-          child: Icon(icon, color: Colors.black, size: 24),
+          child: Icon(icon, color: iconColor ?? Colors.black, size: 24),
         ),
-        title: Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+        title: Text(title, style: TextStyle(color: titleColor ?? textColor, fontWeight: FontWeight.bold, fontSize: 14)),
         subtitle: Padding(padding: const EdgeInsets.only(top: 4.0), child: Text(subtitle, style: TextStyle(color: subTextColor, fontSize: 11))),
         trailing: Icon(Icons.chevron_right_rounded, color: subTextColor),
         onTap: onTap, 
