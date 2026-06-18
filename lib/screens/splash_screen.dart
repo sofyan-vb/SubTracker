@@ -166,6 +166,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
           body: Stack(
             children: [
           
+          if (_state == SplashState.onboarding || _state == SplashState.welcomeNew)
+            const Positioned.fill(child: OnboardingBackground()),
+          
           if (_state == SplashState.welcomeReturning)
             Positioned.fill(
               child: WelcomeReturningView(
@@ -887,7 +890,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFFF5F7FA),
+      color: Colors.transparent,
       width: double.infinity,
       child: Stack(
         alignment: Alignment.center,
@@ -1170,6 +1173,56 @@ class _BudgetThousandsFormatter extends TextInputFormatter {
     return TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(offset: newText.length),
+    );
+  }
+}
+
+class OnboardingBackground extends StatelessWidget {
+  const OnboardingBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          top: -150,
+          left: -100,
+          child: Transform.rotate(
+            angle: 0.5,
+            child: Container(
+              width: 400,
+              height: 400,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                gradient: LinearGradient(
+                  colors: [const Color(0xFF2563EB).withOpacity(0.08), const Color(0xFF0D9488).withOpacity(0.02)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -100,
+          right: -100,
+          child: Transform.rotate(
+            angle: -0.3,
+            child: Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(80),
+                gradient: LinearGradient(
+                  colors: [const Color(0xFF0D9488).withOpacity(0.08), const Color(0xFF2563EB).withOpacity(0.02)],
+                  begin: Alignment.bottomRight,
+                  end: Alignment.topLeft,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

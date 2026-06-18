@@ -9,6 +9,9 @@ import '../providers/subscription_provider.dart';
 import 'dashboard_screen.dart';
 import '../utils/toast_utils.dart';
 import '../services/email_service.dart';
+import '../services/export_service.dart';
+import '../services/cloud_sync_service.dart';
+import '../main.dart'; // Untuk themeModeNotifier
 
 class ProfileScreen extends StatefulWidget {
   final Color bgColor;
@@ -320,8 +323,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentBgColor = isDark ? const Color(0xFF0F172A) : widget.bgColor;
+    final currentCardBg = isDark ? const Color(0xFF1E293B) : widget.cardBg;
+    final currentTextColor = isDark ? Colors.white : widget.textColor;
+
     return Scaffold(
-      backgroundColor: widget.bgColor,
+      backgroundColor: currentBgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -524,6 +532,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   )
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // --- BAGIAN 3: PENGATURAN TAMBAHAN (TEMA & EKSPOR) ---
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: currentCardBg,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: currentTextColor.withOpacity(0.1)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Pengaturan Lanjutan', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                  const SizedBox(height: 16),
+                  
+                  // Dark Mode Switch
+                  ValueListenableBuilder<ThemeMode>(
+                    valueListenable: themeModeNotifier,
+                    builder: (context, currentMode, _) {
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(currentMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode, color: const Color(0xFF2563EB)),
+                        title: Text('Mode Gelap (Dark Mode)', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
+                        trailing: Switch(
+                          value: currentMode == ThemeMode.dark,
+                          onChanged: (val) async {
+                            final newMode = val ? ThemeMode.dark : ThemeMode.light;
+                            themeModeNotifier.value = newMode;
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setString('app_theme_mode', val ? 'Dark' : 'Light');
+                          },
+                          activeColor: const Color(0xFF2563EB),
+                        ),
+                      );
+                    }
+                  ),
+                  const Divider(),
+                  
+                  // Export CSV
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.table_chart, color: Colors.green),
+                    title: Text('Ekspor Laporan CSV', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
+                    onTap: () async {
+                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
+                      await ExportService.exportToCSV(subs);
+                    },
+                  ),
+                  
+                  // Export PDF
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.picture_as_pdf, color: Colors.redAccent),
+                    title: Text('Ekspor Laporan PDF', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
+                    onTap: () async {
+                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
+                      await ExportService.exportToPDF(subs);
+                    },
+                  ),
+                  const Divider(),
+                  
+                  // Cloud Sync
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.cloud_sync, color: Color(0xFF2563EB)),
+                    title: Text('Sinkronisasi Google Drive', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
+                    onTap: () async {
+                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
+                      final result = await CloudSyncService.syncWithGoogleDrive(subs);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+                      }
+                    },
+                  ),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.local_fire_department, color: Colors.orange),
+                    title: Text('Sinkronisasi Firebase', style: TextStyle(color: currentTextColor, fontWeight: FontWeight.w600)),
+                    onTap: () async {
+                      final subs = Provider.of<SubProvider>(context, listen: false).subs;
+                      final result = await CloudSyncService.syncWithFirebase(subs);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+                      }
+                    },
+                  ),
                 ],
               ),
             ),

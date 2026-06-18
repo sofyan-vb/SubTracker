@@ -145,13 +145,18 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
     final dateFormat = DateFormat('MMMM dd, yyyy'); 
-    final textColor = const Color(0xFF1E293B);
-    final subTextColor = Colors.black54;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final innerCardBg = isDark ? const Color(0xFF0F172A) : Colors.grey[50];
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final appBarBg = isDark ? const Color(0xFF0F172A) : const Color(0xFF1E3A8A);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E3A8A), elevation: 0,
+        backgroundColor: appBarBg, elevation: 0,
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
         title: Text(tr('Detail Langganan', 'Subscription Detail'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
@@ -162,9 +167,9 @@ class _DetailScreenState extends State<DetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cardBg,
               borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10))]
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 20, offset: const Offset(0, 10))]
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -173,7 +178,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 Container(
                   padding: const EdgeInsets.all(24), 
                   decoration: BoxDecoration(
-                    color: Colors.grey[100], 
+                    color: innerCardBg, 
                     borderRadius: BorderRadius.circular(20),
                   ), 
                   child: Icon(CategoryUtils.getIcon(currentSub.category), size: 48, color: const Color(0xFF2563EB))
@@ -184,9 +189,17 @@ class _DetailScreenState extends State<DetailScreen> {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(width: 8, height: 8, decoration: BoxDecoration(color: const Color(0xFF2563EB), shape: BoxShape.circle)),
+                    if (currentSub.isTrial) ...[
+                      Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.pinkAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(4)), child: const Text('TRIAL', style: TextStyle(color: Colors.pinkAccent, fontSize: 10, fontWeight: FontWeight.bold))),
+                      const SizedBox(width: 8),
+                    ],
+                    if (currentSub.splitCount > 1) ...[
+                      Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(4)), child: Text('Patungan ${currentSub.splitCount} Org', style: const TextStyle(color: Colors.teal, fontSize: 10, fontWeight: FontWeight.bold))),
+                      const SizedBox(width: 8),
+                    ],
+                    Container(width: 8, height: 8, decoration: BoxDecoration(color: currentSub.isPaused ? Colors.orangeAccent : const Color(0xFF2563EB), shape: BoxShape.circle)),
                     const SizedBox(width: 6),
-                    Text(tr('LANGGANAN AKTIF', 'ACTIVE SUBSCRIPTION'), style: const TextStyle(color: Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                    Text(currentSub.isPaused ? 'DI-PAUSE' : tr('LANGGANAN AKTIF', 'ACTIVE SUBSCRIPTION'), style: TextStyle(color: currentSub.isPaused ? Colors.orangeAccent : const Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                   ],
                 ),
                 
@@ -197,9 +210,9 @@ class _DetailScreenState extends State<DetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: innerCardBg,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200)
+                    border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200)
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,7 +224,7 @@ class _DetailScreenState extends State<DetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(currentSub.category, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text('${currencyFormat.format(currentSub.price)}/mo', style: const TextStyle(color: Color(0xFF2563EB), fontSize: 16, fontWeight: FontWeight.w900)),
+                          Text('${currencyFormat.format(currentSub.price / currentSub.splitCount)}/mo', style: const TextStyle(color: Color(0xFF2563EB), fontSize: 16, fontWeight: FontWeight.w900)),
                         ],
                       ),
                       const Divider(height: 24),
@@ -237,9 +250,9 @@ class _DetailScreenState extends State<DetailScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: innerCardBg,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200)
+                    border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200)
                   ),
                   child: Column(
                     children: [

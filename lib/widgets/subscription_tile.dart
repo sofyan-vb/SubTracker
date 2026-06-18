@@ -58,15 +58,17 @@ class _SubTileState extends State<SubTile> {
     final catColor = CategoryUtils.getColor(widget.sub.category);
     final catIcon = CategoryUtils.getIcon(widget.sub.category);
 
-    final textColor = const Color(0xFF1E293B);
-    final subTextColor = Colors.black54;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(isDark ? 0.2 : 0.04), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -116,6 +118,22 @@ class _SubTileState extends State<SubTile> {
               SlidableAction(
                 onPressed: (context) {
                   final provider = context.read<SubProvider>();
+                  provider.togglePause(widget.sub.id);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text(widget.sub.isPaused ? 'Langganan dilanjutkan' : 'Langganan di-pause', style: const TextStyle(color: Color(0xFF1E293B))),
+                    backgroundColor: Colors.white,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ));
+                },
+                backgroundColor: Colors.orangeAccent,
+                foregroundColor: Colors.white,
+                icon: widget.sub.isPaused ? Icons.play_arrow : Icons.pause,
+                label: widget.sub.isPaused ? 'Resume' : 'Pause',
+              ),
+              SlidableAction(
+                onPressed: (context) {
+                  final provider = context.read<SubProvider>();
                   provider.deleteSub(widget.sub.id);
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text(tr('Langganan dihapus', 'Subscription deleted'), style: const TextStyle(color: Color(0xFF1E293B))),
@@ -149,20 +167,40 @@ class _SubTileState extends State<SubTile> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(widget.sub.name, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              Flexible(child: Text(widget.sub.name, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                              if (widget.sub.isTrial)
+                                Container(
+                                  margin: const EdgeInsets.only(left: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(color: Colors.pinkAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.pinkAccent.withOpacity(0.5))),
+                                  child: const Text('TRIAL', style: TextStyle(color: Colors.pinkAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                                ),
+                              if (widget.sub.splitCount > 1)
+                                Container(
+                                  margin: const EdgeInsets.only(left: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(4), border: Border.all(color: Colors.teal.withOpacity(0.5))),
+                                  child: Text('1/${widget.sub.splitCount}', style: const TextStyle(color: Colors.teal, fontSize: 8, fontWeight: FontWeight.bold)),
+                                )
+                            ],
+                          ),
                           const SizedBox(height: 4),
-                          isFinished
-                              ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600))
-                              : isDue 
-                                  ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
-                                  : Text(countdownText, style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.w500)),
+                          widget.sub.isPaused 
+                              ? const Text('Sedang di-pause', style: TextStyle(color: Colors.orangeAccent, fontSize: 11, fontWeight: FontWeight.w600))
+                              : isFinished
+                                  ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600))
+                                  : isDue 
+                                      ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
+                                      : Text(countdownText, style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(currencyFormat.format(widget.sub.price), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900)),
+                        Text(currencyFormat.format(widget.sub.price / widget.sub.splitCount), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900)),
                         const SizedBox(height: 4),
                         if (isFinished)
                           Container(

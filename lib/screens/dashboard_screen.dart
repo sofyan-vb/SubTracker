@@ -315,10 +315,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       valueListenable: themeNotifier,
       builder: (context, _, child) {
         const currentTheme = 'Biru';
-        // Tema: Light Mode (Sesuai Referensi)
-        Color scaffoldBg = const Color(0xFFF5F7FA); 
-        Color bottomNavBg = Colors.white;
-        Color textColor = const Color(0xFF1E293B); 
+        // Use Theme values for Dark Mode support
+        Color scaffoldBg = Theme.of(context).scaffoldBackgroundColor; 
+        Color bottomNavBg = Theme.of(context).colorScheme.surface;
+        Color textColor = Theme.of(context).colorScheme.onSurface; 
         Color appBarIcons = Colors.white;
 
         return Stack(
@@ -2171,7 +2171,7 @@ class _StatsViewState extends State<_StatsView> {
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [Color(0xFF0EA5E9), Color(0xFF2563EB)], // Gradasi Cyan ke Biru Cerah agar menonjol
+                    colors: [Color(0xFF0EA5E9), Color(0xFF2563EB)], 
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                   ),

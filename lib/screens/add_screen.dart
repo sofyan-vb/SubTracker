@@ -28,6 +28,8 @@ class _AddScreenState extends State<AddScreen> {
   TimeOfDay _selectedTime = TimeOfDay.now(); 
   
   bool _isAutoRenew = true;
+  bool _isTrial = false;
+  int _splitCount = 1;
   String _selectedStatus = '';
   int _reminderDays = 0; 
   String _selectedNotifType = '';
@@ -96,8 +98,13 @@ class _AddScreenState extends State<AddScreen> {
     return ValueListenableBuilder<String>(
       valueListenable: themeNotifier,
       builder: (context, _, child) {
-        const currentTheme = 'Light';
-        Color scaffoldBg = const Color(0xFFF5F7FA); Color cardBg = Colors.white; Color textColor = const Color(0xFF1E293B); Color subTextColor = Colors.black54; Color hintColor = Colors.black38; Color iconColor = const Color(0xFF1E293B); Color appBarBg = const Color(0xFF1E3A8A);
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        Color scaffoldBg = Theme.of(context).scaffoldBackgroundColor; 
+        Color cardBg = isDark ? const Color(0xFF1E293B) : Colors.white; 
+        Color textColor = isDark ? Colors.white : const Color(0xFF1E293B); 
+        Color subTextColor = isDark ? Colors.white70 : Colors.black54; 
+        Color hintColor = isDark ? Colors.white38 : Colors.black38; 
+        Color appBarBg = isDark ? const Color(0xFF0F172A) : const Color(0xFF1E3A8A);
 
         return Scaffold(
           backgroundColor: scaffoldBg, 
@@ -136,7 +143,10 @@ class _AddScreenState extends State<AddScreen> {
                           FadeInSlide(delay: const Duration(milliseconds: 300), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Ingatkan Saya Pada', 'Remind Me On'), subTextColor), _buildDropdown('H-$_reminderDays', ['H-0', 'H-1', 'H-3', 'H-7'], (val) { setState(() => _reminderDays = int.parse(val!.replaceAll('H-', ''))); }, cardBg, textColor)])),
                           FadeInSlide(delay: const Duration(milliseconds: 350), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Tipe Pengingat', 'Reminder Type'), subTextColor), _buildDropdown(_selectedNotifType, notifTypes, (val) => setState(() => _selectedNotifType = val!), cardBg, textColor)])),
                           const SizedBox(height: 14),
-                          FadeInSlide(delay: const Duration(milliseconds: 400), child: _buildSwitch(tr('Perpanjangan Otomatis', 'Auto Renewal'), _isAutoRenew, (val) => setState(() => _isAutoRenew = val), textColor, hintColor)),
+                          FadeInSlide(delay: const Duration(milliseconds: 380), child: _buildSplitCounter(tr('Patungan / Split Bill (Orang)', 'Split Bill (People)'), _splitCount, (val) => setState(() => _splitCount = val), textColor, cardBg)),
+                          const SizedBox(height: 14),
+                          FadeInSlide(delay: const Duration(milliseconds: 400), child: _buildSwitch(tr('Masa Uji Coba (Free Trial)', 'Free Trial'), _isTrial, (val) => setState(() => _isTrial = val), textColor, hintColor)),
+                          FadeInSlide(delay: const Duration(milliseconds: 420), child: _buildSwitch(tr('Perpanjangan Otomatis', 'Auto Renewal'), _isAutoRenew, (val) => setState(() => _isAutoRenew = val), textColor, hintColor)),
                         ],
                         const SizedBox(height: 24),
                       ],
@@ -161,7 +171,7 @@ class _AddScreenState extends State<AddScreen> {
                           return; 
                         }
 
-                        final newSub = Subscription(id: DateTime.now().millisecondsSinceEpoch.toString(), name: _nameCtrl.text, price: double.tryParse(_priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0, dueDate: exactDateTime, category: _selectedCategory);
+                        final newSub = Subscription(id: DateTime.now().millisecondsSinceEpoch.toString(), name: _nameCtrl.text, price: double.tryParse(_priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0, dueDate: exactDateTime, category: _selectedCategory, isTrial: _isTrial, splitCount: _splitCount);
                         context.read<SubProvider>().addSub(newSub);
 
                         final prefs = await SharedPreferences.getInstance();
@@ -348,11 +358,26 @@ class _AddScreenState extends State<AddScreen> {
   Widget _buildFakeInput(String text, IconData icon, Color bg, Color textColor, Color hintColor) { 
     return Container(
       padding: const EdgeInsets.all(16), 
-      decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
+      decoration: BoxDecoration(color: bg == Colors.white ? Colors.grey[100] : bg.withOpacity(0.5), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Expanded(child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)), Icon(icon, color: hintColor, size: 20)])
     ); 
   }
   Widget _buildSwitch(String label, bool value, Function(bool) onChanged, Color textColor, Color hintColor) { return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)), Switch(value: value, onChanged: onChanged, activeColor: const Color(0xFF2563EB), activeTrackColor: const Color(0xFF93C5FD), inactiveTrackColor: hintColor)]); }
+  Widget _buildSplitCounter(String label, int count, Function(int) onChanged, Color textColor, Color cardBg) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)),
+        Row(
+          children: [
+            IconButton(icon: Icon(Icons.remove_circle_outline, color: textColor), onPressed: count > 1 ? () => onChanged(count - 1) : null),
+            Text('$count', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
+            IconButton(icon: Icon(Icons.add_circle_outline, color: textColor), onPressed: () => onChanged(count + 1)),
+          ],
+        )
+      ],
+    );
+  }
 }
 
 class ThousandsSeparatorInputFormatter extends TextInputFormatter {

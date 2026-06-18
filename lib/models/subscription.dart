@@ -6,6 +6,9 @@ class Subscription {
   final String category;
   final bool isFinished; 
   final DateTime? dateAdded;
+  final bool isPaused;
+  final bool isTrial;
+  final int splitCount;
 
   Subscription({
     required this.id,
@@ -15,6 +18,9 @@ class Subscription {
     required this.category,
     this.isFinished = false, 
     this.dateAdded,
+    this.isPaused = false,
+    this.isTrial = false,
+    this.splitCount = 1,
   });
 
   Map<String, dynamic> toJson() => {
@@ -25,6 +31,9 @@ class Subscription {
     'category': category,
     'isFinished': isFinished, 
     'dateAdded': dateAdded?.toIso8601String() ?? DateTime.now().toIso8601String(),
+    'isPaused': isPaused,
+    'isTrial': isTrial,
+    'splitCount': splitCount,
   };
 
   factory Subscription.fromJson(Map<String, dynamic> json) => Subscription(
@@ -35,6 +44,9 @@ class Subscription {
     category: json['category'],
     isFinished: json['isFinished'] ?? false, 
     dateAdded: json['dateAdded'] != null ? DateTime.parse(json['dateAdded']) : DateTime.now(),
+    isPaused: json['isPaused'] ?? false,
+    isTrial: json['isTrial'] ?? false,
+    splitCount: json['splitCount'] ?? 1,
   );
 
   Subscription copyWith({
@@ -45,6 +57,9 @@ class Subscription {
     String? category,
     bool? isFinished,
     DateTime? dateAdded,
+    bool? isPaused,
+    bool? isTrial,
+    int? splitCount,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -54,6 +69,9 @@ class Subscription {
       category: category ?? this.category,
       isFinished: isFinished ?? this.isFinished,
       dateAdded: dateAdded ?? this.dateAdded,
+      isPaused: isPaused ?? this.isPaused,
+      isTrial: isTrial ?? this.isTrial,
+      splitCount: splitCount ?? this.splitCount,
     );
   }
 }

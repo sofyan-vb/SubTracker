@@ -109,7 +109,7 @@ class SubProvider extends ChangeNotifier {
   
   
   double get totalMonthly {
-    return _subs.where((s) => !s.isFinished).fold(0, (sum, item) => sum + item.price);
+    return _subs.where((s) => !s.isFinished && !s.isPaused).fold(0, (sum, item) => sum + (item.price / item.splitCount));
   }
 
 
@@ -117,11 +117,12 @@ class SubProvider extends ChangeNotifier {
 
   Map<String, double> get categoryBreakdown {
     Map<String, double> breakdown = {};
-    for (var sub in _subs.where((s) => !s.isFinished)) { 
+    for (var sub in _subs.where((s) => !s.isFinished && !s.isPaused)) { 
+      double effectivePrice = sub.price / sub.splitCount;
       if (breakdown.containsKey(sub.category)) {
-        breakdown[sub.category] = breakdown[sub.category]! + sub.price;
+        breakdown[sub.category] = breakdown[sub.category]! + effectivePrice;
       } else {
-        breakdown[sub.category] = sub.price;
+        breakdown[sub.category] = effectivePrice;
       }
     }
     
@@ -158,6 +159,15 @@ class SubProvider extends ChangeNotifier {
     _subs.removeWhere((sub) => sub.id == id);
     _saveData();
     notifyListeners();
+  }
+
+  void togglePause(String id) {
+    final index = _subs.indexWhere((s) => s.id == id);
+    if (index != -1) {
+      _subs[index] = _subs[index].copyWith(isPaused: !_subs[index].isPaused);
+      _saveData();
+      notifyListeners();
+    }
   }
 
   void deleteSub(String id) {

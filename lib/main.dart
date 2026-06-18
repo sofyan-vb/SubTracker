@@ -8,7 +8,9 @@ import 'providers/subscription_provider.dart';
 import 'services/notification_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/terms_screen.dart'; 
-import 'screens/dashboard_screen.dart'; 
+import 'screens/dashboard_screen.dart';
+
+final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.light);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +21,15 @@ Future<void> main() async {
   languageNotifier.value = prefs.getString('app_lang') ?? 'EN';
   ringtoneNotifier.value = prefs.getString('app_ringtone') ?? 'ringtone_default';
   alarmNotifier.value = prefs.getString('app_alarm') ?? 'alarm_lagu';
+  
+  final String savedTheme = prefs.getString('app_theme_mode') ?? 'System';
+  if (savedTheme == 'Dark') {
+    themeModeNotifier.value = ThemeMode.dark;
+  } else if (savedTheme == 'Light') {
+    themeModeNotifier.value = ThemeMode.light;
+  } else {
+    themeModeNotifier.value = ThemeMode.system;
+  }
 
   runApp(
     MultiProvider(
@@ -35,33 +46,62 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SubTracker',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFFF5F7FA), 
-          elevation: 0,
-          iconTheme: IconThemeData(color: Color(0xFF1E293B)),
-          titleTextStyle: TextStyle(color: Color(0xFF1E293B), fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        colorScheme: const ColorScheme.light(
-          primary: Color(0xFF2563EB), 
-          secondary: Color(0xFF2563EB),
-          surface: Colors.white,
-          onSurface: Color(0xFF1E293B),
-        ),
-        useMaterial3: true,
-        pageTransitionsTheme: const PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
-            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-          },
-        ),
-      ),
-      home: const GateKeeper(), 
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeNotifier,
+      builder: (context, currentMode, _) {
+        return MaterialApp(
+          title: 'SubTracker',
+          debugShowCheckedModeBanner: false,
+          themeMode: currentMode,
+          theme: ThemeData(
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFFF5F7FA), 
+              elevation: 0,
+              iconTheme: IconThemeData(color: Color(0xFF1E293B)),
+              titleTextStyle: TextStyle(color: Color(0xFF1E293B), fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF2563EB), 
+              secondary: Color(0xFF2563EB),
+              surface: Colors.white,
+              onSurface: Color(0xFF1E293B),
+            ),
+            useMaterial3: true,
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+                TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF0F172A), // Slate 900
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF0F172A), 
+              elevation: 0,
+              iconTheme: IconThemeData(color: Colors.white),
+              titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF3B82F6), // Blue 500
+              secondary: Color(0xFF3B82F6),
+              surface: Color(0xFF1E293B), // Slate 800
+              onSurface: Colors.white,
+            ),
+            useMaterial3: true,
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+                TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+              },
+            ),
+          ),
+          home: const GateKeeper(), 
+        );
+      }
     );
   }
 }
