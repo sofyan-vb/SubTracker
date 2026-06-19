@@ -48,6 +48,50 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439958613854:android:6b0be3c39f031695e529cf",
+        "android_client_info": {
+          "package_name": "com.sofyan.subtracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "439958613854-ae1uto0s8tkeovovuaa7f6bncqrsks13.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sofyan.subtracker",
+            "certificate_hash": "7a512e00a7acb6def98cea2537f655ba617d2ed9"
+          }
+        },
+        {
+          "client_id": "439958613854-v2kfq0of5n5t4pb59cu24ub3amrtf0am.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGCHEBEBRP_c1uh_9KRzAEkHDnOEzWs08"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "439958613854-v2kfq0of5n5t4pb59cu24ub3amrtf0am.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "439958613854-jth7lp2ggg7r3p03ksmlaqq4q242slof.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.subTracker"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
