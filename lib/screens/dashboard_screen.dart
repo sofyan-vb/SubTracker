@@ -161,6 +161,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _showPremiumProfileDialog(BuildContext context, Color bottomNavBg, Color textColor, Color scaffoldBg) {
+    bool isDark = Theme.of(context).brightness == Brightness.dark;
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -186,9 +187,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Container(
                     height: 100,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-                      gradient: LinearGradient(colors: [Color(0xFF0D9488), Color(0xFFF5F7FA)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                      gradient: LinearGradient(
+                        colors: isDark 
+                          ? [const Color(0xFF1E293B), const Color(0xFF0F172A)] 
+                          : [const Color(0xFF0D9488), const Color(0xFF2DD4BF)], 
+                        begin: Alignment.topLeft, 
+                        end: Alignment.bottomRight
+                      ),
                     ),
                     child: Stack(
                       clipBehavior: Clip.none,
@@ -196,7 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Positioned(
                           right: 12, top: 12,
                           child: IconButton(
-                            icon: const Icon(Icons.close_rounded, color: Color(0xFF1E293B), size: 24),
+                            icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
                             onPressed: () => Navigator.pop(context)
                           )
                         ),
@@ -508,32 +515,65 @@ class _HomeViewState extends State<_HomeView> {
       context: context,
       builder: (ctx) {
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          backgroundColor: dialogBg,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          backgroundColor: Colors.transparent,
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: dialogBg,
+              borderRadius: BorderRadius.circular(28),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ValueListenableBuilder<String?>(
-                  valueListenable: userPhotoNotifier,
-                  builder: (context, photo, child) {
-                    return Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF2563EB), width: 3),
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                    gradient: LinearGradient(
+                      colors: isDark 
+                        ? [const Color(0xFF1E3A8A).withOpacity(0.9), const Color(0xFF0F172A)] 
+                        : [const Color(0xFF2563EB), const Color(0xFF1E3A8A)], 
+                      begin: Alignment.topLeft, 
+                      end: Alignment.bottomRight
+                    ),
+                  ),
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        right: 12, top: 12,
+                        child: IconButton(
+                          icon: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
+                          onPressed: () => Navigator.pop(context)
+                        )
                       ),
-                      child: CircleAvatar(
-                        radius: 45,
-                        backgroundColor: isDark ? Colors.white10 : Colors.grey.shade100,
-                        backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
-                        child: photo == null ? Icon(Icons.person, size: 45, color: subTextCol) : null,
+                      Positioned(
+                        bottom: -40,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(color: dialogBg, shape: BoxShape.circle),
+                            child: ValueListenableBuilder<String?>(
+                              valueListenable: userPhotoNotifier,
+                              builder: (context, photo, child) {
+                                return CircleAvatar(
+                                  radius: 40,
+                                  backgroundColor: isDark ? Colors.white10 : Colors.grey.shade100,
+                                  backgroundImage: photo != null ? MemoryImage(base64Decode(photo)) : null,
+                                  child: photo == null ? Icon(Icons.person, size: 45, color: subTextCol) : null,
+                                );
+                              }
+                            ),
+                          ),
+                        ),
                       ),
-                    );
-                  }
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 50),
                 ValueListenableBuilder<String>(
                   valueListenable: userNameNotifier,
                   builder: (context, name, child) {
@@ -570,21 +610,7 @@ class _HomeViewState extends State<_HomeView> {
                     );
                   }
                 ),
-                const SizedBox(height: 30),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? Colors.white10 : Colors.grey.shade100,
-                      foregroundColor: textCol,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))
-                    ),
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(tr('Tutup', 'Close'), style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                )
+                const SizedBox(height: 24),
               ],
             ),
           ),
@@ -702,6 +728,123 @@ class _HomeViewState extends State<_HomeView> {
               ),
             );
           }
+        );
+      }
+    );
+  }
+
+  void _showSettingsSheet(BuildContext context, Color bgColor, Color textColor) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: bgColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetContext) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final sheetCardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+        
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              InkWell(
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  final newMode = themeModeNotifier.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                  themeModeNotifier.value = newMode;
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('app_theme_mode', newMode == ThemeMode.dark ? 'Dark' : 'Light');
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(color: sheetCardColor, borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    children: [
+                      Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.15), shape: BoxShape.circle), child: Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: const Color(0xFF2563EB))),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(isDark ? tr('Mode Terang', 'Light Mode') : tr('Mode Gelap', 'Dark Mode'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(tr('Ubah tema aplikasi sesuai kenyamanan mata Anda.', 'Change the app theme for your eye comfort.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              InkWell(
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  final subs = context.read<SubProvider>().subs;
+                  final result = await CloudSyncService.syncWithGoogleDrive(subs);
+                  ToastUtils.show(context, result);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(color: sheetCardColor, borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    children: [
+                      Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.green.withOpacity(0.15), shape: BoxShape.circle), child: const Icon(Icons.cloud_sync_rounded, color: Colors.green)),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(tr('Sinkronisasi Google Drive', 'Sync Google Drive'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(tr('Simpan dan pulihkan cadangan data Anda secara aman menggunakan akun Google Drive pribadi Anda.', 'Safely backup and restore your data using your personal Google Drive account.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              InkWell(
+                onTap: () async {
+                  Navigator.pop(sheetContext);
+                  final subs = context.read<SubProvider>().subs;
+                  final result = await CloudSyncService.syncWithFirebase(subs);
+                  ToastUtils.show(context, result);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(color: sheetCardColor, borderRadius: BorderRadius.circular(16)),
+                  child: Row(
+                    children: [
+                      Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: Colors.orange.withOpacity(0.15), shape: BoxShape.circle), child: const Icon(Icons.local_fire_department_rounded, color: Colors.orange)),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(tr('Sinkronisasi Firebase', 'Sync Firebase'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            Text(tr('Sinkronkan data ke cloud Firebase agar dapat diakses secara sinkron dan real-time dari perangkat lain.', 'Sync data to Firebase cloud to access synchronously and real-time from other devices.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 30),
+            ],
+          ),
         );
       }
     );
@@ -962,70 +1105,18 @@ class _HomeViewState extends State<_HomeView> {
                                 );
                               }
                             ),
-                            PopupMenuButton<String>(
-                              icon: Container(
+                            GestureDetector(
+                              onTap: () => _showSettingsSheet(context, bgColor, textColor),
+                              child: Container(
+                                margin: const EdgeInsets.only(left: 8),
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.white30, width: 1.5),
                                 ),
                                 child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 22),
                               ),
-                              offset: const Offset(0, 50),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E293B) : Colors.white,
-                              onSelected: (value) async {
-                                final subs = context.read<SubProvider>().subs;
-                                if (value == 'dark_mode') {
-                                  final newMode = themeModeNotifier.value == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
-                                  themeModeNotifier.value = newMode;
-                                  final prefs = await SharedPreferences.getInstance();
-                                  await prefs.setString('app_theme_mode', newMode == ThemeMode.dark ? 'Dark' : 'Light');
-                                } else if (value == 'sync_drive') {
-                                  final result = await CloudSyncService.syncWithGoogleDrive(subs);
-                                  ToastUtils.show(context, result);
-                                } else if (value == 'sync_firebase') {
-                                  final result = await CloudSyncService.syncWithFirebase(subs);
-                                  ToastUtils.show(context, result);
-                                }
-                              },
-                              itemBuilder: (context) {
-                                final isDark = themeModeNotifier.value == ThemeMode.dark;
-                                final popupTextColor = isDark ? Colors.white : const Color(0xFF1E293B);
-                                return [
-                                  PopupMenuItem(
-                                    value: 'dark_mode',
-                                    child: Row(
-                                      children: [
-                                        Icon(isDark ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: const Color(0xFF2563EB)),
-                                        const SizedBox(width: 8),
-                                        Text(isDark ? 'Mode Terang' : 'Mode Gelap', style: TextStyle(fontWeight: FontWeight.bold, color: popupTextColor)),
-                                      ],
-                                    ),
-                                  ),
-                                  const PopupMenuDivider(),
-                                  PopupMenuItem(
-                                    value: 'sync_drive',
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.cloud_sync_rounded, color: Colors.green),
-                                        const SizedBox(width: 8),
-                                        Text(tr('Sinkronisasi Google Drive', 'Sync Google Drive'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: popupTextColor)),
-                                      ],
-                                    ),
-                                  ),
-                                  PopupMenuItem(
-                                    value: 'sync_firebase',
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.local_fire_department_rounded, color: Colors.orange),
-                                        const SizedBox(width: 8),
-                                        Text(tr('Sinkronisasi Firebase', 'Sync Firebase'), style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: popupTextColor)),
-                                      ],
-                                    ),
-                                  ),
-                                ];
-                              },
                             ),
                           ],
                         ),
@@ -2618,6 +2709,11 @@ class _SettingsViewState extends State<_SettingsView> {
                                             userNameNotifier.value = ''; 
                                             
                                             ToastUtils.show(context, tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared'));
+                                            Navigator.pushAndRemoveUntil(
+                                              context,
+                                              MaterialPageRoute(builder: (context) => const SplashScreen()),
+                                              (route) => false,
+                                            );
                                           }, 
                                           child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
                                         ),
@@ -2662,7 +2758,7 @@ class _SettingsViewState extends State<_SettingsView> {
               color: const Color(0xFF2563EB).withOpacity(0.15),
               shape: BoxShape.circle,
             ),
-            child: Text(number, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 11)),
+            child: Text(number, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -2701,12 +2797,12 @@ class _SettingsViewState extends State<_SettingsView> {
 
             FadeInSlide(delay: Duration.zero,
               child: Container(
-                color: Colors.white,
+                color: Colors.transparent,
                 child: SwitchListTile(
                   activeColor: Colors.white,
                   activeTrackColor: const Color(0xFF2563EB),
                   inactiveThumbColor: Colors.grey,
-                  inactiveTrackColor: Colors.grey.shade300,
+                  inactiveTrackColor: isDark ? Colors.white24 : Colors.grey.shade300,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
                   subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 11)),

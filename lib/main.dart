@@ -114,6 +114,7 @@ class GateKeeper extends StatefulWidget {
 
 class _GateKeeperState extends State<GateKeeper> {
   bool _showLanguageSelect = false;
+  bool _isLoadingRoute = true;
   String? _selectedLanguage;
 
   @override
@@ -128,15 +129,22 @@ class _GateKeeperState extends State<GateKeeper> {
     final budget = prefs.getString('monthly_budget');
     final hasAccepted = prefs.getBool('hasAcceptedTerms') ?? false;
 
-  
     if (budget != null && budget.isNotEmpty) {
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const SplashScreen(isNewUser: false)),
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => const SplashScreen(isNewUser: false),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
         );
       }
     } else {
-      
+      if (mounted) {
+        setState(() {
+          _isLoadingRoute = false;
+        });
+      }
       await Future.delayed(const Duration(milliseconds: 6500));
       if (mounted) {
         if (hasAccepted) {
@@ -238,6 +246,10 @@ class _GateKeeperState extends State<GateKeeper> {
           ),
         ),
       );
+    }
+
+    if (_isLoadingRoute) {
+      return const Scaffold(backgroundColor: Color(0xFF09090B));
     }
 
     return const Scaffold(

@@ -53,12 +53,12 @@ class ToastUtils {
                       ),
                       child: Icon(icon, color: iconColor, size: 24),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 12),
                     Flexible(
                       child: Text(
                         message, 
                         style: const TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.left,
                       )
                     ),
                   ],
