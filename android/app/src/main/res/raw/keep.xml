@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_notification,@raw/alarm_classic,@raw/alarm_digital,@raw/alarm_lagu,@raw/ringtone_alert,@raw/ringtone_chime,@raw/ringtone_default,@raw/ringtone_synth" />
