@@ -1,6 +1,6 @@
 {
-    "name": "sub_tracker",
-    "short_name": "sub_tracker",
+    "name": "SubtrackIQ",
+    "short_name": "SubtrackIQ",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

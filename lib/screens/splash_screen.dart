@@ -59,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Future<void> _loadReturningUser() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _savedName = prefs.getString('user_name') ?? 'SubTracker';
+      _savedName = prefs.getString('user_name') ?? 'SubtrackIQ';
     });
   }
 
@@ -363,7 +363,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                             String res = await context.read<SubProvider>().importBackup();
                                             if (res == 'success') {
                                               final prefs = await SharedPreferences.getInstance();
-                                              await prefs.setString('user_name', 'SubTracker User');
+                                              await prefs.setString('user_name', 'SubtrackIQ User');
                                               if (context.mounted) {
                                                 ToastUtils.show(context, 'Data dipulihkan!');
                                                 _goToDashboard();
@@ -708,7 +708,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                             children: [
                               ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.asset('assets/icon.png', height: 60, width: 60, fit: BoxFit.cover)),
                               const SizedBox(width: 12),
-                              Text('SubTracker', style: TextStyle(color: textColor, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+                              Text('SubtrackIQ', style: TextStyle(color: textColor, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
                             ],
                           ),
                         ),
@@ -758,7 +758,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Text(
-                                          _activeUserName.isEmpty ? tr('Pengguna SubTracker', 'SubTracker User') : _activeUserName,
+                                          _activeUserName.isEmpty ? tr('Pengguna SubtrackIQ', 'SubtrackIQ User') : _activeUserName,
                                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
                                           maxLines: 1, overflow: TextOverflow.ellipsis,
                                         ),
@@ -884,13 +884,13 @@ class WelcomeNewView extends StatefulWidget {
 }
 
 class _WelcomeNewViewState extends State<WelcomeNewView> {
-  bool _showSubTracker = false;
+  bool _showSubtrackIQ = false;
 
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(milliseconds: 1500), () {
-      if (mounted) setState(() => _showSubTracker = true);
+      if (mounted) setState(() => _showSubtrackIQ = true);
     });
     Future.delayed(const Duration(milliseconds: 4500), () {
       if (mounted) widget.onNext();
@@ -925,7 +925,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
              
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 1000),
-                opacity: _showSubTracker ? 1.0 : 0.0,
+                opacity: _showSubtrackIQ ? 1.0 : 0.0,
                 child: Image.asset('assets/icon.png', height: 180),
               ),
               const SizedBox(height: 16),
@@ -941,10 +941,10 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
         
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 800),
-                opacity: _showSubTracker ? 1.0 : 0.0,
+                opacity: _showSubtrackIQ ? 1.0 : 0.0,
                 child: AnimatedScale(
                   duration: const Duration(milliseconds: 800),
-                  scale: _showSubTracker ? 1.0 : 0.5,
+                  scale: _showSubtrackIQ ? 1.0 : 0.5,
                   curve: Curves.easeOutBack,
                   child: ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
@@ -953,7 +953,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
                       end: Alignment.bottomRight,
                     ).createShader(bounds),
                     child: const Text(
-                      'SubTracker',
+                      'SubtrackIQ',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 48, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0, 

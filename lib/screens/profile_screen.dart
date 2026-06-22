@@ -222,9 +222,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final result = await EmailService.sendNotificationEmail(
       toEmail: email,
-      subject: 'Tes Notifikasi SubTracker',
-      message: 'Selamat! Email notifikasi SubTracker Anda berhasil terhubung. Mulai sekarang, setiap kali Anda menambahkan langganan baru di profil ini, notifikasinya akan dikirim ke email ini.',
-      name: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'SubTracker',
+      subject: 'Tes Notifikasi SubtrackIQ',
+      message: 'Selamat! Email notifikasi SubtrackIQ Anda berhasil terhubung. Mulai sekarang, setiap kali Anda menambahkan langganan baru di profil ini, notifikasinya akan dikirim ke email ini.',
+      name: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'SubtrackIQ',
     );
 
     if (mounted) {

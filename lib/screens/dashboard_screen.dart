@@ -30,6 +30,7 @@ import '../utils/currency_utils.dart';
 import '../widgets/currency_converter_sheet.dart';
 import 'add_screen.dart';
 import 'detail_screen.dart'; 
+import 'settings_screen.dart';
 
 
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Putih');
@@ -236,7 +237,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ValueListenableBuilder<String>(
                     valueListenable: userNameNotifier,
                     builder: (context, userName, child) {
-                      return Text(userName.isEmpty ? 'SubTracker User' : userName, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold));
+                      return Text(userName.isEmpty ? 'SubtrackIQ User' : userName, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold));
                     }
                   ),
                   const SizedBox(height: 28),
@@ -311,10 +312,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 0: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
       case 1: return _CalendarView(key: const ValueKey('calendar'), theme: currentTheme);
       case 2: return _StatsView(key: const ValueKey('stats'), theme: currentTheme);
-      case 3: return _SettingsView(
-        key: const ValueKey('settings'), 
-        theme: currentTheme,
-      );
+      case 3: return const SettingsScreen(key: ValueKey('settings'));
       default: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
     }
   }
@@ -578,7 +576,7 @@ class _HomeViewState extends State<_HomeView> {
                   valueListenable: userNameNotifier,
                   builder: (context, name, child) {
                     return Text(
-                      name.isEmpty ? 'SubTracker User' : name,
+                      name.isEmpty ? 'SubtrackIQ User' : name,
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol),
                     );
                   }
@@ -2499,12 +2497,12 @@ class _SettingsViewState extends State<_SettingsView> {
       final data = prefs.getString('saved_subs') ?? '[]';
       
       final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/subtracker_backup.json');
+      final file = File('${directory.path}/subtrackiq_backup.json');
       await file.writeAsString(data);
       
       final result = await Share.shareXFiles(
         [XFile(file.path)], 
-        text: 'Ini adalah backup data langganan SubTracker Anda. Simpan file ini di tempat yang aman.'
+        text: 'Ini adalah backup data langganan SubtrackIQ Anda. Simpan file ini di tempat yang aman.'
       );
     } catch(e) {
       if (mounted) ToastUtils.show(context, 'Backup Gagal: $e', icon: Icons.error_outline, iconColor: Colors.redAccent);
@@ -2659,10 +2657,10 @@ class _SettingsViewState extends State<_SettingsView> {
                       children: [
                         Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12)),
                         const SizedBox(height: 8),
-                        Text(tr('Di SubTracker, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTracker, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
+                        Text(tr('Di SubtrackIQ, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubtrackIQ, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
                         
-                        _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubTracker tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubTracker does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
+                        _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubtrackIQ tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubtrackIQ does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
                         _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage'), tr('Semua data tagihan dan nama Anda murni disimpan dan dienkripsi di dalam memori internal HP Anda. Tidak ada data yang dikirim ke Cloud.', 'All your bills and name are purely saved and encrypted locally in your phone. No data is sent to the Cloud.'), textColor, subTextColor),
                         _buildPrivacyPoint('3', tr('Sistem Notifikasi Pintar', 'Smart Notification System'), tr('Pengingat tagihan berjalan langsung di latar belakang sistem HP Anda tanpa perlu menghubungi server eksternal.', 'Bill reminders run locally on your phone background without needing to contact external servers.'), textColor, subTextColor),
                         _buildPrivacyPoint('4', tr('Akses Pihak Ketiga', 'Third-Party Access'), tr('Kami menjamin 100% bahwa data finansial Anda tidak akan pernah dijual atau dibagikan ke pihak ketiga manapun untuk tujuan iklan.', 'We 100% guarantee that your financial data will never be sold or shared to any third parties for advertising.'), textColor, subTextColor),
@@ -2875,10 +2873,10 @@ class _SettingsViewState extends State<_SettingsView> {
             ),
             FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(
-                Icons.info_rounded, tr('Tentang SubTracker', 'About SubTracker'), 'Version 1.0.0',
+                Icons.info_rounded, tr('Tentang SubtrackIQ', 'About SubtrackIQ'), 'Version 1.0.0',
                 () => showAboutDialog(
                   context: context,
-                  applicationName: 'SubTracker',
+                  applicationName: 'SubtrackIQ',
                   applicationVersion: '1.0.0',
                   applicationLegalese: 'Developed carefully.\n© 2026 Copyright.',
                   applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.white)),

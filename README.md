@@ -1,6 +1,6 @@
-# 🚀 SubTracker - Smart Subscription Manager
+# 🚀 SubtrackIQ - Smart Subscription Manager
 
-**SubTracker** adalah aplikasi pintar berbasis *Offline-First* yang dirancang untuk membantu pengguna mencatat, memantau, dan mengingatkan jadwal pembayaran tagihan langganan bulanan (seperti Netflix, Spotify, Internet, dll) secara terorganisir dan tepat waktu.
+**SubtrackIQ** adalah aplikasi pintar berbasis *Offline-First* yang dirancang untuk membantu pengguna mencatat, memantau, dan mengingatkan jadwal pembayaran tagihan langganan bulanan (seperti Netflix, Spotify, Internet, dll) secara terorganisir dan tepat waktu.
 
 Aplikasi ini dikembangkan untuk memenuhi standar UI/UX yang elegan—tidak terlalu sederhana, namun tidak terlalu ramai—dengan fungsionalitas pengingat lokal (Alarm/Notifikasi) tanpa mengorbankan privasi pengguna.
 
@@ -33,7 +33,7 @@ Aplikasi ini dikembangkan untuk memenuhi standar UI/UX yang elegan—tidak terla
 ---
 
 ## 📋 Blueprint & Tema Aplikasi
-- **Nama Aplikasi:** SubTracker
+- **Nama Aplikasi:** SubtrackIQ
 - **Tema:** Keuangan & Productivity (Subscription Manager & Reminder).
 - **Target Pengguna:** Individu yang memiliki banyak layanan langganan digital dan sering lupa tanggal jatuh tempo.
 - **Arsitektur:** *Offline-First* (Penyimpanan lokal dengan *SharedPreferences* dan sistem *Local Notifications*).
@@ -72,7 +72,7 @@ Aplikasi ini dikembangkan untuk memenuhi standar UI/UX yang elegan—tidak terla
 
 ## 🛠️ Dokumentasi Cara Kerja Aplikasi
 
-Berikut adalah alur penggunaan aplikasi SubTracker:
+Berikut adalah alur penggunaan aplikasi SubtrackIQ:
 
 1. **Memulai Aplikasi (Awal)**
    - **Pengguna Baru:** Dihadapkan pada halaman pemilihan Bahasa, Persetujuan Syarat & Ketentuan, dilanjutkan dengan animasi Welcome polos yang diketik secara halus. Setelah menekan "Mulai Sekarang", pengguna mengisi Form Profil (Nama & Anggaran).

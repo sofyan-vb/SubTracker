@@ -65,7 +65,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'subtracker-5ac3f.firebasestorage.app',
     androidClientId: '439958613854-rikgu3ivin5tqdt3alm0ovgufsd9rtpn.apps.googleusercontent.com',
     iosClientId: '439958613854-jth7lp2ggg7r3p03ksmlaqq4q242slof.apps.googleusercontent.com',
-    iosBundleId: 'com.example.subTracker',
+    iosBundleId: 'com.example.subtrackiq',
   );
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyAiwCHP6aF3oANmLSIve5c4tgtJbxWeqQY',
@@ -75,7 +75,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'subtracker-5ac3f.firebasestorage.app',
     androidClientId: '439958613854-rikgu3ivin5tqdt3alm0ovgufsd9rtpn.apps.googleusercontent.com',
     iosClientId: '439958613854-jth7lp2ggg7r3p03ksmlaqq4q242slof.apps.googleusercontent.com',
-    iosBundleId: 'com.example.subTracker',
+    iosBundleId: 'com.example.subtrackiq',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

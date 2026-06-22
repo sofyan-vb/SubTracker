@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sub_tracker/utils/category_utils.dart';
+import 'package:subtrack_iq/utils/category_utils.dart';
 import '../utils/toast_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart'; 

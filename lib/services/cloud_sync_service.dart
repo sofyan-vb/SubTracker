@@ -19,6 +19,7 @@ class CloudSyncService {
 
   static Future<String> syncWithGoogleDrive(List<Subscription> subs) async {
     try {
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         return "Sinkronisasi dibatalkan oleh pengguna.";
@@ -35,7 +36,7 @@ class CloudSyncService {
       final stream = Stream.value(utf8.encode(jsonData));
       
       var driveFile = drive.File();
-      driveFile.name = "SubTracker_Backup.json";
+      driveFile.name = "SubtrackIQ_Backup.json";
 
       await driveApi.files.create(
         driveFile,
@@ -56,6 +57,7 @@ class CloudSyncService {
         );
       }
 
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         return "Sinkronisasi dibatalkan oleh pengguna.";

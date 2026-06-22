@@ -92,6 +92,42 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439958613854:android:97620614dde45173e529cf",
+        "android_client_info": {
+          "package_name": "com.sofyan.subtrackiq"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "439958613854-v2kfq0of5n5t4pb59cu24ub3amrtf0am.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGCHEBEBRP_c1uh_9KRzAEkHDnOEzWs08"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "439958613854-v2kfq0of5n5t4pb59cu24ub3amrtf0am.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "439958613854-jth7lp2ggg7r3p03ksmlaqq4q242slof.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.subTracker"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
