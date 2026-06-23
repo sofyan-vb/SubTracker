@@ -11,7 +11,7 @@ class ExportService {
   static Future<void> exportToCSV(List<Subscription> subs, String userName) async {
     List<List<dynamic>> rows = [];
     
-    rows.add(["Laporan Pengeluaran SubtrackIQ", "Pengguna: $userName"]);
+    rows.add(["Laporan Pengeluaran SubTrack IQ", "Pengguna: $userName"]);
     rows.add([]);
     
     // Headers
@@ -34,7 +34,7 @@ class ExportService {
     String csvData = const ListToCsvConverter().convert(rows);
 
     final directory = await getTemporaryDirectory();
-    final safeName = userName.isEmpty ? 'SubtrackIQ' : userName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+    final safeName = userName.isEmpty ? 'SubTrack IQ' : userName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
     final path = "${directory.path}/Laporan_${safeName}_${DateTime.now().millisecondsSinceEpoch}.csv";
     final File file = File(path);
     await file.writeAsString(csvData);
@@ -53,7 +53,7 @@ class ExportService {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
-              pw.Text("Laporan Pengeluaran SubtrackIQ", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+              pw.Text("Laporan Pengeluaran SubTrack IQ", style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 8),
               pw.Text("Pengguna: $userName", style: pw.TextStyle(fontSize: 16, color: PdfColors.grey700)),
               pw.SizedBox(height: 20),
@@ -75,7 +75,7 @@ class ExportService {
     );
 
     final directory = await getTemporaryDirectory();
-    final safeName = userName.isEmpty ? 'SubtrackIQ' : userName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+    final safeName = userName.isEmpty ? 'SubTrack IQ' : userName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
     final path = "${directory.path}/Laporan_${safeName}_${DateTime.now().millisecondsSinceEpoch}.pdf";
     final File file = File(path);
     await file.writeAsBytes(await pdf.save());

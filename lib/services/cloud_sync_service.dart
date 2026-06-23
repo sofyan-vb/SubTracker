@@ -36,7 +36,7 @@ class CloudSyncService {
       final stream = Stream.value(utf8.encode(jsonData));
       
       var driveFile = drive.File();
-      driveFile.name = "SubtrackIQ_Backup.json";
+      driveFile.name = "SubTrack IQ_Backup.json";
 
       await driveApi.files.create(
         driveFile,

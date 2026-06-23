@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
       valueListenable: themeModeNotifier,
       builder: (context, currentMode, _) {
         return MaterialApp(
-          title: 'SubtrackIQ',
+          title: 'SubTrack IQ',
           debugShowCheckedModeBanner: false,
           themeMode: currentMode,
           theme: ThemeData(
@@ -282,7 +282,7 @@ class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> with Si
     super.initState();
     
     _typingPart = tr('Selamat datang di', 'Welcome to');
-    _staticPart = 'SubtrackIQ';
+    _staticPart = 'SubTrack IQ';
     _paintController = AnimationController(vsync: this, duration: const Duration(milliseconds: 2500));
     _paintAnimation = Tween<double>(begin: -0.2, end: 1.2).animate(CurvedAnimation(parent: _paintController, curve: Curves.easeInOutCubic));
     Future.delayed(const Duration(milliseconds: 600), () {

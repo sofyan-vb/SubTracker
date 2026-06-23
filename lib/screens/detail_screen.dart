@@ -8,6 +8,7 @@ import '../models/subscription.dart';
 import '../providers/subscription_provider.dart'; 
 import 'dashboard_screen.dart';
 import '../utils/currency_utils.dart';
+import 'edit_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   final Subscription sub;
@@ -187,7 +188,23 @@ class _DetailScreenState extends State<DetailScreen> {
                   child: Icon(CategoryUtils.getIcon(currentSub.category), size: 48, color: const Color(0xFF2563EB))
                 ),
                 const SizedBox(height: 16),
-                Text(currentSub.name, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(currentSub.name, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900)),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.edit_note_rounded, color: Color(0xFF2563EB)),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => EditScreen(sub: currentSub))).then((_) {
+                          final provider = context.read<SubProvider>();
+                          final updated = provider.subs.firstWhere((s) => s.id == currentSub.id, orElse: () => currentSub);
+                          if (mounted) setState(() => currentSub = updated);
+                        });
+                      },
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisSize: MainAxisSize.min,

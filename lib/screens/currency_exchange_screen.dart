@@ -26,6 +26,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
   String _selectedRange = '1M';
   Map<String, double> _historicalData = {};
   bool _isLoadingChart = false;
+  bool _isEditingBase = true;
   
   final List<String> _ranges = ['1D', '5D', '1M', '1Y', '5Y', 'Max'];
 
@@ -83,19 +84,26 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     return Scaffold(
       backgroundColor: scaffoldBg,
       appBar: AppBar(
-        backgroundColor: scaffoldBg,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+              begin: Alignment.topLeft, end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new_rounded, color: textColor),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(tr('Kalkulator Kurs', 'Exchange Rate'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 20)),
+        title: Text(tr('Kalkulator Kurs', 'Exchange Rate'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFF2563EB),
-          unselectedLabelColor: textColor.withOpacity(0.5),
-          indicatorColor: const Color(0xFF2563EB),
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white54,
+          indicatorColor: Colors.white,
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           tabs: [
@@ -122,27 +130,6 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2563EB).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF2563EB).withOpacity(0.3)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.info_outline_rounded, color: Color(0xFF2563EB)),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    '1 $_convBase = $rateFormatted\nData realtime dari Frankfurter API.',
-                    style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold, height: 1.4),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 32),
           
           _buildCurrencyInputBox(
             label: tr('Dari', 'From'),
@@ -150,6 +137,8 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
             controller: _baseCtrl,
             cardColor: cardColor,
             textColor: textColor,
+            isEditing: _isEditingBase,
+            onTap: () => setState(() => _isEditingBase = true),
             onCurrencyChanged: (val) {
               setState(() => _convBase = val!);
               _calculateConversion(true);
@@ -190,13 +179,84 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
             controller: _targetCtrl,
             cardColor: cardColor,
             textColor: textColor,
+            isEditing: !_isEditingBase,
+            onTap: () => setState(() => _isEditingBase = false),
             onCurrencyChanged: (val) {
               setState(() => _convTarget = val!);
               _calculateConversion(false);
             },
             onChanged: (val) => _calculateConversion(false),
           ),
+          
+          const SizedBox(height: 32),
+          _buildNumpad(cardColor, textColor),
         ],
+      ),
+    );
+  }
+
+  void _onNumpadTap(String value) {
+    TextEditingController ctrl = _isEditingBase ? _baseCtrl : _targetCtrl;
+    if (value == 'C') {
+      ctrl.text = '0';
+    } else if (value == '<') {
+      if (ctrl.text.isNotEmpty) {
+        ctrl.text = ctrl.text.substring(0, ctrl.text.length - 1);
+      }
+    } else {
+      if (value == '.' && ctrl.text.contains('.')) return;
+      if (ctrl.text == '0' && value != '.') ctrl.text = '';
+      ctrl.text += value;
+    }
+    if (ctrl.text.isEmpty) ctrl.text = '0';
+    _calculateConversion(_isEditingBase);
+  }
+
+  Widget _buildNumpad(Color cardColor, Color textColor) {
+    final List<String> buttons = [
+      '7', '8', '9',
+      '4', '5', '6',
+      '1', '2', '3',
+      '.', '0', '<',
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))],
+      ),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          childAspectRatio: 1.8,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemCount: buttons.length,
+        itemBuilder: (context, index) {
+          String btn = buttons[index];
+          bool isAction = btn == '<';
+          return InkWell(
+            onTap: () => _onNumpadTap(btn),
+            onLongPress: isAction ? () => _onNumpadTap('C') : null,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isAction ? const Color(0xFFEF4444).withOpacity(0.1) : textColor.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: btn == '<' 
+                  ? Icon(Icons.backspace_rounded, color: isAction ? const Color(0xFFEF4444) : textColor)
+                  : Text(btn, style: TextStyle(color: isAction ? const Color(0xFFEF4444) : textColor, fontSize: 24, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -207,6 +267,8 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     required TextEditingController controller,
     required Color cardColor,
     required Color textColor,
+    required bool isEditing,
+    required VoidCallback onTap,
     required ValueChanged<String?> onCurrencyChanged,
     required ValueChanged<String> onChanged,
   }) {
@@ -259,9 +321,16 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
               Expanded(
                 child: TextField(
                   controller: controller,
+                  readOnly: true,
+                  showCursor: isEditing,
+                  onTap: onTap,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   textAlign: TextAlign.right,
-                  style: TextStyle(color: textColor, fontSize: 28, fontWeight: FontWeight.w900),
+                  style: TextStyle(
+                    color: isEditing ? const Color(0xFF2563EB) : textColor, 
+                    fontSize: 28, 
+                    fontWeight: FontWeight.w900
+                  ),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
@@ -381,6 +450,63 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                 ? Center(child: Text('Data tidak tersedia', style: TextStyle(color: textColor.withOpacity(0.5))))
                 : _buildChart(chartColor, isDark),
           ),
+          
+          if (!_isLoadingChart && _historicalData.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 18),
+                            const SizedBox(width: 4),
+                            Text('Tertinggi', style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(CurrencyUtils.getFormat(_statTarget).format(_historicalData.values.reduce((a, b) => a > b ? a : b)), style: const TextStyle(color: Color(0xFF10B981), fontSize: 16, fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.trending_down_rounded, color: Color(0xFFEF4444), size: 18),
+                            const SizedBox(width: 4),
+                            Text('Terendah', style: TextStyle(color: const Color(0xFFEF4444).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(CurrencyUtils.getFormat(_statTarget).format(_historicalData.values.reduce((a, b) => a < b ? a : b)), style: const TextStyle(color: Color(0xFFEF4444), fontSize: 16, fontWeight: FontWeight.w900)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ]
         ],
       ),
     );

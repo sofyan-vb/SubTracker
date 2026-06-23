@@ -267,10 +267,10 @@ class SubProvider extends ChangeNotifier {
         _subs.map((sub) => sub.toJson()).toList(),
       );
       final Directory tempDir = Directory.systemTemp;
-      final File tempFile = File('${tempDir.path}/subtrackiq_backup.json');
+      final File tempFile = File('${tempDir.path}/SubTrack IQ_backup.json');
       await tempFile.writeAsString(encodedData);
       
-      await Share.shareXFiles([XFile(tempFile.path)], text: 'Backup SubtrackIQ Data');
+      await Share.shareXFiles([XFile(tempFile.path)], text: 'Backup SubTrack IQ Data');
       return 'success';
     } catch (e) {
       return e.toString();

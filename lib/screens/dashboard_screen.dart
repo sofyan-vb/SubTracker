@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 import '../utils/toast_utils.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:share_plus/share_plus.dart';
@@ -30,8 +31,9 @@ import '../utils/currency_utils.dart';
 import '../widgets/currency_converter_sheet.dart';
 import 'add_screen.dart';
 import 'detail_screen.dart'; 
-import 'settings_screen.dart';
-
+import 'currency_exchange_screen.dart';
+import 'currency_selector_screen.dart';
+import 'help_center_screen.dart';
 
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Putih');
 final ValueNotifier<String> userNameNotifier = ValueNotifier<String>('');
@@ -59,7 +61,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isSearching = false;
   final TextEditingController _searchCtrl = TextEditingController();
   bool _isLoadingAdd = false;
-
 
   @override
   void initState() {
@@ -237,7 +238,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ValueListenableBuilder<String>(
                     valueListenable: userNameNotifier,
                     builder: (context, userName, child) {
-                      return Text(userName.isEmpty ? 'SubtrackIQ User' : userName, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold));
+                      return Text(userName.isEmpty ? 'SubTrack IQ User' : userName, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold));
                     }
                   ),
                   const SizedBox(height: 28),
@@ -312,7 +313,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
       case 0: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
       case 1: return _CalendarView(key: const ValueKey('calendar'), theme: currentTheme);
       case 2: return _StatsView(key: const ValueKey('stats'), theme: currentTheme);
-      case 3: return const SettingsScreen(key: ValueKey('settings'));
+      case 3: return _SettingsView(
+        key: const ValueKey('settings'), 
+        theme: currentTheme,
+      );
       default: return _HomeView(key: const ValueKey('home'), theme: currentTheme);
     }
   }
@@ -422,7 +426,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
+                            Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              margin: const EdgeInsets.only(top: 4),
+                              height: 4, width: _currentIndex == 0 ? 16 : 0,
+                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
+                            )
                           ],
                         ),
                       ),
@@ -432,7 +442,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
+                            Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              margin: const EdgeInsets.only(top: 4),
+                              height: 4, width: _currentIndex == 1 ? 16 : 0,
+                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
+                            )
                           ],
                         ),
                       ),
@@ -443,7 +459,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
+                            Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              margin: const EdgeInsets.only(top: 4),
+                              height: 4, width: _currentIndex == 2 ? 16 : 0,
+                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
+                            )
                           ],
                         ),
                       ),
@@ -453,7 +475,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 28),
+                            Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              margin: const EdgeInsets.only(top: 4),
+                              height: 4, width: _currentIndex == 3 ? 16 : 0,
+                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
+                            )
                           ],
                         ),
                       ),
@@ -462,7 +490,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
             ),
-
 
           ],
         );
@@ -576,7 +603,7 @@ class _HomeViewState extends State<_HomeView> {
                   valueListenable: userNameNotifier,
                   builder: (context, name, child) {
                     return Text(
-                      name.isEmpty ? 'SubtrackIQ User' : name,
+                      name.isEmpty ? 'SubTrack IQ User' : name,
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textCol),
                     );
                   }
@@ -2247,6 +2274,18 @@ class _StatsViewState extends State<_StatsView> {
                                 title: isLarge ? '${percentage.toStringAsFixed(0)}%' : '',
                                 radius: 50,
                                 titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white, shadows: [Shadow(color: Colors.black26, blurRadius: 2)]),
+                                badgeWidget: isLarge 
+                                  ? Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)],
+                                      ),
+                                      child: Icon(CategoryUtils.getIcon(sub.category), size: 14, color: CategoryUtils.getColor(sub.category)),
+                                    )
+                                  : null,
+                                badgePositionPercentageOffset: 1.15,
                               );
                             }).toList();
                           }(),
@@ -2497,12 +2536,12 @@ class _SettingsViewState extends State<_SettingsView> {
       final data = prefs.getString('saved_subs') ?? '[]';
       
       final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/subtrackiq_backup.json');
+      final file = File('${directory.path}/SubTrack IQ_backup.json');
       await file.writeAsString(data);
       
       final result = await Share.shareXFiles(
         [XFile(file.path)], 
-        text: 'Ini adalah backup data langganan SubtrackIQ Anda. Simpan file ini di tempat yang aman.'
+        text: 'Ini adalah backup data langganan SubTrack IQ Anda. Simpan file ini di tempat yang aman.'
       );
     } catch(e) {
       if (mounted) ToastUtils.show(context, 'Backup Gagal: $e', icon: Icons.error_outline, iconColor: Colors.redAccent);
@@ -2537,38 +2576,7 @@ class _SettingsViewState extends State<_SettingsView> {
   }
 
   void _showCurrencySelector() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: dialogBg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (sheetContext) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: CurrencyUtils.data.keys.map((code) {
-                return ListTile(
-                  title: Text('${CurrencyUtils.data[code]!['name']} ($code)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                  trailing: currencyNotifier.value == code ? const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB)) : null,
-                  onTap: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('app_currency', code);
-                    currencyNotifier.value = code;
-                    setState(() {});
-                    Navigator.pop(sheetContext);
-                  },
-                );
-              }).toList(),
-            ),
-          ),
-        );
-      },
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const CurrencySelectorScreen()));
   }
 
   void _showLanguageSelector() {
@@ -2657,10 +2665,10 @@ class _SettingsViewState extends State<_SettingsView> {
                       children: [
                         Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12)),
                         const SizedBox(height: 8),
-                        Text(tr('Di SubtrackIQ, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubtrackIQ, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
+                        Text(tr('Di SubTrack IQ, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTrack IQ, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
                         const SizedBox(height: 20),
                         
-                        _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubtrackIQ tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubtrackIQ does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
+                        _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubTrack IQ tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubTrack IQ does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
                         _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage'), tr('Semua data tagihan dan nama Anda murni disimpan dan dienkripsi di dalam memori internal HP Anda. Tidak ada data yang dikirim ke Cloud.', 'All your bills and name are purely saved and encrypted locally in your phone. No data is sent to the Cloud.'), textColor, subTextColor),
                         _buildPrivacyPoint('3', tr('Sistem Notifikasi Pintar', 'Smart Notification System'), tr('Pengingat tagihan berjalan langsung di latar belakang sistem HP Anda tanpa perlu menghubungi server eksternal.', 'Bill reminders run locally on your phone background without needing to contact external servers.'), textColor, subTextColor),
                         _buildPrivacyPoint('4', tr('Akses Pihak Ketiga', 'Third-Party Access'), tr('Kami menjamin 100% bahwa data finansial Anda tidak akan pernah dijual atau dibagikan ke pihak ketiga manapun untuk tujuan iklan.', 'We 100% guarantee that your financial data will never be sold or shared to any third parties for advertising.'), textColor, subTextColor),
@@ -2850,13 +2858,7 @@ class _SettingsViewState extends State<_SettingsView> {
 
             FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Currency Converter'), tr('Perbandingan Mata Uang', 'Compare Currencies'), () {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: cardBg,
-                  isScrollControlled: true,
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-                  builder: (_) => CurrencyConverterSheet(bgColor: cardBg, textColor: textColor),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (_) => CurrencyExchangeScreen()));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
@@ -2872,17 +2874,33 @@ class _SettingsViewState extends State<_SettingsView> {
               child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme, iconColor: Colors.red, titleColor: Colors.red),
             ),
             FadeInSlide(delay: Duration.zero,
+              child: _buildSettingTile(Icons.help_outline_rounded, tr('Pusat Bantuan', 'Help Center'), tr('FAQ & Bantuan Aplikasi', 'FAQ & App Help'), () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpCenterScreen()));
+              }, cardBg, textColor, subTextColor, widget.theme),
+            ),
+            FadeInSlide(delay: Duration.zero,
+              child: _buildSettingTile(Icons.bug_report_rounded, tr('Laporkan Bug / Saran', 'Report Bug / Suggestion'), tr('Bantu kami jadi lebih baik', 'Help us get better'), () async {
+                final Uri emailLaunchUri = Uri(scheme: 'mailto', path: 'support@subtrackiq.com', query: 'subject=Laporan%20Bug%20/%20Saran%20SubTrack%20IQ');
+                try { await launchUrl(emailLaunchUri); } catch (e) { ToastUtils.show(context, 'Tidak dapat membuka email client'); }
+              }, cardBg, textColor, subTextColor, widget.theme),
+            ),
+            FadeInSlide(delay: Duration.zero,
+              child: _buildSettingTile(Icons.star_rate_rounded, tr('Beri Rating Aplikasi', 'Rate Our App'), tr('Dukung kami di Play Store', 'Support us on Play Store'), () {
+                ToastUtils.show(context, tr('Akan diarahkan ke Play Store...', 'Will redirect to Play Store...'));
+              }, cardBg, textColor, subTextColor, widget.theme),
+            ),
+            FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(
-                Icons.info_rounded, tr('Tentang SubtrackIQ', 'About SubtrackIQ'), 'Version 1.0.0',
+                Icons.info_rounded, tr('Tentang SubTrack IQ', 'About SubTrack IQ'), 'Version 1.0.0',
                 () => showAboutDialog(
                   context: context,
-                  applicationName: 'SubtrackIQ',
+                  applicationName: 'SubTrack IQ',
                   applicationVersion: '1.0.0',
                   applicationLegalese: 'Developed carefully.\n© 2026 Copyright.',
                   applicationIcon: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.subscriptions, color: Colors.white)),
                 ),
                 cardBg, textColor, subTextColor, widget.theme,
-                iconColor: Colors.amber, titleColor: Colors.amber
+                iconColor: const Color(0xFF2563EB), titleColor: const Color(0xFF2563EB)
               ),
             ),
           ],

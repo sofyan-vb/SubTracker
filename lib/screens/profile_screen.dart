@@ -222,9 +222,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final result = await EmailService.sendNotificationEmail(
       toEmail: email,
-      subject: 'Tes Notifikasi SubtrackIQ',
-      message: 'Selamat! Email notifikasi SubtrackIQ Anda berhasil terhubung. Mulai sekarang, setiap kali Anda menambahkan langganan baru di profil ini, notifikasinya akan dikirim ke email ini.',
-      name: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'SubtrackIQ',
+      subject: 'Tes Notifikasi SubTrack IQ',
+      message: 'Selamat! Email notifikasi SubTrack IQ Anda berhasil terhubung. Mulai sekarang, setiap kali Anda menambahkan langganan baru di profil ini, notifikasinya akan dikirim ke email ini.',
+      name: _nameCtrl.text.isNotEmpty ? _nameCtrl.text : 'SubTrack IQ',
     );
 
     if (mounted) {
@@ -333,10 +333,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         centerTitle: true,
         flexibleSpace: Container(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
-              begin: Alignment.topLeft, end: Alignment.bottomRight,
+              colors: isDark 
+                ? [const Color(0xFF1E3A8A), const Color(0xFF0F172A)]
+                : [const Color(0xFF2563EB), const Color(0xFF93C5FD)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
           ),
         ),

@@ -11,14 +11,15 @@ import 'dashboard_screen.dart';
 import 'package:flutter/services.dart';
 import '../utils/category_utils.dart';
 
-class AddScreen extends StatefulWidget {
-  const AddScreen({super.key});
+class EditScreen extends StatefulWidget {
+  final Subscription sub;
+  const EditScreen({super.key, required this.sub});
 
   @override
-  State<AddScreen> createState() => _AddScreenState();
+  State<EditScreen> createState() => _EditScreenState();
 }
 
-class _AddScreenState extends State<AddScreen> {
+class _EditScreenState extends State<EditScreen> {
   final _nameCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
   
@@ -37,6 +38,15 @@ class _AddScreenState extends State<AddScreen> {
   @override
   void initState() {
     super.initState();
+    final sub = widget.sub;
+    _nameCtrl.text = sub.name;
+    _priceCtrl.text = NumberFormat.decimalPattern('id').format(sub.price);
+    _selectedCategory = sub.category;
+    _selectedDate = sub.dueDate;
+    _selectedTime = TimeOfDay.fromDateTime(sub.dueDate);
+    _isTrial = sub.isTrial;
+    _splitCount = sub.splitCount;
+    _isShortcutUsed = true;
   }
 
   @override
@@ -118,7 +128,7 @@ class _AddScreenState extends State<AddScreen> {
           appBar: AppBar(
             backgroundColor: appBarBg, elevation: 0,
             leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-            title: Text(tr('Tambah Langganan', 'Add Subscription'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
+            title: Text(tr('Edit Langganan', 'Edit Subscription'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
           ),
           body: SafeArea(
             child: Column(
@@ -178,8 +188,8 @@ class _AddScreenState extends State<AddScreen> {
                           return; 
                         }
 
-                        final newSub = Subscription(id: DateTime.now().millisecondsSinceEpoch.toString(), name: _nameCtrl.text, price: double.tryParse(_priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0, dueDate: exactDateTime, category: _selectedCategory, isTrial: _isTrial, splitCount: _splitCount);
-                        context.read<SubProvider>().addSub(newSub);
+                        final newSub = Subscription(id: widget.sub.id, name: _nameCtrl.text, price: double.tryParse(_priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0, dueDate: exactDateTime, category: _selectedCategory, isTrial: _isTrial, splitCount: _splitCount);
+                        context.read<SubProvider>().updateSub(newSub);
 
                         final prefs = await SharedPreferences.getInstance();
                         final savedName = prefs.getString('user_name') ?? ''; 
@@ -194,12 +204,12 @@ class _AddScreenState extends State<AddScreen> {
 
                         try { NotificationService.scheduleNotification(newSub.id.hashCode, notifTitle, notifBody, scheduledDateTime, isAlarm: isUsingAlarm); } catch (_) {}
                         if (mounted) {
-                          ToastUtils.show(context, tr('Berhasil ditambahkan', 'Successfully added'));
+                          ToastUtils.show(context, tr('Berhasil diperbarui', 'Successfully updated'));
                           Navigator.pop(context); 
                         }
                       }
                     },
-                    child: Text(tr('TAMBAHKAN', 'ADD NEW'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white)),
+                    child: Text(tr('SIMPAN PERUBAHAN', 'SAVE CHANGES'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white)),
                   ),
                 ),
               ],

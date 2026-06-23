@@ -13,7 +13,7 @@ class EmailService {
     required String toEmail,
     required String subject,
     required String message,
-    String name = 'SubtrackIQ',
+    String name = 'SubTrack IQ',
   }) async {
     try {
       debugPrint('=== EMAIL SERVICE ===');

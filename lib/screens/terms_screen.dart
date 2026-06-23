@@ -91,7 +91,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(tr('Selamat Datang di', 'Welcome to'), style: TextStyle(fontSize: 18, color: subTextColor)),
-              Text('SubtrackIQ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -1.0)),
+              Text('SubTrack IQ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -1.0)),
               const SizedBox(height: 24),
 
               Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
@@ -112,7 +112,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          tr('Dengan menggunakan aplikasi SubtrackIQ, Anda secara otomatis menyetujui seluruh ketentuan berikut:', 'By using the SubtrackIQ application, you automatically agree to all of the following terms:'),
+                          tr('Dengan menggunakan aplikasi SubTrack IQ, Anda secara otomatis menyetujui seluruh ketentuan berikut:', 'By using the SubTrack IQ application, you automatically agree to all of the following terms:'),
                           style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, height: 1.5),
                         ),
                         const SizedBox(height: 20),
@@ -134,8 +134,8 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                         _buildTermItem(
                           '3', 
                           tr('PEMBATASAN TANGGUNG JAWAB', 'LIMITATION OF LIABILITY'), 
-                          tr('SubtrackIQ dirancang sebagai alat bantu produktivitas semata. Segala bentuk kerugian finansial, denda keterlambatan pembayaran langganan, atau pemutusan layanan yang disebabkan oleh kelalaian pengguna, kegagalan perangkat dalam memunculkan notifikasi, atau bug sistem, berada sepenuhnya di luar tanggung jawab pengembang.', 
-                             'SubtrackIQ is designed solely as a productivity tool. Any form of financial loss, subscription late payment fines, or service termination caused by user negligence, device failure to show notifications, or system bugs, are entirely beyond the developer\'s responsibility.'),
+                          tr('SubTrack IQ dirancang sebagai alat bantu produktivitas semata. Segala bentuk kerugian finansial, denda keterlambatan pembayaran langganan, atau pemutusan layanan yang disebabkan oleh kelalaian pengguna, kegagalan perangkat dalam memunculkan notifikasi, atau bug sistem, berada sepenuhnya di luar tanggung jawab pengembang.', 
+                             'SubTrack IQ is designed solely as a productivity tool. Any form of financial loss, subscription late payment fines, or service termination caused by user negligence, device failure to show notifications, or system bugs, are entirely beyond the developer\'s responsibility.'),
                           isDark
                         ),
                         _buildTermItem(
