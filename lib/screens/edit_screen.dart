@@ -24,7 +24,6 @@ class _EditScreenState extends State<EditScreen> {
   final _priceCtrl = TextEditingController();
   
   String _selectedCategory = '';
-  bool _isShortcutUsed = false;
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now(); 
   
@@ -46,7 +45,6 @@ class _EditScreenState extends State<EditScreen> {
     _selectedTime = TimeOfDay.fromDateTime(sub.dueDate);
     _isTrial = sub.isTrial;
     _splitCount = sub.splitCount;
-    _isShortcutUsed = true;
   }
 
   @override
@@ -99,13 +97,70 @@ class _EditScreenState extends State<EditScreen> {
     return tr('Misal: Layanan Lain', 'E.g: Other Service');
   }
 
+  void _showAddCustomCategoryDialog() {
+    final newCatCtrl = TextEditingController();
+    Color tempColor = Colors.blue;
+    IconData tempIcon = Icons.star_rounded;
+
+    final List<Color> colors = [Colors.blue, Colors.red, Colors.green, Colors.orange, Colors.purple, Colors.pink, Colors.teal, Colors.brown];
+    final List<IconData> icons = [Icons.star_rounded, Icons.favorite_rounded, Icons.work_rounded, Icons.home_rounded, Icons.sports_esports_rounded, Icons.fitness_center_rounded, Icons.pets_rounded, Icons.local_dining_rounded];
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text(tr('Kategori Baru', 'New Category'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(controller: newCatCtrl, decoration: InputDecoration(hintText: tr('Nama Kategori', 'Category Name'))),
+                    const SizedBox(height: 24),
+                    Wrap(
+                      spacing: 12, runSpacing: 12,
+                      children: colors.map((c) => GestureDetector(
+                        onTap: () => setDialogState(() => tempColor = c),
+                        child: CircleAvatar(backgroundColor: c, radius: 18, child: tempColor == c ? const Icon(Icons.check, color: Colors.white, size: 20) : null),
+                      )).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                    Wrap(
+                      spacing: 12, runSpacing: 12,
+                      children: icons.map((i) => GestureDetector(
+                        onTap: () => setDialogState(() => tempIcon = i),
+                        child: CircleAvatar(backgroundColor: tempColor.withOpacity(0.1), radius: 18, child: Icon(i, color: tempIcon == i ? tempColor : Colors.grey, size: 24)),
+                      )).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'))),
+                TextButton(
+                  onPressed: () async {
+                    if (newCatCtrl.text.isNotEmpty) {
+                      await CategoryUtils.addCustomCategory(newCatCtrl.text, tempColor, tempIcon);
+                      Navigator.pop(ctx);
+                      setState(() { _selectedCategory = newCatCtrl.text; });
+                    }
+                  }, 
+                  child: Text(tr('Simpan', 'Save'), style: const TextStyle(fontWeight: FontWeight.bold))
+                ),
+              ],
+            );
+          }
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<String> categories = [
-      tr('Hiburan', 'Entertainment'), tr('Musik', 'Music'), tr('Software', 'Software'), 
-      tr('Utilitas', 'Utilities'), tr('Belanja', 'Shopping'), tr('Game', 'Game'), 
-      tr('Edukasi', 'Education'), tr('Cloud Storage', 'Cloud Storage'), tr('Lainnya', 'Others')
-    ];
+    final List<String> categories = CategoryUtils.getAllCategories(languageNotifier.value == 'ID');
+    categories.add(tr('+ Tambah Kategori Baru', '+ Add New Category'));
     final List<String> statuses = [tr('Aktif', 'Active'), tr('Non-Aktif', 'Inactive')];
     final List<String> notifTypes = [tr('Notifikasi Biasa', 'Standard Notification'), tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)')];
 
@@ -139,9 +194,13 @@ class _EditScreenState extends State<EditScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FadeInSlide(delay: const Duration(milliseconds: 50), child: _buildCategoryIcons(categories, cardBg, textColor)),
-                        const SizedBox(height: 12),
-                        FadeInSlide(delay: const Duration(milliseconds: 100), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Kategori', 'Category'), subTextColor), _buildDropdown(_selectedCategory, categories, (val) => setState(() { _selectedCategory = val!; _isShortcutUsed = false; }), cardBg, textColor, disabled: _isShortcutUsed)])), const SizedBox(width: 16), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel('Status', subTextColor), _buildDropdown(_selectedStatus, statuses, (val) => setState(() => _selectedStatus = val!), cardBg, textColor)]))])),
+                        FadeInSlide(delay: const Duration(milliseconds: 100), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Kategori', 'Category'), subTextColor), _buildDropdown(_selectedCategory, categories, (val) {
+                          if (val == tr('+ Tambah Kategori Baru', '+ Add New Category')) {
+                            _showAddCustomCategoryDialog();
+                          } else {
+                            setState(() { _selectedCategory = val!; });
+                          }
+                        }, cardBg, textColor)])), const SizedBox(width: 16), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel('Status', subTextColor), _buildDropdown(_selectedStatus, statuses, (val) => setState(() => _selectedStatus = val!), cardBg, textColor)]))])),
                         
                         if (_selectedCategory.isNotEmpty) ...[
                           const SizedBox(height: 12),
@@ -220,121 +279,7 @@ class _EditScreenState extends State<EditScreen> {
     );
   }
 
-  Widget _buildCategoryIcons(List<String> categories, Color cardBg, Color textColor) {
-    Map<String, List<String>> appExamples = {
-      'Hiburan': ['Netflix', 'Disney+', 'Prime Video', 'HBO Go', 'Vidio'],
-      'Entertainment': ['Netflix', 'Disney+', 'Prime Video', 'HBO Go', 'Hulu'],
-      'Musik': ['Spotify', 'Apple Music', 'YouTube Music', 'Joox'],
-      'Music': ['Spotify', 'Apple Music', 'YouTube Music', 'Tidal'],
-      'Software': ['Adobe CC', 'Microsoft 365', 'Canva Pro', 'Figma'],
-      'Utilitas': ['PLN', 'IndiHome', 'Biznet', 'PDAM'],
-      'Utilities': ['Electricity', 'Internet', 'Water', 'Gas'],
-      'Belanja': ['Shopee', 'Tokopedia', 'Amazon Prime', 'Lazada'],
-      'Shopping': ['Amazon Prime', 'Walmart+', 'Shopee'],
-      'Game': ['Xbox Game Pass', 'PS Plus', 'Steam', 'Nintendo Switch'],
-      'Edukasi': ['Duolingo', 'Ruangguru', 'Udemy', 'Coursera'],
-      'Education': ['Duolingo', 'Udemy', 'Coursera', 'Skillshare'],
-      'Cloud Storage': ['Google One', 'iCloud', 'Dropbox', 'OneDrive'],
-      'Lainnya': [],
-      'Others': [],
-    };
 
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: cardBg.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.auto_awesome, color: const Color(0xFF2563EB), size: 18),
-              const SizedBox(width: 8),
-              Text(tr('Pilih Pintasan Kategori', 'Select Category Shortcut'), style: TextStyle(color: textColor.withValues(alpha: 0.8), fontWeight: FontWeight.bold, fontSize: 11)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 65,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final cat = categories[index];
-                final isSelected = _selectedCategory == cat;
-                IconData iconData = CategoryUtils.getIcon(cat);
-                Color catColor = CategoryUtils.getColor(cat);
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      if (isSelected) {
-                        _selectedCategory = '';
-                        _isShortcutUsed = false;
-                        _nameCtrl.text = '';
-                      } else {
-                        _selectedCategory = cat;
-                        _isShortcutUsed = true;
-                        _nameCtrl.text = ''; 
-                      }
-                    });
-                  },
-                  child: Container(
-                    width: 70,
-                    margin: const EdgeInsets.only(right: 14),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF2563EB) : cardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: isSelected ? Colors.transparent : Colors.black12, width: 1.5),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(iconData, color: isSelected ? Colors.white : catColor, size: 22),
-                        const SizedBox(height: 8),
-                        Text(cat, style: TextStyle(color: isSelected ? Colors.white : textColor.withValues(alpha: 0.5), fontSize: 9, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          if (_isShortcutUsed && appExamples[_selectedCategory] != null && appExamples[_selectedCategory]!.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: appExamples[_selectedCategory]!.map((appName) {
-                return InkWell(
-                  onTap: () {
-                    setState(() {
-                      _nameCtrl.text = appName;
-                    });
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB).withValues(alpha: 0.15),
-                      border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.white24 : Colors.black12, width: 1.5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(appName, style: TextStyle(color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 12)),
-                  ),
-                );
-              }).toList(),
-            ),
-          ]
-        ],
-      ),
-    );
-  }
 
   Widget _buildLabel(String text, Color color) { return Padding(padding: const EdgeInsets.only(bottom: 6, left: 4, top: 12), child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold))); }
   Widget _buildTextField(TextEditingController ctrl, String hint, Color bg, Color textColor, Color hintColor, {bool isNumber = false, String? prefixText, List<TextInputFormatter>? formatters}) { 

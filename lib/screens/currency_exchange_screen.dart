@@ -60,9 +60,12 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
   }
   
   String _formatInput(double value, String currency) {
-    if (value == 0) return '';
-    int decimals = (currency == 'IDR' || currency == 'JPY') ? 0 : 4;
-    return value.toStringAsFixed(decimals);
+    if (value == 0) return '0';
+    int decimals = (currency == 'IDR' || currency == 'JPY') ? 0 : 2;
+    final format = NumberFormat.decimalPattern('en');
+    format.minimumFractionDigits = 0;
+    format.maximumFractionDigits = decimals;
+    return format.format(value);
   }
 
   Future<void> _fetchChartData() async {
@@ -166,7 +169,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                 decoration: BoxDecoration(
                   color: const Color(0xFF2563EB),
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4))],
                 ),
                 child: const Icon(Icons.swap_vert_rounded, color: Colors.white, size: 28),
               ),
@@ -197,18 +200,30 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
 
   void _onNumpadTap(String value) {
     TextEditingController ctrl = _isEditingBase ? _baseCtrl : _targetCtrl;
+    
+    String raw = ctrl.text.replaceAll(',', '');
+    
     if (value == 'C') {
-      ctrl.text = '0';
+      raw = '0';
     } else if (value == '<') {
-      if (ctrl.text.isNotEmpty) {
-        ctrl.text = ctrl.text.substring(0, ctrl.text.length - 1);
+      if (raw.isNotEmpty) {
+        raw = raw.substring(0, raw.length - 1);
       }
     } else {
-      if (value == '.' && ctrl.text.contains('.')) return;
-      if (ctrl.text == '0' && value != '.') ctrl.text = '';
-      ctrl.text += value;
+      if (value == '.' && raw.contains('.')) return;
+      if (raw == '0' && value != '.') raw = '';
+      raw += value;
     }
-    if (ctrl.text.isEmpty) ctrl.text = '0';
+    
+    if (raw.isEmpty) raw = '0';
+    
+    List<String> parts = raw.split('.');
+    String intPart = parts[0];
+    if (intPart.isNotEmpty && intPart != '-') {
+       intPart = NumberFormat.decimalPattern('en').format(int.parse(intPart));
+    }
+    ctrl.text = parts.length > 1 ? '$intPart.${parts[1]}' : intPart;
+    
     _calculateConversion(_isEditingBase);
   }
 
@@ -328,13 +343,15 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: isEditing ? const Color(0xFF2563EB) : textColor, 
-                    fontSize: 28, 
+                    fontSize: 32, 
                     fontWeight: FontWeight.w900
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
+                    prefixText: CurrencyUtils.getFormat(currency).currencySymbol + ' ',
+                    prefixStyle: TextStyle(color: textColor.withOpacity(0.5), fontSize: 20, fontWeight: FontWeight.bold)
                   ),
                   onChanged: onChanged,
                 ),

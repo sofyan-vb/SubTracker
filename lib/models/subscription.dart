@@ -9,6 +9,8 @@ class Subscription {
   final bool isPaused;
   final bool isTrial;
   final int splitCount;
+  final List<DateTime> paymentHistory;
+  final int usageCount;
 
   Subscription({
     required this.id,
@@ -21,6 +23,8 @@ class Subscription {
     this.isPaused = false,
     this.isTrial = false,
     this.splitCount = 1,
+    this.paymentHistory = const [],
+    this.usageCount = 0,
   });
 
   Map<String, dynamic> toJson() => {
@@ -34,6 +38,8 @@ class Subscription {
     'isPaused': isPaused,
     'isTrial': isTrial,
     'splitCount': splitCount,
+    'paymentHistory': paymentHistory.map((d) => d.toIso8601String()).toList(),
+    'usageCount': usageCount,
   };
 
   factory Subscription.fromJson(Map<String, dynamic> json) => Subscription(
@@ -47,6 +53,8 @@ class Subscription {
     isPaused: json['isPaused'] ?? false,
     isTrial: json['isTrial'] ?? false,
     splitCount: json['splitCount'] ?? 1,
+    paymentHistory: json['paymentHistory'] != null ? (json['paymentHistory'] as List).map((e) => DateTime.parse(e)).toList() : [],
+    usageCount: json['usageCount'] ?? 0,
   );
 
   Subscription copyWith({
@@ -60,6 +68,8 @@ class Subscription {
     bool? isPaused,
     bool? isTrial,
     int? splitCount,
+    List<DateTime>? paymentHistory,
+    int? usageCount,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -72,6 +82,8 @@ class Subscription {
       isPaused: isPaused ?? this.isPaused,
       isTrial: isTrial ?? this.isTrial,
       splitCount: splitCount ?? this.splitCount,
+      paymentHistory: paymentHistory ?? this.paymentHistory,
+      usageCount: usageCount ?? this.usageCount,
     );
   }
 }

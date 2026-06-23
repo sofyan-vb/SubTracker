@@ -372,7 +372,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF2563EB),
                   borderRadius: BorderRadius.circular(22),
-                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4))],
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
                 ),
                 child: FloatingActionButton(
                   elevation: 0, hoverElevation: 0, highlightElevation: 0, focusElevation: 0,
@@ -422,67 +422,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     children: [
                       InkWell(
                         onTap: () => setState(() => _currentIndex = 0),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              margin: const EdgeInsets.only(top: 4),
-                              height: 4, width: _currentIndex == 0 ? 16 : 0,
-                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
-                            )
-                          ],
+                        borderRadius: BorderRadius.circular(24),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _currentIndex == 0 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
                         ),
                       ),
                       InkWell(
                         onTap: () => setState(() => _currentIndex = 1),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              margin: const EdgeInsets.only(top: 4),
-                              height: 4, width: _currentIndex == 1 ? 16 : 0,
-                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
-                            )
-                          ],
+                        borderRadius: BorderRadius.circular(24),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _currentIndex == 1 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
                         ),
                       ),
                       const SizedBox(width: 48), 
                       InkWell(
                         onTap: () => setState(() => _currentIndex = 2),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              margin: const EdgeInsets.only(top: 4),
-                              height: 4, width: _currentIndex == 2 ? 16 : 0,
-                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
-                            )
-                          ],
+                        borderRadius: BorderRadius.circular(24),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _currentIndex == 2 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
                         ),
                       ),
                       InkWell(
                         onTap: () => setState(() => _currentIndex = 3),
-                        borderRadius: BorderRadius.circular(12),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              margin: const EdgeInsets.only(top: 4),
-                              height: 4, width: _currentIndex == 3 ? 16 : 0,
-                              decoration: BoxDecoration(color: const Color(0xFF2563EB), borderRadius: BorderRadius.circular(2)),
-                            )
-                          ],
+                        borderRadius: BorderRadius.circular(24),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: _currentIndex == 3 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
                         ),
                       ),
                     ],
@@ -2339,7 +2327,7 @@ class _StatsViewState extends State<_StatsView> {
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(24),
-                  boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 8))],
                 ),
                 child: Row(
                   children: [
@@ -2799,8 +2787,40 @@ class _SettingsViewState extends State<_SettingsView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-
+            FadeInSlide(delay: Duration.zero,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 24, top: 12),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10))
+                  ]
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.workspace_premium_rounded, color: Colors.amber, size: 48),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Upgrade ke Pro', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
+                          const SizedBox(height: 4),
+                          Text('Buka fitur tanpa batas & hapus iklan', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+                  ],
+                ),
+              ),
+            ),
             FadeInSlide(delay: Duration.zero,
               child: Container(
                 color: Colors.transparent,

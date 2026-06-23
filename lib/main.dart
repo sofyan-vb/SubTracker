@@ -10,6 +10,8 @@ import 'screens/splash_screen.dart';
 import 'screens/terms_screen.dart'; 
 import 'screens/dashboard_screen.dart';
 
+import 'utils/category_utils.dart';
+
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.light);
 
 Future<void> main() async {
@@ -30,6 +32,8 @@ Future<void> main() async {
   } else {
     themeModeNotifier.value = ThemeMode.system;
   }
+
+  await CategoryUtils.loadCustomCategories();
 
   runApp(
     MultiProvider(

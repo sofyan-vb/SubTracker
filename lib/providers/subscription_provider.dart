@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/subscription.dart';
 import '../services/email_service.dart';
 import 'package:intl/intl.dart';
+import '../services/widget_service.dart';
 
 class SubProvider extends ChangeNotifier {
   List<Subscription> _subs = [];
@@ -255,6 +256,9 @@ class SubProvider extends ChangeNotifier {
       _subs.map((sub) => sub.toJson()).toList(),
     );
     await prefs.setString(dataKey, encodedData);
+    
+    // Update Home Widget
+    await WidgetService.updateWidget(_subs);
   }
 
   Future<void> _loadData() async {

@@ -9,6 +9,8 @@ import '../providers/subscription_provider.dart';
 import 'dashboard_screen.dart';
 import '../utils/currency_utils.dart';
 import 'edit_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:add_2_calendar/add_2_calendar.dart';
 
 class DetailScreen extends StatefulWidget {
   final Subscription sub;
@@ -96,7 +98,10 @@ class _DetailScreenState extends State<DetailScreen> {
 
   void _markAsFinished() {
     final provider = context.read<SubProvider>();
-    final updatedSub = Subscription(id: currentSub.id, name: currentSub.name, price: currentSub.price, dueDate: currentSub.dueDate, category: currentSub.category, isFinished: true);
+    final newHistory = List<DateTime>.from(currentSub.paymentHistory);
+    newHistory.add(DateTime.now());
+
+    final updatedSub = currentSub.copyWith(isFinished: true, paymentHistory: newHistory);
     provider.removeSub(currentSub.id); provider.addSub(updatedSub);
     setState(() { currentSub = updatedSub; });
     ToastUtils.show(context, tr('Catatan ditandai selesai', 'Record marked as completed'));
@@ -139,10 +144,46 @@ class _DetailScreenState extends State<DetailScreen> {
   void _processRenewal(int monthsToAdd) {
     final provider = context.read<SubProvider>();
     final newDate = DateTime(currentSub.dueDate.year, currentSub.dueDate.month + monthsToAdd, currentSub.dueDate.day, currentSub.dueDate.hour, currentSub.dueDate.minute);
-    final updatedSub = Subscription(id: currentSub.id, name: currentSub.name, price: currentSub.price, dueDate: newDate, category: currentSub.category, isFinished: false);
+    final newHistory = List<DateTime>.from(currentSub.paymentHistory);
+    newHistory.add(DateTime.now());
+
+    final updatedSub = currentSub.copyWith(dueDate: newDate, isFinished: false, paymentHistory: newHistory);
     provider.removeSub(currentSub.id); provider.addSub(updatedSub);
     setState(() { currentSub = updatedSub; });
     ToastUtils.show(context, tr('Diperpanjang $monthsToAdd Bulan', 'Renewed for $monthsToAdd Month(s)'));
+  }
+
+  void _useServiceToday() {
+    final provider = context.read<SubProvider>();
+    final updatedSub = currentSub.copyWith(usageCount: currentSub.usageCount + 1);
+    provider.removeSub(currentSub.id); provider.addSub(updatedSub);
+    setState(() { currentSub = updatedSub; });
+    ToastUtils.show(context, tr('Berhasil dicatat', 'Recorded successfully'));
+  }
+
+  Future<void> _tagihTeman() async {
+    final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
+    final amount = currencyFormat.format(currentSub.price / currentSub.splitCount);
+    final date = DateFormat('dd MMM yyyy').format(currentSub.dueDate);
+    final text = 'Halo! Sekadar pengingat untuk patungan tagihan ${currentSub.name} sebesar $amount yang jatuh tempo pada $date.';
+    final url = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(text)}');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      ToastUtils.show(context, tr('Gagal membuka WhatsApp', 'Failed to open WhatsApp'));
+    }
+  }
+
+  void _addToCalendar() {
+    final Event event = Event(
+      title: 'Tagihan ${currentSub.name}',
+      description: 'Jangan lupa bayar tagihan ${currentSub.name}',
+      location: '',
+      startDate: currentSub.dueDate,
+      endDate: currentSub.dueDate.add(const Duration(hours: 1)),
+      allDay: true,
+    );
+    Add2Calendar.addEvent2Cal(event);
   }
 
   @override
@@ -194,7 +235,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     Text(currentSub.name, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900)),
                     const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.edit_note_rounded, color: Color(0xFF2563EB)),
+                      icon: const Icon(Icons.edit_document, color: Color(0xFF2563EB)),
                       onPressed: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => EditScreen(sub: currentSub))).then((_) {
                           final provider = context.read<SubProvider>();
@@ -259,16 +300,67 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                 ),
                 
+                if (currentSub.splitCount > 1) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+                      icon: const Icon(Icons.chat_rounded, size: 18),
+                      label: Text(tr('Tagih Teman via WhatsApp', 'Split Bill via WhatsApp'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      onPressed: _tagihTeman,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(foregroundColor: textColor, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                    icon: const Icon(Icons.edit_calendar_rounded, size: 18),
+                    label: Text(tr('Tambahkan ke Kalender', 'Add to Calendar'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    onPressed: _addToCalendar,
+                  ),
+                ),
+                
                 const SizedBox(height: 24),
                 
                 // Payment History
+                if (currentSub.paymentHistory.isNotEmpty) ...[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(tr('Riwayat Pembayaran', 'Payment History'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: innerCardBg,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200)
+                    ),
+                    child: Column(
+                      children: currentSub.paymentHistory.map((date) {
+                        return Column(
+                          children: [
+                            _buildHistoryRow(currentSub.name, dateFormat.format(date), currencyFormat.format(currentSub.price), textColor, subTextColor),
+                            if (date != currentSub.paymentHistory.last) const Divider(height: 1),
+                          ],
+                        );
+                      }).toList().reversed.toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+
+                // Cost Per Use
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(tr('Riwayat Pembayaran', 'Payment History'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                  child: Text(tr('Analisis "Worth It"', '"Worth It" Analysis'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: innerCardBg,
                     borderRadius: BorderRadius.circular(16),
@@ -276,9 +368,31 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                   child: Column(
                     children: [
-                      _buildHistoryRow(currentSub.name, dateFormat.format(currentSub.dueDate.subtract(const Duration(days: 30))), currencyFormat.format(currentSub.price), textColor, subTextColor),
-                      const Divider(height: 1),
-                      _buildHistoryRow(currentSub.name, dateFormat.format(currentSub.dueDate.subtract(const Duration(days: 60))), currencyFormat.format(currentSub.price), textColor, subTextColor),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(tr('Sudah dipakai:', 'Used:'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                          Text('${currentSub.usageCount} kali', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(tr('Biaya per pemakaian:', 'Cost per use:'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                          Text(currentSub.usageCount == 0 ? '-' : currencyFormat.format(currentSub.price / currentSub.usageCount), style: const TextStyle(color: Color(0xFF10B981), fontSize: 16, fontWeight: FontWeight.w900)),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.touch_app_rounded, size: 16),
+                          label: Text(tr('Pakai Layanan Hari Ini', 'Use Service Today')),
+                          style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFF2563EB), side: const BorderSide(color: Color(0xFF2563EB))),
+                          onPressed: _useServiceToday,
+                        ),
+                      )
                     ],
                   ),
                 ),

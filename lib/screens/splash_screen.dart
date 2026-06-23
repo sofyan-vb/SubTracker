@@ -915,7 +915,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
             top: MediaQuery.of(context).size.height * 0.35,
             child: Container(
               width: 250, height: 250,
-              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: const Color(0xFF2563EB).withOpacity(0.06), blurRadius: 100, spreadRadius: 50)]),
+              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 100, spreadRadius: 50)]),
             ),
           ),
           

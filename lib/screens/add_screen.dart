@@ -89,13 +89,70 @@ class _AddScreenState extends State<AddScreen> {
     return tr('Misal: Layanan Lain', 'E.g: Other Service');
   }
 
+  void _showAddCustomCategoryDialog() {
+    final newCatCtrl = TextEditingController();
+    Color tempColor = Colors.blue;
+    IconData tempIcon = Icons.star_rounded;
+
+    final List<Color> colors = [Colors.blue, Colors.red, Colors.green, Colors.orange, Colors.purple, Colors.pink, Colors.teal, Colors.brown];
+    final List<IconData> icons = [Icons.star_rounded, Icons.favorite_rounded, Icons.work_rounded, Icons.home_rounded, Icons.sports_esports_rounded, Icons.fitness_center_rounded, Icons.pets_rounded, Icons.local_dining_rounded];
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              title: Text(tr('Kategori Baru', 'New Category'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(controller: newCatCtrl, decoration: InputDecoration(hintText: tr('Nama Kategori', 'Category Name'))),
+                    const SizedBox(height: 24),
+                    Wrap(
+                      spacing: 12, runSpacing: 12,
+                      children: colors.map((c) => GestureDetector(
+                        onTap: () => setDialogState(() => tempColor = c),
+                        child: CircleAvatar(backgroundColor: c, radius: 18, child: tempColor == c ? const Icon(Icons.check, color: Colors.white, size: 20) : null),
+                      )).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                    Wrap(
+                      spacing: 12, runSpacing: 12,
+                      children: icons.map((i) => GestureDetector(
+                        onTap: () => setDialogState(() => tempIcon = i),
+                        child: CircleAvatar(backgroundColor: tempColor.withOpacity(0.1), radius: 18, child: Icon(i, color: tempIcon == i ? tempColor : Colors.grey, size: 24)),
+                      )).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'))),
+                TextButton(
+                  onPressed: () async {
+                    if (newCatCtrl.text.isNotEmpty) {
+                      await CategoryUtils.addCustomCategory(newCatCtrl.text, tempColor, tempIcon);
+                      Navigator.pop(ctx);
+                      setState(() { _selectedCategory = newCatCtrl.text; });
+                    }
+                  }, 
+                  child: Text(tr('Simpan', 'Save'), style: const TextStyle(fontWeight: FontWeight.bold))
+                ),
+              ],
+            );
+          }
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<String> categories = [
-      tr('Hiburan', 'Entertainment'), tr('Musik', 'Music'), tr('Software', 'Software'), 
-      tr('Utilitas', 'Utilities'), tr('Belanja', 'Shopping'), tr('Game', 'Game'), 
-      tr('Edukasi', 'Education'), tr('Cloud Storage', 'Cloud Storage'), tr('Lainnya', 'Others')
-    ];
+    final List<String> categories = CategoryUtils.getAllCategories(languageNotifier.value == 'ID');
+    categories.add(tr('+ Tambah Kategori Baru', '+ Add New Category'));
     final List<String> statuses = [tr('Aktif', 'Active'), tr('Non-Aktif', 'Inactive')];
     final List<String> notifTypes = [tr('Notifikasi Biasa', 'Standard Notification'), tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)')];
 
@@ -131,7 +188,13 @@ class _AddScreenState extends State<AddScreen> {
                       children: [
                         FadeInSlide(delay: const Duration(milliseconds: 50), child: _buildCategoryIcons(categories, cardBg, textColor)),
                         const SizedBox(height: 12),
-                        FadeInSlide(delay: const Duration(milliseconds: 100), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Kategori', 'Category'), subTextColor), _buildDropdown(_selectedCategory, categories, (val) => setState(() { _selectedCategory = val!; _isShortcutUsed = false; }), cardBg, textColor, disabled: _isShortcutUsed)])), const SizedBox(width: 16), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel('Status', subTextColor), _buildDropdown(_selectedStatus, statuses, (val) => setState(() => _selectedStatus = val!), cardBg, textColor)]))])),
+                        FadeInSlide(delay: const Duration(milliseconds: 100), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel(tr('Kategori', 'Category'), subTextColor), _buildDropdown(_selectedCategory, categories, (val) {
+                          if (val == tr('+ Tambah Kategori Baru', '+ Add New Category')) {
+                            _showAddCustomCategoryDialog();
+                          } else {
+                            setState(() { _selectedCategory = val!; _isShortcutUsed = false; });
+                          }
+                        }, cardBg, textColor, disabled: _isShortcutUsed)])), const SizedBox(width: 16), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [_buildLabel('Status', subTextColor), _buildDropdown(_selectedStatus, statuses, (val) => setState(() => _selectedStatus = val!), cardBg, textColor)]))])),
                         
                         if (_selectedCategory.isNotEmpty) ...[
                           const SizedBox(height: 12),
