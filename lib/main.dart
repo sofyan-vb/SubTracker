@@ -125,6 +125,7 @@ class _GateKeeperState extends State<GateKeeper> {
   void initState() {
     super.initState();
     _checkRoute();
+    NotificationService.scheduleInactiveReminder();
   }
 
   Future<void> _checkRoute() async {

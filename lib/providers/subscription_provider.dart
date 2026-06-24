@@ -8,6 +8,8 @@ import '../models/subscription.dart';
 import '../services/email_service.dart';
 import 'package:intl/intl.dart';
 import '../services/widget_service.dart';
+import '../services/notification_service.dart';
+import '../utils/currency_utils.dart';
 
 class SubProvider extends ChangeNotifier {
   List<Subscription> _subs = [];
@@ -15,9 +17,16 @@ class SubProvider extends ChangeNotifier {
   String _searchQuery = '';
   String _sortBy = 'Terdekat';
   String _categoryFilter = 'Semua Layanan';
+  String _targetCurrency = 'IDR';
 
   String get sortBy => _sortBy;
   String get categoryFilter => _categoryFilter;
+  String get targetCurrency => _targetCurrency;
+
+  void setTargetCurrency(String currency) {
+    _targetCurrency = currency;
+    notifyListeners();
+  }
 
   void setCategoryFilter(String category) {
     _categoryFilter = category;
@@ -38,9 +47,13 @@ class SubProvider extends ChangeNotifier {
 
     // Migrasi data lama jika pengguna belum memiliki data khusus namanya, tapi data global ada
     if (userName.isNotEmpty && !prefs.containsKey(dataKey) && prefs.containsKey('saved_subs')) {
-      final String? globalData = prefs.getString('saved_subs');
-      if (globalData != null) {
-        await prefs.setString(dataKey, globalData);
+      final savedUsers = prefs.getStringList('saved_users') ?? [];
+      // Only copy global data if this is the first explicit user
+      if (savedUsers.length <= 1) {
+        final String? globalData = prefs.getString('saved_subs');
+        if (globalData != null) {
+          await prefs.setString(dataKey, globalData);
+        }
       }
     }
 
@@ -110,7 +123,10 @@ class SubProvider extends ChangeNotifier {
   
   
   double get totalMonthly {
-    return _subs.where((s) => !s.isFinished && !s.isPaused).fold(0, (sum, item) => sum + (item.price / item.splitCount));
+    return _subs.where((s) => !s.isFinished && !s.isPaused).fold(0, (sum, item) {
+      double convertedPrice = CurrencyUtils.convert(item.price, item.currency, _targetCurrency);
+      return sum + (convertedPrice / item.splitCount);
+    });
   }
 
 
@@ -119,7 +135,8 @@ class SubProvider extends ChangeNotifier {
   Map<String, double> get categoryBreakdown {
     Map<String, double> breakdown = {};
     for (var sub in _subs.where((s) => !s.isFinished && !s.isPaused)) { 
-      double effectivePrice = sub.price / sub.splitCount;
+      double convertedPrice = CurrencyUtils.convert(sub.price, sub.currency, _targetCurrency);
+      double effectivePrice = convertedPrice / sub.splitCount;
       if (breakdown.containsKey(sub.category)) {
         breakdown[sub.category] = breakdown[sub.category]! + effectivePrice;
       } else {
@@ -158,6 +175,7 @@ class SubProvider extends ChangeNotifier {
 
   void removeSub(String id) {
     _subs.removeWhere((sub) => sub.id == id);
+    NotificationService.cancelNotification(id.hashCode);
     _saveData();
     notifyListeners();
   }
@@ -172,12 +190,10 @@ class SubProvider extends ChangeNotifier {
   }
 
   void deleteSub(String id) {
-    final index = _subs.indexWhere((s) => s.id == id);
-    if (index != -1) {
-      _subs[index] = _subs[index].copyWith(isFinished: true);
-      _saveData();
-      notifyListeners();
-    }
+    _subs.removeWhere((s) => s.id == id);
+    NotificationService.cancelNotification(id.hashCode);
+    _saveData();
+    notifyListeners();
   }
 
   void renewSub(String id) {

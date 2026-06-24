@@ -59,6 +59,7 @@ dependencies:
   url_launcher: ^6.3.2
   add_2_calendar: ^3.0.1
   home_widget: ^0.9.3
+  audioplayers: ^6.7.1
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +87,7 @@ flutter:
 
   assets:
     - assets/
+    - assets/audio/
   
   # To add assets to your application, add an assets section, like this:
   # assets:

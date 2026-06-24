@@ -17,7 +17,7 @@ class CurrencyUtils {
 
   static Future<void> fetchRealTimeRates() async {
     try {
-      final response = await http.get(Uri.parse('https://api.frankfurter.dev/v1/latest?base=USD'));
+      final response = await http.get(Uri.parse('https://open.er-api.com/v6/latest/USD'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> body = json.decode(response.body);
         final rates = body['rates'] as Map<String, dynamic>;
@@ -90,11 +90,40 @@ class CurrencyUtils {
 
   static NumberFormat getFormat(String currencyCode) {
     final currency = data[currencyCode] ?? data['IDR']!;
+    if (currencyCode == 'IDR') {
+      return NumberFormat.currency(
+        locale: 'id_ID',
+        symbol: 'Rp ',
+        decimalDigits: 0,
+      );
+    }
     return NumberFormat.currency(
       locale: currency['locale'],
       symbol: currency['symbol'] + ' ',
-      decimalDigits: (currencyCode == 'IDR' || currencyCode == 'JPY') ? 0 : 4,
+      decimalDigits: (currencyCode == 'JPY') ? 0 : 4,
     );
+  }
+
+  static double parsePrice(String input, String currencyCode) {
+    if (input.isEmpty) return 0.0;
+    if (currencyCode == 'IDR' || currencyCode == 'JPY') {
+      return double.tryParse(input.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0;
+    }
+    
+    String clean = input.replaceAll(RegExp(r'[^0-9.,]'), '');
+    if (clean.contains(',') && clean.contains('.')) {
+      int lastComma = clean.lastIndexOf(',');
+      int lastDot = clean.lastIndexOf('.');
+      if (lastComma > lastDot) {
+        clean = clean.replaceAll('.', '').replaceAll(',', '.');
+      } else {
+        clean = clean.replaceAll(',', '');
+      }
+    } else if (clean.contains(',')) {
+      clean = clean.replaceAll(',', '.');
+    }
+    
+    return double.tryParse(clean) ?? 0.0;
   }
 
   static double convert(double amount, String fromCurrency, String toCurrency) {

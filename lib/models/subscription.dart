@@ -11,6 +11,7 @@ class Subscription {
   final int splitCount;
   final List<DateTime> paymentHistory;
   final int usageCount;
+  final String currency;
 
   Subscription({
     required this.id,
@@ -25,6 +26,7 @@ class Subscription {
     this.splitCount = 1,
     this.paymentHistory = const [],
     this.usageCount = 0,
+    this.currency = 'IDR',
   });
 
   Map<String, dynamic> toJson() => {
@@ -40,6 +42,7 @@ class Subscription {
     'splitCount': splitCount,
     'paymentHistory': paymentHistory.map((d) => d.toIso8601String()).toList(),
     'usageCount': usageCount,
+    'currency': currency,
   };
 
   factory Subscription.fromJson(Map<String, dynamic> json) => Subscription(
@@ -53,8 +56,9 @@ class Subscription {
     isPaused: json['isPaused'] ?? false,
     isTrial: json['isTrial'] ?? false,
     splitCount: json['splitCount'] ?? 1,
-    paymentHistory: json['paymentHistory'] != null ? (json['paymentHistory'] as List).map((e) => DateTime.parse(e)).toList() : [],
+    paymentHistory: (json['paymentHistory'] as List<dynamic>?)?.map((d) => DateTime.parse(d)).toList() ?? [],
     usageCount: json['usageCount'] ?? 0,
+    currency: json['currency'] ?? 'IDR',
   );
 
   Subscription copyWith({
@@ -70,6 +74,7 @@ class Subscription {
     int? splitCount,
     List<DateTime>? paymentHistory,
     int? usageCount,
+    String? currency,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -84,6 +89,7 @@ class Subscription {
       splitCount: splitCount ?? this.splitCount,
       paymentHistory: paymentHistory ?? this.paymentHistory,
       usageCount: usageCount ?? this.usageCount,
+      currency: currency ?? this.currency,
     );
   }
 }

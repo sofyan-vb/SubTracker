@@ -337,7 +337,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             gradient: LinearGradient(
               colors: isDark 
                 ? [const Color(0xFF1E3A8A), const Color(0xFF0F172A)]
-                : [const Color(0xFF2563EB), const Color(0xFF93C5FD)],
+                : [const Color(0xFF2563EB), const Color(0xFF1E3A8A)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

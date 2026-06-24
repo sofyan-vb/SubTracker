@@ -39,7 +39,13 @@ class _EditScreenState extends State<EditScreen> {
     super.initState();
     final sub = widget.sub;
     _nameCtrl.text = sub.name;
-    _priceCtrl.text = NumberFormat.decimalPattern('id').format(sub.price);
+    
+    if (sub.currency == 'IDR' || sub.currency == 'JPY') {
+      _priceCtrl.text = NumberFormat.decimalPattern('id').format(sub.price);
+    } else {
+      _priceCtrl.text = sub.price.toString().replaceAll(RegExp(r'\.0$'), '');
+    }
+    
     _selectedCategory = sub.category;
     _selectedDate = sub.dueDate;
     _selectedTime = TimeOfDay.fromDateTime(sub.dueDate);
@@ -211,7 +217,15 @@ class _EditScreenState extends State<EditScreen> {
                               builder: (context, currency, _) {
                                 final format = CurrencyUtils.getFormat(currency);
                                 final prefix = format.currencySymbol + ' ';
-                                return _buildTextField(_priceCtrl, tr('Misal: 150.000', 'E.g: 150,000'), cardBg, textColor, hintColor, isNumber: true, prefixText: prefix, formatters: [ThousandsSeparatorInputFormatter()]);
+                                final isZeroDecimal = currency == 'IDR' || currency == 'JPY';
+                                return _buildTextField(
+                                  _priceCtrl, 
+                                  isZeroDecimal ? tr('Misal: 150.000', 'E.g: 150,000') : tr('Misal: 9.99', 'E.g: 9.99'), 
+                                  cardBg, textColor, hintColor, 
+                                  isNumber: true, 
+                                  prefixText: prefix, 
+                                  formatters: isZeroDecimal ? [ThousandsSeparatorInputFormatter()] : []
+                                );
                               }
                             )
                           ])),
@@ -247,7 +261,7 @@ class _EditScreenState extends State<EditScreen> {
                           return; 
                         }
 
-                        final newSub = Subscription(id: widget.sub.id, name: _nameCtrl.text, price: double.tryParse(_priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0, dueDate: exactDateTime, category: _selectedCategory, isTrial: _isTrial, splitCount: _splitCount);
+                        final newSub = Subscription(id: widget.sub.id, name: _nameCtrl.text, price: CurrencyUtils.parsePrice(_priceCtrl.text, currencyNotifier.value), dueDate: exactDateTime, category: _selectedCategory, isTrial: _isTrial, splitCount: _splitCount, paymentHistory: widget.sub.paymentHistory, usageCount: widget.sub.usageCount, currency: currencyNotifier.value);
                         context.read<SubProvider>().updateSub(newSub);
 
                         final prefs = await SharedPreferences.getInstance();
@@ -287,7 +301,7 @@ class _EditScreenState extends State<EditScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 4), 
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
       child: TextField(
-        controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, 
+        controller: ctrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), 
         style: TextStyle(color: textColor, fontWeight: FontWeight.bold), 
         inputFormatters: formatters, 
         decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(16))

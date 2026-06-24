@@ -14,6 +14,9 @@ import 'package:provider/provider.dart';
 import 'profile_screen.dart';
 import 'history_screen.dart';
 import 'splash_screen.dart';
+import 'privacy_screen.dart';
+import 'language_screen.dart';
+import 'notification_sound_screen.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'dart:math';
@@ -88,7 +91,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (savedLang != null) languageNotifier.value = savedLang;
 
     final savedCurrency = prefs.getString('app_currency');
-    if (savedCurrency != null) currencyNotifier.value = savedCurrency;
+    if (savedCurrency != null) {
+      currencyNotifier.value = savedCurrency;
+      if (mounted) context.read<SubProvider>().setTargetCurrency(savedCurrency);
+    }
 
     CurrencyUtils.fetchRealTimeRates().then((_) {
       if (mounted) setState(() {});
@@ -420,59 +426,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround, 
                     children: [
-                      InkWell(
-                        onTap: () => setState(() => _currentIndex = 0),
-                        borderRadius: BorderRadius.circular(24),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _currentIndex == 0 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Icon(Icons.grid_view_rounded, color: _currentIndex == 0 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => setState(() => _currentIndex = 1),
-                        borderRadius: BorderRadius.circular(24),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _currentIndex == 1 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Icon(Icons.calendar_month_rounded, color: _currentIndex == 1 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                        ),
-                      ),
+                      _buildBottomNavItem(0, Icons.grid_view_rounded),
+                      _buildBottomNavItem(1, Icons.calendar_month_rounded),
                       const SizedBox(width: 48), 
-                      InkWell(
-                        onTap: () => setState(() => _currentIndex = 2),
-                        borderRadius: BorderRadius.circular(24),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _currentIndex == 2 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Icon(Icons.bar_chart_rounded, color: _currentIndex == 2 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => setState(() => _currentIndex = 3),
-                        borderRadius: BorderRadius.circular(24),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _currentIndex == 3 ? const Color(0xFF2563EB).withValues(alpha: 0.15) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Icon(Icons.person_rounded, color: _currentIndex == 3 ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, size: 26),
-                        ),
-                      ),
+                      _buildBottomNavItem(2, Icons.bar_chart_rounded),
+                      _buildBottomNavItem(3, Icons.person_rounded),
                     ],
                   ),
                 ),
@@ -482,6 +440,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         );
       }
+    );
+  }
+
+  Widget _buildBottomNavItem(int index, IconData iconData) {
+    bool isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 60,
+        height: 60,
+        child: AnimatedAlign(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          alignment: isSelected ? Alignment.topCenter : Alignment.center,
+          child: Padding(
+            padding: EdgeInsets.only(top: isSelected ? 4.0 : 0),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return ScaleTransition(scale: animation, child: child);
+              },
+              child: Icon(
+                iconData, 
+                key: ValueKey<bool>(isSelected),
+                color: isSelected ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, 
+                size: isSelected ? 28 : 24,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1087,7 +1077,8 @@ class _HomeViewState extends State<_HomeView> {
                                 final urgentCount = provider.activeSubs.where((sub) {
                                   final date = _extractDateSafely(sub);
                                   if (date == null) return false;
-                                  return date.isBefore(now) || DateUtils.isSameDay(date, now);
+                                  final diff = date.difference(DateTime(now.year, now.month, now.day)).inDays;
+                                  return diff <= 7;
                                 }).length;
                                 return GestureDetector(
                                   onTap: () {
@@ -1190,7 +1181,7 @@ class _HomeViewState extends State<_HomeView> {
                                                     child: const Icon(Icons.history_rounded, color: Color(0xFF2563EB), size: 18),
                                                   ),
                                                   const SizedBox(width: 12),
-                                                  Text(tr('Layanan Dihapus', 'Deleted Services'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.bold)),
+                                                  Text(tr('Riwayat Pembayaran', 'Payment History'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.bold)),
                                                 ],
                                               ),
                                               IconButton(
@@ -1203,7 +1194,7 @@ class _HomeViewState extends State<_HomeView> {
                                           if (deletedSubs.isEmpty)
                                             Padding(
                                               padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Text(tr('Belum ada layanan yang dihapus', 'No deleted services yet'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
+                                              child: Text(tr('Belum ada riwayat pembayaran', 'No payment history yet'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
                                             )
                                           else
                                             Flexible(
@@ -1839,7 +1830,7 @@ class _CalendarViewState extends State<_CalendarView> {
                               final isToday = DateUtils.isSameDay(thisDate, DateTime.now());
                               final isHoliday = _getHolidayName(thisDate) != null; 
                               
-                              bool hasBill = provider.subs.any((sub) {
+                              bool hasBill = provider.activeSubs.any((sub) {
                                 final date = _extractDateSafely(sub);
                                 return date != null && DateUtils.isSameDay(date, thisDate);
                               });
@@ -1983,7 +1974,7 @@ class _CalendarViewState extends State<_CalendarView> {
                             final isToday = DateUtils.isSameDay(thisDate, DateTime.now());
                             final isHoliday = _getHolidayName(thisDate) != null; 
                             
-                            bool hasBill = provider.subs.any((sub) {
+                            bool hasBill = provider.activeSubs.any((sub) {
                               final date = _extractDateSafely(sub);
                               return date != null && DateUtils.isSameDay(date, thisDate);
                             });
@@ -2567,208 +2558,7 @@ class _SettingsViewState extends State<_SettingsView> {
     Navigator.push(context, MaterialPageRoute(builder: (_) => const CurrencySelectorScreen()));
   }
 
-  void _showLanguageSelector() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
-    final unselectedRadioColor = isDark ? Colors.white70 : Colors.black54;
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300)),
-        title: Row(children: [Icon(Icons.language, color: textColor), const SizedBox(width: 10), Text(tr('Pilih Bahasa', 'Choose Language'), style: TextStyle(color: textColor))]),
-        
-        content: Theme(
-          data: Theme.of(context).copyWith(
-            unselectedWidgetColor: unselectedRadioColor,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RadioListTile<String>(
-                title: Text('English', style: TextStyle(color: textColor)),
-                value: 'EN',
-                groupValue: languageNotifier.value, 
-                activeColor: const Color(0xFF2563EB),
-                onChanged: (val) async {
-                  languageNotifier.value = val!; 
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setString('app_lang', val); 
-                  if (mounted) Navigator.pop(ctx);
-                },
-              ),
-              RadioListTile<String>(
-                title: Text('Bahasa Indonesia', style: TextStyle(color: textColor)),
-                value: 'ID',
-                groupValue: languageNotifier.value, 
-                activeColor: const Color(0xFF2563EB),
-                onChanged: (val) async {
-                  languageNotifier.value = val!; 
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setString('app_lang', val); 
-                  if (mounted) Navigator.pop(ctx);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showPrivacySheet() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final sheetBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
-    final subTextColor = isDark ? Colors.white70 : Colors.black54;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, 
-      backgroundColor: sheetBg,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-      builder: (ctx) {
-        return FractionallySizedBox(
-          heightFactor: 0.85, 
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(tr('Privasi & Keamanan Data', 'Privacy & Data Security'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                    IconButton(icon: Icon(Icons.close, color: textColor), onPressed: () => Navigator.pop(ctx))
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                        const SizedBox(height: 8),
-                        Text(tr('Di SubTrack IQ, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTrack IQ, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5)),
-                        const SizedBox(height: 20),
-                        
-                        _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubTrack IQ tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubTrack IQ does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
-                        _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage'), tr('Semua data tagihan dan nama Anda murni disimpan dan dienkripsi di dalam memori internal HP Anda. Tidak ada data yang dikirim ke Cloud.', 'All your bills and name are purely saved and encrypted locally in your phone. No data is sent to the Cloud.'), textColor, subTextColor),
-                        _buildPrivacyPoint('3', tr('Sistem Notifikasi Pintar', 'Smart Notification System'), tr('Pengingat tagihan berjalan langsung di latar belakang sistem HP Anda tanpa perlu menghubungi server eksternal.', 'Bill reminders run locally on your phone background without needing to contact external servers.'), textColor, subTextColor),
-                        _buildPrivacyPoint('4', tr('Akses Pihak Ketiga', 'Third-Party Access'), tr('Kami menjamin 100% bahwa data finansial Anda tidak akan pernah dijual atau dibagikan ke pihak ketiga manapun untuk tujuan iklan.', 'We 100% guarantee that your financial data will never be sold or shared to any third parties for advertising.'), textColor, subTextColor),
-                        _buildPrivacyPoint('5', tr('Kendali Penuh Pengguna', 'Full User Control'), tr('Anda memegang kendali mutlak. Anda bebas mengatur, mengubah, hingga memusnahkan seluruh catatan Anda kapan saja menggunakan zona merah di bawah ini.', 'You hold absolute control. You are free to manage, edit, or destroy all your records anytime using the red zone below.'), textColor, subTextColor),
-                        
-                        const SizedBox(height: 30),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.redAccent.withOpacity(0.3))),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(children: [const Icon(Icons.warning_rounded, color: Colors.redAccent), const SizedBox(width: 8), Text(tr('Zona Bahaya', 'Danger Zone'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12))]),
-                              const SizedBox(height: 8),
-                              Text(tr('Menghapus semua data akan menghilangkan seluruh catatan Anda secara permanen.', 'Deleting all data will permanently remove all your records.'), style: TextStyle(color: subTextColor, fontSize: 10)),
-                              const SizedBox(height: 16),
-                              ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white, elevation: 0),
-                                onPressed: () async {
-                                  Navigator.pop(ctx);
-                                  showDialog(
-                                    context: context,
-                                    builder: (confirmCtx) => AlertDialog(
-                                      backgroundColor: sheetBg,
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300)),
-                                      title: Text(tr('Reboot Sistem?', 'System Reboot?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                                      content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?'), style: TextStyle(color: subTextColor)),
-                                      actions: [
-                                        TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: textColor.withOpacity(0.6)))),
-                                        TextButton(
-                                          onPressed: () async {
-                                            Navigator.pop(confirmCtx);
-                                            final prefs = await SharedPreferences.getInstance();
-                                            await prefs.clear();
-                                            
-                                            final provider = context.read<SubProvider>();
-                                            final subsList = provider.subs.toList();
-                                            for (var sub in subsList) {
-                                              provider.removeSub(sub.id);
-                                            }
-                                            
-                                            themeNotifier.value = 'Hitam';
-                                            userNameNotifier.value = ''; 
-                                            
-                                            ToastUtils.show(context, tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared'));
-                                            Navigator.pushAndRemoveUntil(
-                                              context,
-                                              MaterialPageRoute(builder: (context) => const SplashScreen()),
-                                              (route) => false,
-                                            );
-                                          }, 
-                                          child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
-                                        ),
-                                      ]
-                                    )
-                                  );
-                                },
-                                child: Text(tr('Hapus Seluruh Data Aplikasi', 'Delete All App Data'), style: const TextStyle(fontWeight: FontWeight.bold)),
-                              )
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-    );
-  }
-
-  Widget _buildPrivacyPoint(String number, String title, String desc, Color textColor, Color subTextColor) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: textColor.withOpacity(0.02),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: textColor.withOpacity(0.15)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 28, height: 28,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2563EB).withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Text(number, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)),
-                const SizedBox(height: 6),
-                Text(desc, style: TextStyle(color: subTextColor, fontSize: 11, height: 1.5)),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -2787,40 +2577,7 @@ class _SettingsViewState extends State<_SettingsView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FadeInSlide(delay: Duration.zero,
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 24, top: 12),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2563EB), Color(0xFF8B5CF6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 10))
-                  ]
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.workspace_premium_rounded, color: Colors.amber, size: 48),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Upgrade ke Pro', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
-                          const SizedBox(height: 4),
-                          Text('Buka fitur tanpa batas & hapus iklan', style: TextStyle(color: Colors.white70, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
-                  ],
-                ),
-              ),
-            ),
+
             FadeInSlide(delay: Duration.zero,
               child: Container(
                 color: Colors.transparent,
@@ -2849,7 +2606,9 @@ class _SettingsViewState extends State<_SettingsView> {
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', _showLanguageSelector, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const LanguageScreen()));
+              }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
               child: ValueListenableBuilder<String>(
@@ -2866,7 +2625,9 @@ class _SettingsViewState extends State<_SettingsView> {
                   return ValueListenableBuilder<String>(
                     valueListenable: alarmNotifier,
                     builder: (context, alarm, child) {
-                      return _buildSettingTile(Icons.library_music_rounded, tr('Nada Notifikasi', 'Notification Sound'), "${ringtone.replaceAll('ringtone_', '').toUpperCase()} | ${alarm.replaceAll('alarm_', '').toUpperCase()}", _showRingtoneSelector, cardBg, textColor, subTextColor, widget.theme);
+                      return _buildSettingTile(Icons.library_music_rounded, tr('Nada Notifikasi', 'Notification Sound'), "${ringtone == 'default_system' ? 'DEFAULT' : ringtone.replaceAll('ringtone_', '').toUpperCase()} | ${alarm.replaceAll('alarm_', '').toUpperCase()}", () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationSoundScreen()));
+                      }, cardBg, textColor, subTextColor, widget.theme);
                     }
                   );
                 }
@@ -2891,7 +2652,9 @@ class _SettingsViewState extends State<_SettingsView> {
             const SizedBox(height: 8),
             _buildGroupHeader(Icons.security_rounded, tr('Sistem & Privasi', 'System & Privacy')),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), _showPrivacySheet, cardBg, textColor, subTextColor, widget.theme, iconColor: Colors.red, titleColor: Colors.red),
+              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyScreen()));
+              }, cardBg, textColor, subTextColor, widget.theme, iconColor: Colors.red, titleColor: Colors.red),
             ),
             FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.help_outline_rounded, tr('Pusat Bantuan', 'Help Center'), tr('FAQ & Bantuan Aplikasi', 'FAQ & App Help'), () {
@@ -2905,8 +2668,9 @@ class _SettingsViewState extends State<_SettingsView> {
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.star_rate_rounded, tr('Beri Rating Aplikasi', 'Rate Our App'), tr('Dukung kami di Play Store', 'Support us on Play Store'), () {
-                ToastUtils.show(context, tr('Akan diarahkan ke Play Store...', 'Will redirect to Play Store...'));
+              child: _buildSettingTile(Icons.star_rate_rounded, tr('Beri Rating Aplikasi', 'Rate Our App'), tr('Dukung kami di Play Store', 'Support us on Play Store'), () async {
+                final Uri url = Uri.parse('https://play.google.com/store/apps/details?id=com.sofyan.subtrackiq');
+                try { await launchUrl(url, mode: LaunchMode.externalApplication); } catch (e) { ToastUtils.show(context, tr('Tidak dapat membuka Play Store', 'Cannot open Play Store')); }
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
@@ -2929,112 +2693,7 @@ class _SettingsViewState extends State<_SettingsView> {
     );
   }
 
-  void _previewSound(String soundFile, {bool isAlarm = false}) {
-    final channelId = 'preview_${soundFile}_v1';
-    final details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        channelId, 'Pratinjau Suara',
-        channelDescription: 'Preview',
-        importance: Importance.max,
-        priority: Priority.high,
-        playSound: true,
-        sound: RawResourceAndroidNotificationSound(soundFile),
-        audioAttributesUsage: isAlarm ? AudioAttributesUsage.alarm : AudioAttributesUsage.notification,
-      ),
-    );
-    FlutterLocalNotificationsPlugin().show(8888, 'Pratinjau Suara', 'Memutar $soundFile...', details);
-    
-    Future.delayed(const Duration(seconds: 3), () {
-      FlutterLocalNotificationsPlugin().cancel(8888);
-    });
-  }
 
-  void _showRingtoneSelector() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dialogBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
-    final unselectedRadioColor = isDark ? Colors.white70 : Colors.black54; 
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: dialogBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: isDark ? Colors.white12 : Colors.grey.shade300)),
-        title: Row(children: [Icon(Icons.notifications_active_rounded, color: textColor), const SizedBox(width: 10), Text(tr('Suara Notifikasi & Alarm', 'Notification & Alarm'), style: TextStyle(color: textColor, fontSize: 12))]),
-        contentPadding: const EdgeInsets.symmetric(vertical: 20),
-        content: Theme(
-          data: Theme.of(context).copyWith(unselectedWidgetColor: unselectedRadioColor),
-          child: SizedBox(
-            width: double.maxFinite,
-            child: StatefulBuilder(
-              builder: (context, setStateSB) {
-                return SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 11)),
-                      ),
-                      ...['ringtone_default', 'ringtone_chime', 'ringtone_alert', 'ringtone_synth'].map((r) {
-                        return RadioListTile<String>(
-                          title: Text(r.replaceAll('ringtone_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 12)),
-                          value: r,
-                          groupValue: ringtoneNotifier.value, 
-                          activeColor: const Color(0xFF2563EB),
-                          dense: true,
-                          onChanged: (val) async {
-                            ringtoneNotifier.value = val!; 
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setString('app_ringtone', val); 
-                            setStateSB((){});
-                            if (mounted) setState((){});
-                            _previewSound(val);
-                          },
-                        );
-                      }),
-                      const Divider(color: Colors.white10),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        child: Text(tr('Suara Alarm Tagihan', 'Billing Alarm Sound'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 11)),
-                      ),
-                      ...['alarm_lagu', 'alarm_digital', 'alarm_classic'].map((r) {
-                        return RadioListTile<String>(
-                          title: Text(r.replaceAll('alarm_', '').toUpperCase(), style: TextStyle(color: textColor, fontSize: 12)),
-                          value: r,
-                          groupValue: alarmNotifier.value, 
-                          activeColor: Colors.redAccent,
-                          dense: true,
-                          onChanged: (val) async {
-                            alarmNotifier.value = val!; 
-                            final prefs = await SharedPreferences.getInstance();
-                            await prefs.setString('app_alarm', val); 
-                            setStateSB((){});
-                            if (mounted) setState((){});
-                            _previewSound(val, isAlarm: true);
-                          },
-                        );
-                      }),
-                    ],
-                  ),
-                );
-              }
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              FlutterLocalNotificationsPlugin().cancel(8888);
-              Navigator.pop(ctx);
-            },
-            child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold))
-          )
-        ],
-      )
-    );
-  }
 
   Widget _buildGroupHeader(IconData icon, String title) {
     return Padding(

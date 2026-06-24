@@ -33,18 +33,12 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _budgetCtrl = TextEditingController();
-  String _savedName = ''; 
-
-  late AnimationController _arrowCtrl;
-  late Animation<double> _arrowSlide;
+  String _savedName = '';
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: 0);
-
-    _arrowCtrl = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
-    _arrowSlide = Tween<double>(begin: 0.0, end: 6.0).animate(CurvedAnimation(parent: _arrowCtrl, curve: Curves.easeInOut));
     
     
     if (widget.isNewUser) {
@@ -69,7 +63,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _budgetCtrl.dispose();
-    _arrowCtrl.dispose();
     super.dispose();
   }
 
@@ -170,7 +163,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
             children: [
           
           if (_state == SplashState.onboarding || _state == SplashState.welcomeNew)
-            const Positioned.fill(child: OnboardingBackground()),
+            const Positioned.fill(child: StaticModernBackground()),
           
           if (_state == SplashState.welcomeReturning)
             Positioned.fill(
@@ -206,9 +199,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                 img3: 'assets/welcome2.jpg', 
               ),
             ),
-            if (_state == SplashState.form || _state == SplashState.loading)
+            if (_state == SplashState.choice || _state == SplashState.form || _state == SplashState.loading)
               Positioned.fill(
-                child: Container(color: Colors.white.withOpacity(0.65)), // Overlay for form readability
+                child: Container(color: Theme.of(context).brightness == Brightness.dark ? Colors.black.withValues(alpha: 0.45) : Colors.white.withValues(alpha: 0.55)), // Overlay for form readability
               ),
           ],
 
@@ -232,7 +225,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                 alignment: Alignment.centerLeft,
                                 child: showTopExitButton
                                     ? IconButton(
-                                        icon: const Icon(Icons.arrow_back, color: Color(0xFF1E293B), size: 28),
+                                        icon: const Icon(Icons.close_rounded, color: Color(0xFF1E293B), size: 28),
                                         onPressed: () {
                                           if (_state == SplashState.form) {
                                             setState(() {
@@ -304,7 +297,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         decoration: InputDecoration(
                                           labelText: tr('Target Anggaran Per Bulan', 'Monthly Budget Target'),
                                           labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
-                                          prefixIcon: const Icon(Icons.account_balance_wallet, color: Color(0xFF1E293B), size: 22),
+                                          prefixIcon: const Icon(Icons.savings_rounded, color: Color(0xFF1E293B), size: 22),
                                           prefixText: 'Rp ',
                                           prefixStyle: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16),
                                           filled: true, fillColor: Colors.grey[100],
@@ -458,14 +451,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                               setState(() => _state = SplashState.choice); 
                                             }
                                           },
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
-                                              const SizedBox(width: 8),
-                                              const Icon(Icons.arrow_forward_rounded, size: 20),
-                                            ],
-                                          ),
+                                          child: Text(_getButtonText(), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, letterSpacing: 1.0)),
                                         ),
                                       ],
                                     );
@@ -557,12 +543,10 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
   String? _base64Image;
   late AnimationController _logoCtrl;
   late AnimationController _textCtrl;
-  late AnimationController _arrowCtrl;
 
   late Animation<double> _logoScale;
   late Animation<double> _textOpacity;
   late Animation<Offset> _textSlide;
-  late Animation<double> _arrowSlide;
 
   bool _isLoading = false; 
   String _activeUserName = '';
@@ -573,9 +557,10 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
     final prefs = await SharedPreferences.getInstance();
     if (mounted) {
       setState(() { 
-        _activeUserName = widget.userName;
+        String loadedName = prefs.getString('user_name') ?? 'SubTrack IQ User';
+        _activeUserName = loadedName.isNotEmpty ? loadedName : 'SubTrack IQ User';
         _savedUsers = prefs.getStringList('saved_users') ?? [];
-        if (_activeUserName.isNotEmpty && !_savedUsers.contains(_activeUserName)) {
+        if (_activeUserName.isNotEmpty && !_savedUsers.contains(_activeUserName) && _activeUserName != 'SubTrack IQ User') {
            _savedUsers.insert(0, _activeUserName);
         }
         for (var user in _savedUsers) {
@@ -892,7 +877,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) setState(() => _showSubTrackIQ = true);
     });
-    Future.delayed(const Duration(milliseconds: 4500), () {
+    Future.delayed(const Duration(milliseconds: 5500), () {
       if (mounted) widget.onNext();
     });
   }
@@ -911,11 +896,20 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
       width: double.infinity,
       child: Stack(
         children: [
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.35,
-            child: Container(
-              width: 250, height: 250,
-              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 100, spreadRadius: 50)]),
+          Align(
+            alignment: Alignment.center,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 1500),
+              opacity: _showSubTrackIQ ? 1.0 : 0.0,
+              child: Container(
+                width: 250, height: 250,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle, 
+                  boxShadow: [
+                    BoxShadow(color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.8), blurRadius: 100, spreadRadius: 60)
+                  ]
+                ),
+              ),
             ),
           ),
           
@@ -932,7 +926,7 @@ class _WelcomeNewViewState extends State<WelcomeNewView> {
               TypewriterText(
                 'Welcome to',
                 delay: const Duration(milliseconds: 500),
-                speed: const Duration(milliseconds: 100),
+                speed: const Duration(milliseconds: 60),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 20, fontStyle: FontStyle.italic, color: subTextColor, letterSpacing: 1.5),
               ),
@@ -1029,6 +1023,66 @@ class _TypewriterTextState extends State<TypewriterText> {
 }
 
 
+class StaticModernBackground extends StatelessWidget {
+  const StaticModernBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = const Color(0xFF2563EB);
+    final secondaryColor = const Color(0xFF0D9488);
+    
+    return Stack(
+      children: [
+        Positioned(
+          top: -100,
+          right: -50,
+          child: Transform.rotate(
+            angle: -0.2,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 1.5,
+              height: 350,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+                gradient: LinearGradient(
+                  colors: [
+                    primaryColor.withValues(alpha: isDark ? 0.15 : 0.08),
+                    secondaryColor.withValues(alpha: isDark ? 0.05 : 0.02),
+                  ],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: -150,
+          left: -100,
+          child: Transform.rotate(
+            angle: 0.15,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 1.2,
+              height: 400,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(80),
+                gradient: LinearGradient(
+                  colors: [
+                    secondaryColor.withValues(alpha: isDark ? 0.1 : 0.05),
+                    primaryColor.withValues(alpha: isDark ? 0.05 : 0.02),
+                  ],
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class StaggeredAlbumBackground extends StatefulWidget {
   final String img1, img2, img3;
   const StaggeredAlbumBackground({super.key, required this.img1, required this.img2, required this.img3});
@@ -1080,7 +1134,7 @@ class _StaggeredAlbumBackgroundState extends State<StaggeredAlbumBackground> wit
                   borderRadius: BorderRadius.circular(12),
                   image: DecorationImage(image: AssetImage(path), fit: BoxFit.cover, alignment: alignment),
                   border: Border.all(color: Colors.black12, width: 2),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.8), blurRadius: 20, offset: const Offset(0, 10))],
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.8), blurRadius: 20, offset: const Offset(0, 10))],
                 ),
               ),
             ),

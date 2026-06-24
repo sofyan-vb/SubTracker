@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/currency_utils.dart';
 import 'dashboard_screen.dart' show currencyNotifier, tr;
+import 'package:provider/provider.dart';
+import '../providers/subscription_provider.dart';
 
 class CurrencySelectorScreen extends StatefulWidget {
   const CurrencySelectorScreen({super.key});
@@ -65,6 +67,7 @@ class _CurrencySelectorScreenState extends State<CurrencySelectorScreen> {
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setString('app_currency', code);
                     currencyNotifier.value = code;
+                    context.read<SubProvider>().setTargetCurrency(code);
                     if (mounted) Navigator.pop(context);
                   },
                 ),

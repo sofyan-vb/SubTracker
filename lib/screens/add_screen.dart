@@ -205,7 +205,15 @@ class _AddScreenState extends State<AddScreen> {
                               builder: (context, currency, _) {
                                 final format = CurrencyUtils.getFormat(currency);
                                 final prefix = format.currencySymbol + ' ';
-                                return _buildTextField(_priceCtrl, tr('Misal: 150.000', 'E.g: 150,000'), cardBg, textColor, hintColor, isNumber: true, prefixText: prefix, formatters: [ThousandsSeparatorInputFormatter()]);
+                                final isZeroDecimal = currency == 'IDR' || currency == 'JPY';
+                                return _buildTextField(
+                                  _priceCtrl, 
+                                  isZeroDecimal ? tr('Misal: 150.000', 'E.g: 150,000') : tr('Misal: 9.99', 'E.g: 9.99'), 
+                                  cardBg, textColor, hintColor, 
+                                  isNumber: true, 
+                                  prefixText: prefix, 
+                                  formatters: isZeroDecimal ? [ThousandsSeparatorInputFormatter()] : []
+                                );
                               }
                             )
                           ])),
@@ -241,7 +249,7 @@ class _AddScreenState extends State<AddScreen> {
                           return; 
                         }
 
-                        final newSub = Subscription(id: DateTime.now().millisecondsSinceEpoch.toString(), name: _nameCtrl.text, price: double.tryParse(_priceCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0, dueDate: exactDateTime, category: _selectedCategory, isTrial: _isTrial, splitCount: _splitCount);
+                        final newSub = Subscription(id: DateTime.now().millisecondsSinceEpoch.toString(), name: _nameCtrl.text, price: CurrencyUtils.parsePrice(_priceCtrl.text, currencyNotifier.value), dueDate: exactDateTime, category: _selectedCategory, isTrial: _isTrial, splitCount: _splitCount, currency: currencyNotifier.value);
                         context.read<SubProvider>().addSub(newSub);
 
                         final prefs = await SharedPreferences.getInstance();
@@ -395,7 +403,7 @@ class _AddScreenState extends State<AddScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 4), 
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.transparent)), 
       child: TextField(
-        controller: ctrl, keyboardType: isNumber ? TextInputType.number : TextInputType.text, 
+        controller: ctrl, keyboardType: const TextInputType.numberWithOptions(decimal: true), 
         style: TextStyle(color: textColor, fontWeight: FontWeight.bold), 
         inputFormatters: formatters, 
         decoration: InputDecoration(prefixText: prefixText, prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 12), hintText: hint, hintStyle: TextStyle(color: hintColor), border: InputBorder.none, contentPadding: const EdgeInsets.all(16))

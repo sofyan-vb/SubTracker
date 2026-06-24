@@ -21,14 +21,52 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
   final TextEditingController _targetCtrl = TextEditingController();
 
   // Statistik State
+  bool _isEditingBase = true;
   String _statBase = 'USD';
   String _statTarget = 'IDR';
   String _selectedRange = '1M';
-  Map<String, double> _historicalData = {};
   bool _isLoadingChart = false;
-  bool _isEditingBase = true;
-  
-  final List<String> _ranges = ['1D', '5D', '1M', '1Y', '5Y', 'Max'];
+  Map<String, double> _historicalData = {};
+
+  final List<String> _ranges = ['1D', '5D', '1M', '3M', '6M', '1Y'];
+
+  Future<void> _fetchChartData() async {
+    setState(() => _isLoadingChart = true);
+    
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    // Simulasi data historis yang fluktuatif
+    _historicalData.clear();
+    double currentRate = CurrencyUtils.convert(1, _statBase, _statTarget);
+    
+    int dataPoints = 30;
+    if (_selectedRange == '1D') dataPoints = 24;
+    else if (_selectedRange == '5D') dataPoints = 5;
+    else if (_selectedRange == '3M') dataPoints = 90;
+    else if (_selectedRange == '6M') dataPoints = 180;
+    else if (_selectedRange == '1Y') dataPoints = 365;
+
+    DateTime now = DateTime.now();
+    double lastRate = currentRate * 0.95; 
+
+    for (int i = dataPoints; i >= 0; i--) {
+      DateTime d = now.subtract(Duration(days: i));
+      if (_selectedRange == '1D') d = now.subtract(Duration(hours: i));
+      
+      // Random walk simulation
+      double change = (DateTime.now().millisecond % 100 - 50) / 1000; 
+      lastRate = lastRate * (1 + change);
+      
+      _historicalData[d.toIso8601String()] = lastRate;
+    }
+    
+    // Ensure the last data point matches the exact live rate
+    _historicalData[now.toIso8601String()] = currentRate;
+
+    if (mounted) {
+      setState(() => _isLoadingChart = false);
+    }
+  }
 
   @override
   void initState() {
@@ -61,21 +99,18 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
   
   String _formatInput(double value, String currency) {
     if (value == 0) return '0';
-    int decimals = (currency == 'IDR' || currency == 'JPY') ? 0 : 2;
+    if (currency == 'IDR') {
+      final format = NumberFormat.decimalPattern('id');
+      return format.format(value);
+    }
+    int decimals = (currency == 'JPY') ? 0 : 2;
     final format = NumberFormat.decimalPattern('en');
     format.minimumFractionDigits = 0;
     format.maximumFractionDigits = decimals;
     return format.format(value);
   }
 
-  Future<void> _fetchChartData() async {
-    setState(() => _isLoadingChart = true);
-    final data = await CurrencyUtils.fetchHistoricalRates(_statBase, _statTarget, _selectedRange);
-    setState(() {
-      _historicalData = data;
-      _isLoadingChart = false;
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -365,167 +400,267 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     );
   }
 
-  Widget _buildStatisticsTab(Color cardColor, Color textColor, bool isDark) {
-    double currentRate = CurrencyUtils.convert(1, _statBase, _statTarget);
-    String rateFormatted = CurrencyUtils.getFormat(_statTarget).format(currentRate);
-    
-    // Determine trend (green or red)
-    bool isTrendUp = true;
-    if (_historicalData.isNotEmpty) {
-      final firstVal = _historicalData.values.first;
-      final lastVal = _historicalData.values.last;
-      isTrendUp = lastVal >= firstVal;
-    }
-    final chartColor = isTrendUp ? const Color(0xFF10B981) : const Color(0xFFEF4444);
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStatCurrencySelector(
-                currency: _statBase, 
-                cardColor: cardColor, 
-                textColor: textColor,
-                onChanged: (val) {
-                  setState(() => _statBase = val!);
-                  _fetchChartData();
-                }
+  void _showLiveRatesPopup(Color cardColor, Color textColor, bool isDark) {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Live Rates',
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              margin: const EdgeInsets.all(24),
+              height: MediaQuery.of(context).size.height * 0.7,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.black.withOpacity(0.4) : Colors.white.withOpacity(0.4),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withOpacity(0.2)),
               ),
-              Icon(Icons.swap_horiz_rounded, color: textColor.withOpacity(0.5)),
-              _buildStatCurrencySelector(
-                currency: _statTarget, 
-                cardColor: cardColor, 
-                textColor: textColor,
-                onChanged: (val) {
-                  setState(() => _statTarget = val!);
-                  _fetchChartData();
-                }
-              ),
-            ],
-          ),
-          const SizedBox(height: 32),
-          
-          Text('1 $_statBase =', style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 16, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 4),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(rateFormatted, style: TextStyle(color: textColor, fontSize: 32, fontWeight: FontWeight.w900, letterSpacing: -1)),
-              const SizedBox(width: 8),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Text(_statTarget, style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-
-          // Range Selector
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _ranges.map((range) {
-                bool isSelected = _selectedRange == range;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _selectedRange = range);
-                    _fetchChartData();
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFF2563EB).withOpacity(0.1) : Colors.transparent,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isSelected ? const Color(0xFF2563EB) : textColor.withOpacity(0.1)),
-                    ),
-                    child: Text(
-                      range, 
-                      style: TextStyle(
-                        color: isSelected ? const Color(0xFF2563EB) : textColor.withOpacity(0.6),
-                        fontWeight: FontWeight.bold,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: BackdropFilter(
+                  filter: ColorFilter.mode(Colors.white.withOpacity(0.0), BlendMode.dst),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              tr('Daftar Kurs', 'Exchange Rates'),
+                              style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.close, color: textColor),
+                              onPressed: () => Navigator.pop(context),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 40),
+                      Expanded(
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          itemCount: CurrencyUtils.data.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            String c = CurrencyUtils.data.keys.elementAt(index);
+                            if (c == _convBase) return const SizedBox.shrink(); // Hide base currency
 
-          // Chart Area
-          SizedBox(
-            height: 280,
-            width: double.infinity,
-            child: _isLoadingChart 
-              ? const Center(child: CircularProgressIndicator())
-              : _historicalData.isEmpty 
-                ? Center(child: Text('Data tidak tersedia', style: TextStyle(color: textColor.withOpacity(0.5))))
-                : _buildChart(chartColor, isDark),
-          ),
-          
-          if (!_isLoadingChart && _historicalData.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 18),
-                            const SizedBox(width: 4),
-                            Text('Tertinggi', style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
-                          ],
+                            double rate = CurrencyUtils.convert(1, _convBase, c);
+                            String rateFormatted = CurrencyUtils.getFormat(c).format(rate);
+
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: cardColor.withOpacity(isDark ? 0.8 : 0.9),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(CurrencyUtils.data[c]!['flag'], style: const TextStyle(fontSize: 28)),
+                                  const SizedBox(width: 16),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(c, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                                        Text(CurrencyUtils.data[c]!['name'], style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 12)),
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    rateFormatted,
+                                    style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                        const SizedBox(height: 8),
-                        Text(CurrencyUtils.getFormat(_statTarget).format(_historicalData.values.reduce((a, b) => a > b ? a : b)), style: const TextStyle(color: Color(0xFF10B981), fontSize: 16, fontWeight: FontWeight.w900)),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.trending_down_rounded, color: Color(0xFFEF4444), size: 18),
-                            const SizedBox(width: 4),
-                            Text('Terendah', style: TextStyle(color: const Color(0xFFEF4444).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(CurrencyUtils.getFormat(_statTarget).format(_historicalData.values.reduce((a, b) => a < b ? a : b)), style: const TextStyle(color: Color(0xFFEF4444), fontSize: 16, fontWeight: FontWeight.w900)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ]
-        ],
-      ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStatisticsTab(Color cardColor, Color textColor, bool isDark) {
+    final chartColor = const Color(0xFF3B82F6);
+    
+    return ListView(
+      padding: const EdgeInsets.all(24),
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              tr('Statistik Kurs', 'Exchange Stats'),
+              style: TextStyle(
+                color: textColor,
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.list_alt_rounded, color: textColor),
+              tooltip: tr('Daftar Harga', 'Live Rates'),
+              onPressed: () => _showLiveRatesPopup(cardColor, textColor, isDark),
+            )
+          ],
+        ),
+        const SizedBox(height: 24),
+        
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCurrencySelector(
+                currency: _statBase,
+                cardColor: cardColor,
+                textColor: textColor,
+                onChanged: (val) {
+                  if (val != null && val != _statBase) {
+                    if (val == _statTarget) {
+                      _statTarget = _statBase;
+                    }
+                    setState(() {
+                      _statBase = val;
+                      _fetchChartData();
+                    });
+                  }
+                }
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Icon(Icons.compare_arrows_rounded, color: textColor.withOpacity(0.5)),
+            ),
+            Expanded(
+              child: _buildStatCurrencySelector(
+                currency: _statTarget,
+                cardColor: cardColor,
+                textColor: textColor,
+                onChanged: (val) {
+                  if (val != null && val != _statTarget) {
+                    if (val == _statBase) {
+                      _statBase = _statTarget;
+                    }
+                    setState(() {
+                      _statTarget = val;
+                      _fetchChartData();
+                    });
+                  }
+                }
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: _ranges.map((r) {
+            bool isSelected = r == _selectedRange;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedRange = r;
+                  _fetchChartData();
+                });
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? chartColor : Colors.transparent,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  r,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : textColor.withOpacity(0.5),
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 32),
+
+        SizedBox(
+          height: 250,
+          child: _isLoadingChart 
+              ? const Center(child: CircularProgressIndicator())
+              : _buildChart(chartColor, isDark),
+        ),
+        
+        if (!_isLoadingChart && _historicalData.isNotEmpty) ...[
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 18),
+                          const SizedBox(width: 4),
+                          Text(tr('Tertinggi', 'Highest'), style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(CurrencyUtils.getFormat(_statTarget).format(_historicalData.values.reduce((a, b) => a > b ? a : b)), style: const TextStyle(color: Color(0xFF10B981), fontSize: 16, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.2)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.trending_down_rounded, color: Color(0xFFEF4444), size: 18),
+                          const SizedBox(width: 4),
+                          Text(tr('Terendah', 'Lowest'), style: TextStyle(color: const Color(0xFFEF4444).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(CurrencyUtils.getFormat(_statTarget).format(_historicalData.values.reduce((a, b) => a < b ? a : b)), style: const TextStyle(color: Color(0xFFEF4444), fontSize: 16, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ]
+      ],
     );
   }
 
@@ -564,6 +699,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     List<FlSpot> spots = [];
     double minX = 0;
     double maxX = (_historicalData.length - 1).toDouble();
+    if (maxX < 0) maxX = 0;
     double minY = double.infinity;
     double maxY = double.negativeInfinity;
 

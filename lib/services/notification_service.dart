@@ -1,4 +1,5 @@
 import 'dart:typed_data'; 
+import 'dart:math'; 
 import 'package:flutter/foundation.dart'; 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -45,7 +46,9 @@ class NotificationService {
     final tz.TZDateTime scheduledTzTime = tz.TZDateTime.from(scheduledTime, tz.local);
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final Int32List additionalFlags = isAlarm ? Int32List.fromList(<int>[4]) : Int32List(0);
-    final AndroidNotificationSound customSound = RawResourceAndroidNotificationSound(isAlarm ? alarm : ringtone);
+    final AndroidNotificationSound? customSound = (!isAlarm && ringtone == 'default_system') 
+      ? null 
+      : RawResourceAndroidNotificationSound(isAlarm ? alarm : ringtone);
     final String channelId = isAlarm ? 'channel_alarm_${alarm}_v3' : 'channel_notif_${ringtone}_v1';
     final String channelName = isAlarm ? 'Alarm Tagihan' : 'Notifikasi Tagihan';
 
@@ -78,6 +81,60 @@ class NotificationService {
       scheduledTzTime, 
       notifDetails,
       androidScheduleMode: AndroidScheduleMode.alarmClock, 
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
+  static Future<void> cancelNotification(int id) async {
+    if (kIsWeb) return;
+    await _notificationsPlugin.cancel(id);
+  }
+
+  static Future<void> scheduleInactiveReminder() async {
+    if (kIsWeb) return;
+    
+    final List<String> messages = [
+      'Hei, sudah lama kamu tidak mengecek tagihanmu. Yuk cek sekarang agar tidak ada yang terlewat!',
+      'Jangan sampai ada tagihan yang bocor! Buka SubTrack IQ untuk memastikan keuanganmu aman.',
+      'Ada tagihan yang mendekati jatuh tempo? Cek langgananmu di SubTrack IQ hari ini.',
+      'Kondisi keuangan langgananmu butuh perhatian nih. Yuk buka aplikasi sekarang!',
+      'Kelola langgananmu dengan baik. Buka SubTrack IQ dan pastikan semuanya terkontrol.'
+    ];
+    
+    final String body = messages[Random().nextInt(messages.length)];
+    
+    // Schedule for 3 days from now
+    final tz.TZDateTime scheduledTzTime = tz.TZDateTime.now(tz.local).add(const Duration(days: 3));
+    
+    final prefs = await SharedPreferences.getInstance();
+    final String ringtone = prefs.getString('app_ringtone') ?? 'ringtone_default';
+    
+    final AndroidNotificationSound? customSound = (ringtone == 'default_system') 
+      ? null 
+      : RawResourceAndroidNotificationSound(ringtone);
+      
+    final NotificationDetails notifDetails = NotificationDetails(
+      android: AndroidNotificationDetails(
+        'channel_inactive_reminder', 
+        'Pengingat Sistem',
+        channelDescription: 'Pengingat untuk membuka aplikasi',
+        importance: Importance.defaultImportance, 
+        priority: Priority.defaultPriority,    
+        playSound: true,     
+        sound: customSound,      
+      ),
+    );
+
+    // Cancel existing reminder if any, then schedule new one
+    await _notificationsPlugin.cancel(9999);
+    
+    await _notificationsPlugin.zonedSchedule(
+      9999,
+      'SubTrack IQ merindukanmu!', 
+      body,  
+      scheduledTzTime, 
+      notifDetails,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle, 
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
