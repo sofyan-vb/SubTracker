@@ -68,7 +68,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    final bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     final subTextColor = isDark ? Colors.white70 : Colors.black54;

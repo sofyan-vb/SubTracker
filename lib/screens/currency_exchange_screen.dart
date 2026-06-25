@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
@@ -33,35 +34,45 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
   Future<void> _fetchChartData() async {
     setState(() => _isLoadingChart = true);
     
-    await Future.delayed(const Duration(milliseconds: 800));
+    // Coba ambil data riil dari internet
+    Map<String, double> realData = {};
+    if (_statBase != _statTarget) {
+      realData = await CurrencyUtils.fetchHistoricalRates(_statBase, _statTarget, _selectedRange);
+    }
     
-    // Simulasi data historis yang fluktuatif
     _historicalData.clear();
     double currentRate = CurrencyUtils.convert(1, _statBase, _statTarget);
     
-    int dataPoints = 30;
-    if (_selectedRange == '1D') dataPoints = 24;
-    else if (_selectedRange == '5D') dataPoints = 5;
-    else if (_selectedRange == '3M') dataPoints = 90;
-    else if (_selectedRange == '6M') dataPoints = 180;
-    else if (_selectedRange == '1Y') dataPoints = 365;
+    if (realData.isNotEmpty && realData.length > 2) {
+      // Gunakan data riil
+      _historicalData = realData;
+    } else {
+      // Fallback: Simulasi data historis yang fluktuatif jika API gagal / offline
+      await Future.delayed(const Duration(milliseconds: 500));
+      int dataPoints = 30;
+      if (_selectedRange == '1D') dataPoints = 24;
+      else if (_selectedRange == '5D') dataPoints = 5;
+      else if (_selectedRange == '3M') dataPoints = 90;
+      else if (_selectedRange == '6M') dataPoints = 180;
+      else if (_selectedRange == '1Y') dataPoints = 365;
 
-    DateTime now = DateTime.now();
-    double lastRate = currentRate * 0.95; 
+      DateTime now = DateTime.now();
+      double lastRate = currentRate * 0.95; 
 
-    for (int i = dataPoints; i >= 0; i--) {
-      DateTime d = now.subtract(Duration(days: i));
-      if (_selectedRange == '1D') d = now.subtract(Duration(hours: i));
-      
-      // Random walk simulation
-      double change = (DateTime.now().millisecond % 100 - 50) / 1000; 
-      lastRate = lastRate * (1 + change);
-      
-      _historicalData[d.toIso8601String()] = lastRate;
+      for (int i = dataPoints; i >= 0; i--) {
+        DateTime d = now.subtract(Duration(days: i));
+        if (_selectedRange == '1D') d = now.subtract(Duration(hours: i));
+        
+        // Random walk simulation
+        double change = (DateTime.now().millisecond % 100 - 50) / 1000; 
+        lastRate = lastRate * (1 + change);
+        
+        _historicalData[d.toIso8601String()] = lastRate;
+      }
     }
     
     // Ensure the last data point matches the exact live rate
-    _historicalData[now.toIso8601String()] = currentRate;
+    _historicalData[DateTime.now().toIso8601String()] = currentRate;
 
     if (mounted) {
       setState(() => _isLoadingChart = false);
@@ -73,7 +84,12 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _calculateConversion(true);
-    _fetchChartData();
+    _initData();
+  }
+
+  Future<void> _initData() async {
+    await CurrencyUtils.fetchRealTimeRates();
+    if (mounted) _fetchChartData();
   }
 
   @override
@@ -327,24 +343,24 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     final name = currencyData?['name'] ?? '';
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))],
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 13, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
+          Text(label, style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: textColor.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(12),
+                  color: textColor.withOpacity(0.04),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
@@ -356,9 +372,9 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                         value: c,
                         child: Row(
                           children: [
-                            Text(CurrencyUtils.data[c]!['flag'], style: const TextStyle(fontSize: 20)),
+                            Text(CurrencyUtils.data[c]!['flag'], style: const TextStyle(fontSize: 16)),
                             const SizedBox(width: 8),
-                            Text(c, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                            Text(c, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
                           ],
                         ),
                       );
@@ -378,7 +394,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     color: isEditing ? const Color(0xFF2563EB) : textColor, 
-                    fontSize: 32, 
+                    fontSize: 24, 
                     fontWeight: FontWeight.w900
                   ),
                   decoration: InputDecoration(
@@ -386,7 +402,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                     prefixText: CurrencyUtils.getFormat(currency).currencySymbol + ' ',
-                    prefixStyle: TextStyle(color: textColor.withOpacity(0.5), fontSize: 20, fontWeight: FontWeight.bold)
+                    prefixStyle: TextStyle(color: textColor.withOpacity(0.5), fontSize: 16, fontWeight: FontWeight.bold)
                   ),
                   onChanged: onChanged,
                 ),
@@ -400,98 +416,6 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     );
   }
 
-  void _showLiveRatesPopup(Color cardColor, Color textColor, bool isDark) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: 'Live Rates',
-      barrierColor: Colors.black.withOpacity(0.5),
-      transitionDuration: const Duration(milliseconds: 300),
-      pageBuilder: (context, animation, secondaryAnimation) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Container(
-              margin: const EdgeInsets.all(24),
-              height: MediaQuery.of(context).size.height * 0.7,
-              decoration: BoxDecoration(
-                color: isDark ? Colors.black.withOpacity(0.4) : Colors.white.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: BackdropFilter(
-                  filter: ColorFilter.mode(Colors.white.withOpacity(0.0), BlendMode.dst),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              tr('Daftar Kurs', 'Exchange Rates'),
-                              style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.close, color: textColor),
-                              onPressed: () => Navigator.pop(context),
-                            )
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                          itemCount: CurrencyUtils.data.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            String c = CurrencyUtils.data.keys.elementAt(index);
-                            if (c == _convBase) return const SizedBox.shrink(); // Hide base currency
-
-                            double rate = CurrencyUtils.convert(1, _convBase, c);
-                            String rateFormatted = CurrencyUtils.getFormat(c).format(rate);
-
-                            return Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: cardColor.withOpacity(isDark ? 0.8 : 0.9),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(CurrencyUtils.data[c]!['flag'], style: const TextStyle(fontSize: 28)),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(c, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                                        Text(CurrencyUtils.data[c]!['name'], style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 12)),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    rateFormatted,
-                                    style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   Widget _buildStatisticsTab(Color cardColor, Color textColor, bool isDark) {
     final chartColor = const Color(0xFF3B82F6);
@@ -499,72 +423,69 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              tr('Statistik Kurs', 'Exchange Stats'),
-              style: TextStyle(
-                color: textColor,
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.5,
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.list_alt_rounded, color: textColor),
-              tooltip: tr('Daftar Harga', 'Live Rates'),
-              onPressed: () => _showLiveRatesPopup(cardColor, textColor, isDark),
-            )
-          ],
+        Text(
+          tr('Statistik Kurs', 'Exchange Stats'),
+          style: TextStyle(
+            color: textColor,
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          tr('Pilih negara di bawah ini untuk melihat tren pergerakan nilai tukar mata uangnya dibandingkan USD.', 
+             'Select a country below to see its exchange rate trend compared to USD.'),
+          style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 14),
+        ),
+        const SizedBox(height: 16),
+        
+        SizedBox(
+          height: 60,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: CurrencyUtils.data.length,
+            itemBuilder: (context, index) {
+              String c = CurrencyUtils.data.keys.elementAt(index);
+              if (c == _statBase) return const SizedBox.shrink();
+              bool isSelected = c == _statTarget;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _statTarget = c;
+                    _fetchChartData();
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? const Color(0xFF3B82F6) : cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: isSelected ? const Color(0xFF3B82F6) : textColor.withOpacity(0.1)),
+                    boxShadow: [
+                      if (isSelected) BoxShadow(color: const Color(0xFF3B82F6).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Text(CurrencyUtils.data[c]!['flag'], style: const TextStyle(fontSize: 20)),
+                      const SizedBox(width: 8),
+                      Text(
+                        c, 
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : textColor, 
+                          fontWeight: FontWeight.bold
+                        )
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         ),
         const SizedBox(height: 24),
-        
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCurrencySelector(
-                currency: _statBase,
-                cardColor: cardColor,
-                textColor: textColor,
-                onChanged: (val) {
-                  if (val != null && val != _statBase) {
-                    if (val == _statTarget) {
-                      _statTarget = _statBase;
-                    }
-                    setState(() {
-                      _statBase = val;
-                      _fetchChartData();
-                    });
-                  }
-                }
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Icon(Icons.compare_arrows_rounded, color: textColor.withOpacity(0.5)),
-            ),
-            Expanded(
-              child: _buildStatCurrencySelector(
-                currency: _statTarget,
-                cardColor: cardColor,
-                textColor: textColor,
-                onChanged: (val) {
-                  if (val != null && val != _statTarget) {
-                    if (val == _statBase) {
-                      _statBase = _statTarget;
-                    }
-                    setState(() {
-                      _statTarget = val;
-                      _fetchChartData();
-                    });
-                  }
-                }
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -596,7 +517,30 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
           }).toList(),
         ),
         const SizedBox(height: 32),
-
+        if (!_isLoadingChart && _historicalData.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tr('Nilai Saat Ini', 'Current Rate'),
+                      style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '1 $_statBase = ${CurrencyUtils.getFormat(_statTarget).format(_historicalData.values.last)}',
+                      style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         SizedBox(
           height: 250,
           child: _isLoadingChart 
@@ -664,38 +608,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     );
   }
 
-  Widget _buildStatCurrencySelector({required String currency, required Color cardColor, required Color textColor, required ValueChanged<String?> onChanged}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: currency,
-          icon: Icon(Icons.keyboard_arrow_down_rounded, color: textColor),
-          dropdownColor: cardColor,
-          items: CurrencyUtils.data.keys.map((c) {
-            return DropdownMenuItem(
-              value: c,
-              child: Row(
-                children: [
-                  Text(CurrencyUtils.data[c]!['flag'], style: const TextStyle(fontSize: 18)),
-                  const SizedBox(width: 8),
-                  Text(c, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChart(Color chartColor, bool isDark) {
+  Widget _buildChart(Color baseColor, bool isDark) {
     List<FlSpot> spots = [];
     double minX = 0;
     double maxX = (_historicalData.length - 1).toDouble();
@@ -714,6 +627,12 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     if (minY == double.infinity) minY = 0;
     if (maxY == double.negativeInfinity) maxY = 1;
     
+    // Determine color based on trend (up = green, down = red)
+    Color chartColor = const Color(0xFF10B981); // Default green
+    if (spots.isNotEmpty && spots.last.y < spots.first.y) {
+      chartColor = const Color(0xFFEF4444); // Red if down
+    }
+    
     // Add padding to Y axis
     double yPadding = (maxY - minY) * 0.1;
     if (yPadding == 0) yPadding = minY * 0.01;
@@ -723,7 +642,27 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
     return LineChart(
       LineChartData(
         gridData: const FlGridData(show: false),
-        titlesData: const FlTitlesData(show: false),
+        titlesData: FlTitlesData(
+          show: true,
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: false,
+              reservedSize: 45,
+              getTitlesWidget: (value, meta) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    value.toStringAsFixed(2),
+                    style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
         borderData: FlBorderData(show: false),
         minX: minX,
         maxX: maxX,

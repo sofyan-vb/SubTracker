@@ -11,6 +11,7 @@ import '../utils/currency_utils.dart';
 import 'edit_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:add_2_calendar/add_2_calendar.dart';
+import '../widgets/logo_widget.dart';
 
 class DetailScreen extends StatefulWidget {
   final Subscription sub;
@@ -163,7 +164,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Future<void> _tagihTeman() async {
     final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
-    final amount = currencyFormat.format(currentSub.price / currentSub.splitCount);
+    final amount = currencyFormat.format(CurrencyUtils.convert(currentSub.price, currentSub.currency, currencyNotifier.value) / currentSub.splitCount);
     final date = DateFormat('dd MMM yyyy').format(currentSub.dueDate);
     final text = 'Halo! Sekadar pengingat untuk patungan tagihan ${currentSub.name} sebesar $amount yang jatuh tempo pada $date.';
     final url = Uri.parse('https://wa.me/?text=${Uri.encodeComponent(text)}');
@@ -189,268 +190,262 @@ class _DetailScreenState extends State<DetailScreen> {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
-    final dateFormat = DateFormat('MMMM dd, yyyy'); 
+    final convertedPrice = CurrencyUtils.convert(currentSub.price, currentSub.currency, currencyNotifier.value);
+    final dateFormat = DateFormat('yyyy-MM-dd'); 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final scaffoldBg = Theme.of(context).scaffoldBackgroundColor;
+    final scaffoldBg = Theme.of(context).scaffoldBackgroundColor; 
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
-    final innerCardBg = isDark ? const Color(0xFF0F172A) : Colors.grey[50];
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
-    final appBarBg = isDark ? const Color(0xFF0F172A) : const Color(0xFF1E3A8A);
+    final dividerColor = isDark ? Colors.white10 : Colors.black.withOpacity(0.05);
+
+    final yearlyCost = currentSub.billingCycle == 'Bulanan' || currentSub.billingCycle == 'Monthly' ? convertedPrice * 12 : convertedPrice;
+    final monthlyCost = currentSub.billingCycle == 'Tahunan' || currentSub.billingCycle == 'Yearly' ? convertedPrice / 12 : convertedPrice;
 
     return Scaffold(
       backgroundColor: scaffoldBg,
-      appBar: AppBar(
-        backgroundColor: appBarBg, elevation: 0,
-        leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
-        title: Text(tr('Detail Langganan', 'Subscription Detail'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: cardBg,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05), blurRadius: 20, offset: const Offset(0, 10))]
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // App Logo
-                Container(
-                  padding: const EdgeInsets.all(24), 
-                  decoration: BoxDecoration(
-                    color: innerCardBg, 
-                    borderRadius: BorderRadius.circular(20),
-                  ), 
-                  child: Icon(CategoryUtils.getIcon(currentSub.category), size: 48, color: const Color(0xFF2563EB))
-                ),
-                const SizedBox(height: 16),
-                Row(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(currentSub.name, style: TextStyle(color: textColor, fontSize: 24, fontWeight: FontWeight.w900)),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.edit_document, color: Color(0xFF2563EB)),
-                      onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => EditScreen(sub: currentSub))).then((_) {
-                          final provider = context.read<SubProvider>();
-                          final updated = provider.subs.firstWhere((s) => s.id == currentSub.id, orElse: () => currentSub);
-                          if (mounted) setState(() => currentSub = updated);
-                        });
-                      },
-                    ),
+                    Container(width: 40, height: 4, decoration: BoxDecoration(color: isDark ? Colors.white24 : Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+              ),
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
                   children: [
-                    if (currentSub.isTrial) ...[
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.pinkAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(4)), child: const Text('TRIAL', style: TextStyle(color: Colors.pinkAccent, fontSize: 10, fontWeight: FontWeight.bold))),
-                      const SizedBox(width: 8),
-                    ],
-                    if (currentSub.splitCount > 1) ...[
-                      Container(padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2), decoration: BoxDecoration(color: Colors.teal.withOpacity(0.1), borderRadius: BorderRadius.circular(4)), child: Text('Patungan ${currentSub.splitCount} Org', style: const TextStyle(color: Colors.teal, fontSize: 10, fontWeight: FontWeight.bold))),
-                      const SizedBox(width: 8),
-                    ],
-                    Container(width: 8, height: 8, decoration: BoxDecoration(color: currentSub.isPaused ? Colors.orangeAccent : const Color(0xFF2563EB), shape: BoxShape.circle)),
-                    const SizedBox(width: 6),
-                    Text(currentSub.isPaused ? 'DI-PAUSE' : tr('LANGGANAN AKTIF', 'ACTIVE SUBSCRIPTION'), style: TextStyle(color: currentSub.isPaused ? Colors.orangeAccent : const Color(0xFF2563EB), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                    Row(
+                       mainAxisAlignment: MainAxisAlignment.end,
+                       children: [
+                         IconButton(
+                           icon: Icon(Icons.close_rounded, color: textColor),
+                           onPressed: () => Navigator.pop(context),
+                         )
+                       ]
+                    ),
+                    LogoWidget(name: currentSub.name, category: currentSub.category, customLogoPath: currentSub.customLogoPath, size: 80, borderRadius: 24),
+                    const SizedBox(height: 16),
+                    Text(currentSub.name, style: TextStyle(color: textColor, fontSize: 28, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
+                    const SizedBox(height: 4),
+                    Text(currentSub.category, style: TextStyle(color: subTextColor, fontSize: 15)),
                   ],
                 ),
-                
-                const SizedBox(height: 32),
-                
-                // Current Plan Box
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: innerCardBg,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200)
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(tr('PAKET SAAT INI', 'CURRENT PLAN'), style: TextStyle(color: subTextColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(currentSub.category, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text('${currencyFormat.format(currentSub.price / currentSub.splitCount)}/mo', style: const TextStyle(color: Color(0xFF2563EB), fontSize: 16, fontWeight: FontWeight.w900)),
-                        ],
-                      ),
-                      const Divider(height: 24),
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_month_outlined, color: subTextColor, size: 16),
-                          const SizedBox(width: 8),
-                          Text(dateFormat.format(currentSub.dueDate), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.w600)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                
-                if (currentSub.splitCount > 1) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
-                      icon: const Icon(Icons.chat_rounded, size: 18),
-                      label: Text(tr('Tagih Teman via WhatsApp', 'Split Bill via WhatsApp'), style: const TextStyle(fontWeight: FontWeight.bold)),
-                      onPressed: _tagihTeman,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                ],
-                
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(foregroundColor: textColor, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                    icon: const Icon(Icons.edit_calendar_rounded, size: 18),
-                    label: Text(tr('Tambahkan ke Kalender', 'Add to Calendar'), style: const TextStyle(fontWeight: FontWeight.bold)),
-                    onPressed: _addToCalendar,
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Payment History
-                if (currentSub.paymentHistory.isNotEmpty) ...[
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(tr('Riwayat Pembayaran', 'Payment History'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: innerCardBg,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200)
-                    ),
-                    child: Column(
-                      children: currentSub.paymentHistory.map((date) {
-                        return Column(
-                          children: [
-                            _buildHistoryRow(currentSub.name, dateFormat.format(date), currencyFormat.format(currentSub.price), textColor, subTextColor),
-                            if (date != currentSub.paymentHistory.last) const Divider(height: 1),
-                          ],
-                        );
-                      }).toList().reversed.toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
+              ),
+              const SizedBox(height: 24),
 
-                // Cost Per Use
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(tr('Analisis "Worth It"', '"Worth It" Analysis'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: innerCardBg,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200)
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  children: [
+                    _buildCard(
+                      cardBg: cardBg,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('Sudah dipakai:', 'Used:'), style: TextStyle(color: subTextColor, fontSize: 12)),
-                          Text('${currentSub.usageCount} kali', style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                          Row(
+                            children: [
+                              Icon(Icons.payments_outlined, color: const Color(0xFF4F46E5), size: 20),
+                              const SizedBox(width: 8),
+                              Text(tr('Rincian biaya', 'Cost breakdown'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Divider(color: dividerColor, height: 1),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Biaya bulanan', 'Monthly cost'), currencyFormat.format(monthlyCost), subTextColor, textColor, isBold: true),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Biaya tahunan', 'Yearly cost'), currencyFormat.format(yearlyCost), subTextColor, textColor, isBold: true),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Kategori', 'Category'), currentSub.category, subTextColor, textColor, isBold: true),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(tr('Biaya per pemakaian:', 'Cost per use:'), style: TextStyle(color: subTextColor, fontSize: 12)),
-                          Text(currentSub.usageCount == 0 ? '-' : currencyFormat.format(currentSub.price / currentSub.usageCount), style: const TextStyle(color: Color(0xFF10B981), fontSize: 16, fontWeight: FontWeight.w900)),
-                        ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (currentSub.isTrial) ...[
+                      _buildCard(
+                        cardBg: cardBg,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_month_rounded, color: const Color(0xFFB45309), size: 20),
+                                const SizedBox(width: 8),
+                                Text(tr('Uji coba', 'Trial'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            Divider(color: dividerColor, height: 1),
+                            const SizedBox(height: 16),
+                            _buildInfoRow(tr('Status uji coba', 'Trial status'), currentSub.trialEndDate != null && currentSub.trialEndDate!.isBefore(DateTime.now()) ? tr('Uji coba berakhir', 'Trial ended') : tr('Aktif', 'Active'), subTextColor, textColor, isBold: true),
+                            const SizedBox(height: 16),
+                            if (currentSub.trialEndDate != null) _buildInfoRow(tr('Akhir masa percobaan', 'Trial end date'), dateFormat.format(currentSub.trialEndDate!), subTextColor, textColor, isBold: true),
+                            const SizedBox(height: 16),
+                            _buildInfoRow(tr('Harga reguler', 'Regular price'), currencyFormat.format(convertedPrice), subTextColor, textColor, isBold: true),
+                            if (currentSub.trialPrice != null) ...[
+                              const SizedBox(height: 16),
+                              _buildInfoRow(tr('Trial price', 'Trial price'), currencyFormat.format(currentSub.trialPrice!), subTextColor, textColor, isBold: true),
+                            ],
+                            const SizedBox(height: 16),
+                            Text(tr('SubTrack only tracks this locally. Confirm cancellation or billing changes with the provider.', 'SubTrack only tracks this locally. Confirm cancellation or billing changes with the provider.'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          icon: const Icon(Icons.touch_app_rounded, size: 16),
-                          label: Text(tr('Pakai Layanan Hari Ini', 'Use Service Today')),
-                          style: OutlinedButton.styleFrom(foregroundColor: const Color(0xFF2563EB), side: const BorderSide(color: Color(0xFF2563EB))),
-                          onPressed: _useServiceToday,
-                        ),
-                      )
                     ],
-                  ),
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Action Buttons
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB), 
-                      foregroundColor: Colors.white, 
-                      padding: const EdgeInsets.symmetric(vertical: 16), 
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), 
-                      elevation: 0
+
+                    _buildCard(
+                      cardBg: cardBg,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.event_repeat_rounded, color: const Color(0xFFB45309), size: 20),
+                              const SizedBox(width: 8),
+                              Text(tr('Pembaruan', 'Renewal'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Divider(color: dividerColor, height: 1),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Status', 'Status'), currentSub.isFinished ? tr('Finished', 'Finished') : _getCountdownText(currentSub.dueDate), subTextColor, textColor, isBold: true),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Next renewal', 'Next renewal'), dateFormat.format(currentSub.dueDate), subTextColor, textColor, isBold: true),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Siklus Tagihan', 'Billing cycle'), currentSub.billingCycle, subTextColor, textColor, isBold: true),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Metode Pembayaran', 'Payment handling'), currentSub.isAutoRenew ? tr('Perpanjang otomatis', 'Auto-renewing') : tr('Pembayaran manual', 'Manual payment'), subTextColor, textColor, isBold: true),
+                          const SizedBox(height: 16),
+                          Text(tr('SubTrack does not manage or move money. This only tells us to show renewal reminders before your bank, card, or provider charges you.', 'SubTrack does not manage or move money. This only tells us to show renewal reminders before your bank, card, or provider charges you.'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                          const SizedBox(height: 16),
+                          _buildInfoRow(tr('Harga Berlangganan', 'Recurring price'), currencyFormat.format(convertedPrice), subTextColor, textColor, isBold: true),
+                        ],
+                      ),
                     ),
-                    onPressed: _showCheckOptions,
-                    child: Text(tr('Perpanjang Langganan', 'Renew Plan'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                  ),
+                    const SizedBox(height: 16),
+
+                    _buildCard(
+                      cardBg: cardBg,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.link_rounded, color: const Color(0xFF4F46E5), size: 20),
+                              const SizedBox(width: 8),
+                              Text(tr(tr('Tindakan & Pembatalan', 'Actions & Cancellation'), tr('Tindakan & Pembatalan', 'Actions & Cancellation')), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Divider(color: dividerColor, height: 1),
+                          const SizedBox(height: 16),
+                          if (currentSub.cancellationLink != null && currentSub.cancellationLink!.isNotEmpty) ...[
+                            Text(tr('Cancel link', 'Cancel link'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                            const SizedBox(height: 4),
+                            InkWell(
+                              onTap: () async {
+                                final url = Uri.parse(currentSub.cancellationLink!);
+                                if (await canLaunchUrl(url)) await launchUrl(url);
+                              },
+                              child: Text(currentSub.cancellationLink!, style: const TextStyle(color: Color(0xFF2563EB), fontSize: 14, decoration: TextDecoration.underline)),
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
+                              icon: const Icon(Icons.edit_calendar_rounded, size: 18, color: Color(0xFF4F46E5)),
+                              label: Text(tr(tr('Tambah ke Kalender', 'Add to Calendar'), tr('Tambah ke Kalender', 'Add to Calendar')), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                              onPressed: _addToCalendar,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          if (currentSub.splitCount > 1) ...[
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
+                                icon: const Icon(Icons.chat_rounded, size: 18, color: Color(0xFF10B981)),
+                                label: Text(tr(tr('Bagi Tagihan via WhatsApp', 'Split Bill via WhatsApp'), tr('Bagi Tagihan via WhatsApp', 'Split Bill via WhatsApp')), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                                onPressed: _tagihTeman,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
+                              icon: const Icon(Icons.edit_document, size: 18, color: Color(0xFF4F46E5)),
+                              label: Text(tr(tr('Edit Langganan', 'Edit Subscription'), tr('Edit Langganan', 'Edit Subscription')), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                              onPressed: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => EditScreen(sub: currentSub))).then((_) {
+                                  final provider = context.read<SubProvider>();
+                                  final updated = provider.subs.firstWhere((s) => s.id == currentSub.id, orElse: () => currentSub);
+                                  if (mounted) setState(() => currentSub = updated);
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
+                              icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.redAccent),
+                              label: Text(tr('Batalkan langganan', 'Cancel subscription'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                              onPressed: _deleteSub,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                GestureDetector(
-                  onTap: _deleteSub,
-                  child: Text(tr('Hapus Langganan', 'Cancel Membership'), style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600)),
-                )
-              ],
-            ),
+              )
+            ],
           ),
         ),
       ),
     );
   }
-  
-  Widget _buildHistoryRow(String title, String date, String price, Color textColor, Color subTextColor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: const Color(0xFF2563EB).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-            child: const Icon(Icons.receipt_long_rounded, color: Color(0xFF2563EB), size: 16),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 2),
-                Text(date, style: TextStyle(color: subTextColor, fontSize: 10)),
-              ],
-            ),
-          ),
-          Text(price, style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
-        ],
+
+  Widget _buildCard({required Color cardBg, required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
       ),
+      child: child,
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, Color subTextColor, Color textColor, {bool isBold = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(color: subTextColor, fontSize: 13)),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(color: textColor, fontSize: 15, fontWeight: isBold ? FontWeight.bold : FontWeight.normal)),
+      ],
     );
   }
 }

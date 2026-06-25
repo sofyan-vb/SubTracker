@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../main.dart';
 import 'dashboard_screen.dart';
+import '../utils/toast_utils.dart';
 
 class NotificationSoundScreen extends StatefulWidget {
   const NotificationSoundScreen({super.key});
@@ -50,7 +51,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    final bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
 
@@ -108,6 +109,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
                           await prefs.setString('app_ringtone', val); 
                           setState((){});
                           _previewSound(val);
+                          if (context.mounted) ToastUtils.show(context, tr('Suara notifikasi diubah', 'Notification sound changed'));
                         },
                       ),
                       if (r != 'ringtone_synth') Divider(color: isDark ? Colors.white12 : Colors.grey.shade200, height: 1),
@@ -145,6 +147,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
                           await prefs.setString('app_alarm', val); 
                           setState((){});
                           _previewSound(val, isAlarm: true);
+                          if (context.mounted) ToastUtils.show(context, tr('Suara alarm diubah', 'Alarm sound changed'));
                         },
                       ),
                       if (r != 'alarm_classic') Divider(color: isDark ? Colors.white12 : Colors.grey.shade200, height: 1),

@@ -15,6 +15,7 @@ import 'profile_screen.dart';
 import 'history_screen.dart';
 import 'splash_screen.dart';
 import 'privacy_screen.dart';
+import 'danger_zone_screen.dart';
 import 'language_screen.dart';
 import 'notification_sound_screen.dart';
 import 'package:intl/intl.dart';
@@ -99,6 +100,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     CurrencyUtils.fetchRealTimeRates().then((_) {
       if (mounted) setState(() {});
     });
+
+    bool hasShownWelcome = prefs.getBool('has_shown_welcome_toast') ?? false;
+    if (!hasShownWelcome && savedName != null && savedName.isNotEmpty) {
+      await prefs.setBool('has_shown_welcome_toast', true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          ToastUtils.show(context, tr('Selamat datang di SubTrack IQ!', 'Welcome to SubTrack IQ!'));
+        }
+      });
+    }
   }
 
   @override
@@ -335,7 +346,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const currentTheme = 'Biru';
         // Use Theme values for Dark Mode support
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        Color scaffoldBg = Theme.of(context).scaffoldBackgroundColor; 
+        Color scaffoldBg = isDark ? const Color(0xFF0F172A) : Colors.white;
         Color bottomNavBg = Theme.of(context).colorScheme.surface;
         Color textColor = Theme.of(context).colorScheme.onSurface; 
         Color appBarIcons = Colors.white;
@@ -366,7 +377,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 centerTitle: false,
               ),
 
-              body: AnimatedSwitcher(duration: Duration.zero,
+              body: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween<Offset>(begin: const Offset(0.0, 0.05), end: Offset.zero).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
                 child: ValueListenableBuilder<String>(
                   valueListenable: languageNotifier, 
                   builder: (context, lang, child) => _buildBodyContent(currentTheme),
@@ -427,7 +448,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround, 
                     children: [
                       _buildBottomNavItem(0, Icons.grid_view_rounded),
-                      _buildBottomNavItem(1, Icons.calendar_month_rounded),
+                      _buildBottomNavItem(1, Icons.event_note_rounded),
                       const SizedBox(width: 48), 
                       _buildBottomNavItem(2, Icons.bar_chart_rounded),
                       _buildBottomNavItem(3, Icons.person_rounded),
@@ -448,26 +469,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
         width: 60,
         height: 60,
-        child: AnimatedAlign(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          alignment: isSelected ? Alignment.topCenter : Alignment.center,
-          child: Padding(
-            padding: EdgeInsets.only(top: isSelected ? 4.0 : 0),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              transitionBuilder: (child, animation) {
-                return ScaleTransition(scale: animation, child: child);
-              },
-              child: Icon(
-                iconData, 
-                key: ValueKey<bool>(isSelected),
-                color: isSelected ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, 
-                size: isSelected ? 28 : 24,
-              ),
+        child: Center(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+            child: Icon(
+              iconData, 
+              key: ValueKey<bool>(isSelected),
+              color: isSelected ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, 
+              size: isSelected ? 28 : 24,
             ),
           ),
         ),
@@ -877,7 +891,7 @@ class _HomeViewState extends State<_HomeView> {
     else if (hour >= 18 || hour < 4) greeting = tr('Selamat Malam', 'Good Night');
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    Color bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
     Color cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     Color textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     Color subTextColor = isDark ? Colors.white70 : Colors.black54;
@@ -1410,7 +1424,7 @@ class _HomeViewState extends State<_HomeView> {
                                                     contentPadding: EdgeInsets.zero,
                                                     title: Text(s.name, style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 14)),
                                                     subtitle: Text(DateFormat('dd MMM yyyy').format(s.dueDate), style: const TextStyle(color: Colors.black54, fontSize: 12)),
-                                                    trailing: Text(currencyFormat.format(s.price), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+                                                    trailing: Text(currencyFormat.format(CurrencyUtils.convert(s.price, s.currency, currencyNotifier.value)), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)),
                                                   );
                                                 },
                                               ),
@@ -1667,7 +1681,7 @@ class _HomeViewState extends State<_HomeView> {
                                     const SizedBox(height: 2),
                                     Text('${daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft'}', style: TextStyle(color: const Color(0xFF2563EB), fontSize: 11, fontWeight: FontWeight.bold)),
                                     const SizedBox(height: 6),
-                                    Text(currencyFormat.format(sub.price), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900)),
+                                    Text(currencyFormat.format(CurrencyUtils.convert(sub.price, sub.currency, currencyNotifier.value)), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900)),
                                   ],
                                 )
                               ],
@@ -1748,11 +1762,11 @@ class _CalendarViewState extends State<_CalendarView> {
     final subsOnSelectedDate = provider.activeSubs.where((sub) {
       final date = _extractDateSafely(sub);
       if (date == null) return false;
-      return date.year == _selectedDate.year && date.month == _selectedDate.month && date.day == _selectedDate.day;
+      return date.day == _selectedDate.day;
     }).toList();
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    Color bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
     Color cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     Color textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     Color subTextColor = isDark ? Colors.white70 : Colors.black54;
@@ -1832,7 +1846,7 @@ class _CalendarViewState extends State<_CalendarView> {
                               
                               bool hasBill = provider.activeSubs.any((sub) {
                                 final date = _extractDateSafely(sub);
-                                return date != null && DateUtils.isSameDay(date, thisDate);
+                                return date != null && date.day == thisDate.day;
                               });
 
                               Color circleColor = Colors.transparent;
@@ -2246,15 +2260,13 @@ class _StatsViewState extends State<_StatsView> {
                             return activeSubs.map((sub) {
                               final percentage = totalMonthly > 0 ? ((sub as Subscription).price / totalMonthly * 100) : 0.0;
                               
-                              final isLarge = percentage > 5; 
                               return PieChartSectionData(
                                 color: CategoryUtils.getColor(sub.category),
                                 value: sub.price,
-                                title: isLarge ? '${percentage.toStringAsFixed(0)}%' : '',
+                                title: '${percentage.toStringAsFixed(0)}%',
                                 radius: 50,
                                 titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white, shadows: [Shadow(color: Colors.black26, blurRadius: 2)]),
-                                badgeWidget: isLarge 
-                                  ? Container(
+                                badgeWidget: Container(
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
@@ -2262,8 +2274,7 @@ class _StatsViewState extends State<_StatsView> {
                                         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)],
                                       ),
                                       child: Icon(CategoryUtils.getIcon(sub.category), size: 14, color: CategoryUtils.getColor(sub.category)),
-                                    )
-                                  : null,
+                                    ),
                                 badgePositionPercentageOffset: 1.15,
                               );
                             }).toList();
@@ -2290,7 +2301,7 @@ class _StatsViewState extends State<_StatsView> {
                               Expanded(
                                 child: Text(sub.name, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
                               ),
-                              Text(currencyFormat.format(sub.price), style: TextStyle(color: subTextColor, fontSize: 13, fontWeight: FontWeight.w500)),
+                              Text(currencyFormat.format(CurrencyUtils.convert(sub.price, sub.currency, currencyNotifier.value)), style: TextStyle(color: subTextColor, fontSize: 13, fontWeight: FontWeight.w500)),
                               const SizedBox(width: 12),
                               SizedBox(
                                 width: 45,
@@ -2482,7 +2493,7 @@ class _StatsViewState extends State<_StatsView> {
                             ],
                           ),
                         ),
-                        Text(currencyFormat.format(sub.price), style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w900)),
+                        Text(currencyFormat.format(CurrencyUtils.convert(sub.price, sub.currency, currencyNotifier.value)), style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w900)),
                       ],
                     ),
                   );
@@ -2543,10 +2554,10 @@ class _SettingsViewState extends State<_SettingsView> {
           await prefs.setString('saved_subs', data);
           
           if (mounted) {
-            ToastUtils.show(context, 'Data berhasil dipulihkan! Tutup dan buka ulang aplikasi.');
+            ToastUtils.show(context, tr('Data berhasil dipulihkan! Tutup dan buka ulang aplikasi.', 'Data restored successfully! Close and reopen app.'));
           }
         } else {
-          if (mounted) ToastUtils.show(context, 'Format file backup tidak valid', icon: Icons.error_outline, iconColor: Colors.redAccent);
+          if (mounted) ToastUtils.show(context, tr('Format file backup tidak valid', 'Invalid backup format'), icon: Icons.error_outline, iconColor: Colors.redAccent);
         }
       }
     } catch(e) {
@@ -2563,7 +2574,7 @@ class _SettingsViewState extends State<_SettingsView> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    Color bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
     Color cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     Color textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     Color subTextColor = isDark ? Colors.white70 : Colors.black54;
@@ -2638,7 +2649,7 @@ class _SettingsViewState extends State<_SettingsView> {
             _buildGroupHeader(Icons.storage_rounded, tr('Manajemen Data', 'Data Management')),
 
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Currency Converter'), tr('Perbandingan Mata Uang', 'Compare Currencies'), () {
+              child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Exchange Calculator'), tr('Hitung estimasi konversi mata uang', 'Calculate estimated currency conversion'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => CurrencyExchangeScreen()));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
@@ -2648,13 +2659,17 @@ class _SettingsViewState extends State<_SettingsView> {
             FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.restore_rounded, tr('Pulihkan Data', 'Restore Data'), tr('Impor dari File', 'Import from File'), _restoreData, cardBg, textColor, subTextColor, widget.theme),
             ),
-
             const SizedBox(height: 8),
             _buildGroupHeader(Icons.security_rounded, tr('Sistem & Privasi', 'System & Privacy')),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kelola penyimpanan lokal', 'Manage local storage'), () {
+              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kebijakan Privasi', 'Privacy Policy'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyScreen()));
-              }, cardBg, textColor, subTextColor, widget.theme, iconColor: Colors.red, titleColor: Colors.red),
+              }, cardBg, textColor, subTextColor, widget.theme),
+            ),
+            FadeInSlide(delay: Duration.zero,
+              child: _buildSettingTile(Icons.warning_rounded, tr('Zona Bahaya', 'Danger Zone'), tr('Aksi Berisiko', 'Risky Actions'), () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const DangerZoneScreen()));
+              }, cardBg, textColor, subTextColor, widget.theme, iconColor: Colors.redAccent, titleColor: Colors.redAccent),
             ),
             FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(Icons.help_outline_rounded, tr('Pusat Bantuan', 'Help Center'), tr('FAQ & Bantuan Aplikasi', 'FAQ & App Help'), () {

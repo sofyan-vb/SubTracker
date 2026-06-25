@@ -9,6 +9,7 @@ import '../screens/detail_screen.dart';
 import '../screens/dashboard_screen.dart'; 
 import '../utils/category_utils.dart';
 import '../utils/currency_utils.dart';
+import '../widgets/logo_widget.dart';
 
 class SubTile extends StatefulWidget {
   final Subscription sub;
@@ -52,6 +53,7 @@ class _SubTileState extends State<SubTile> {
   @override
   Widget build(BuildContext context) {
     final currencyFormat = CurrencyUtils.getFormat(currencyNotifier.value);
+    final convertedPrice = CurrencyUtils.convert(widget.sub.price, widget.sub.currency, currencyNotifier.value);
     final bool isDue = widget.sub.dueDate.isBefore(DateTime.now());
     final bool isFinished = widget.sub.isFinished; 
     final String countdownText = _getCountdownText(widget.sub.dueDate);
@@ -157,11 +159,7 @@ class _SubTileState extends State<SubTile> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10), 
-                      decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), borderRadius: BorderRadius.circular(12)), 
-                      child: Icon(catIcon, color: const Color(0xFF2563EB), size: 24)
-                    ),
+                    LogoWidget(name: widget.sub.name, category: widget.sub.category, size: 48, borderRadius: 12),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -186,6 +184,14 @@ class _SubTileState extends State<SubTile> {
                                 )
                             ],
                           ),
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(catIcon, color: catColor, size: 12),
+                              const SizedBox(width: 4),
+                              Text(widget.sub.category, style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
                           const SizedBox(height: 4),
                           widget.sub.isPaused 
                               ? const Text('Sedang di-pause', style: TextStyle(color: Colors.orangeAccent, fontSize: 11, fontWeight: FontWeight.w600))
@@ -200,7 +206,7 @@ class _SubTileState extends State<SubTile> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(currencyFormat.format(widget.sub.price / widget.sub.splitCount), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900)),
+                        Text(currencyFormat.format(convertedPrice / widget.sub.splitCount), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900)),
                         const SizedBox(height: 4),
                         if (isFinished)
                           Container(

@@ -13,6 +13,7 @@ import 'dashboard_screen.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import '../providers/subscription_provider.dart';
+import '../utils/currency_utils.dart';
 
 enum SplashState { welcomeNew, welcomeReturning, onboarding, choice, form, loading } 
 
@@ -33,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _budgetCtrl = TextEditingController();
+  String _selectedCurrency = 'IDR';
   String _savedName = '';
 
   @override
@@ -133,7 +135,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
       await prefs.setString('user_name', _nameCtrl.text.trim());
       await prefs.setString('user_email', _emailCtrl.text.trim());
       await prefs.setString('monthly_budget', _budgetCtrl.text.trim());
+      await prefs.setString('user_currency', _selectedCurrency);
       userNameNotifier.value = _nameCtrl.text.trim();
+      currencyNotifier.value = _selectedCurrency;
       
       await Future.delayed(const Duration(milliseconds: 800));
     }
@@ -151,19 +155,20 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   Widget build(BuildContext context) {
     bool showTopExitButton = _state == SplashState.form || _state == SplashState.choice;
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
-
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: bgColor,
-          resizeToAvoidBottomInset: true, 
-          body: Stack(
-            children: [
-          
-          if (_state == SplashState.onboarding || _state == SplashState.welcomeNew)
-            const Positioned.fill(child: StaticModernBackground()),
+    return Theme(
+      data: ThemeData.light().copyWith(
+        scaffoldBackgroundColor: Colors.white,
+      ),
+      child: Stack(
+        children: [
+          Scaffold(
+            backgroundColor: Colors.white,
+            resizeToAvoidBottomInset: true, 
+            body: Stack(
+              children: [
+            
+            if (_state == SplashState.onboarding || _state == SplashState.welcomeNew)
+              const Positioned.fill(child: StaticModernBackground()),
           
           if (_state == SplashState.welcomeReturning)
             Positioned.fill(
@@ -298,7 +303,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           labelText: tr('Target Anggaran Per Bulan', 'Monthly Budget Target'),
                                           labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
                                           prefixIcon: const Icon(Icons.savings_rounded, color: Color(0xFF1E293B), size: 22),
-                                          prefixText: 'Rp ',
+                                          prefixText: '${CurrencyUtils.getFormat(_selectedCurrency).currencySymbol} ',
                                           prefixStyle: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold, fontSize: 16),
                                           filled: true, fillColor: Colors.grey[100],
                                           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18), 
@@ -306,6 +311,31 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                                           focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
                                         ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      DropdownButtonFormField<String>(
+                                        value: _selectedCurrency,
+                                        style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
+                                        decoration: InputDecoration(
+                                          labelText: tr('Mata Uang Default', 'Default Currency'),
+                                          labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+                                          prefixIcon: const Icon(Icons.language_rounded, color: Color(0xFF1E293B), size: 22),
+                                          filled: true, fillColor: Colors.grey[100],
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5)),
+                                        ),
+                                        dropdownColor: Colors.white,
+                                        items: CurrencyUtils.data.keys.map((code) {
+                                          return DropdownMenuItem<String>(
+                                            value: code,
+                                            child: Text('${CurrencyUtils.data[code]!['flag']}  ${CurrencyUtils.data[code]!['name']} ($code)', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+                                          );
+                                        }).toList(),
+                                        onChanged: (val) {
+                                          if (val != null) setState(() => _selectedCurrency = val);
+                                        },
                                       ),
                                     ],
                                   ),
@@ -495,9 +525,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         ],
       ),
     ),
-
   ],
-);
+      ),
+    );
   }
 
   Widget _buildOnboardingSlide({required String imagePath, required String title, required String desc, required Alignment alignment}) {
@@ -673,7 +703,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
           body: Stack(
             alignment: Alignment.center,
             children: [
-              Positioned.fill(child: Container(color: (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA)).withOpacity(0.5))),
+              Positioned.fill(child: Container(color: (Theme.of(context).brightness == Brightness.dark ? const Color(0xFF0F172A) : Colors.white).withOpacity(0.5))),
               Positioned(top: -100, right: -50, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.15)))),
               Positioned(top: 50, left: -80, child: Container(width: 200, height: 200, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.10)))),
               Positioned(top: MediaQuery.of(context).size.height - 250, left: -50, child: Container(width: 400, height: 400, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF2563EB).withOpacity(0.15)))),
@@ -1079,6 +1109,49 @@ class StaticModernBackground extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class AnimatedGradientBackground extends StatefulWidget {
+  const AnimatedGradientBackground({super.key});
+  @override
+  State<AnimatedGradientBackground> createState() => _AnimatedGradientBackgroundState();
+}
+
+class _AnimatedGradientBackgroundState extends State<AnimatedGradientBackground> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 15))..repeat(reverse: true);
+  }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              stops: const [0.0, 0.5, 1.0],
+              colors: [
+                Color.lerp(const Color(0xFF4F46E5), const Color(0xFF06B6D4), _controller.value)!,
+                Color.lerp(const Color(0xFF06B6D4), const Color(0xFF3B82F6), _controller.value)!,
+                Color.lerp(const Color(0xFF3B82F6), const Color(0xFF8B5CF6), _controller.value)!,
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

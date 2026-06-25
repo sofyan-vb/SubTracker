@@ -5,8 +5,11 @@ class ToastUtils {
     IconData icon = Icons.check_circle, 
     Color iconColor = const Color(0xFF0D9488), 
     Duration duration = const Duration(seconds: 2), 
-    Color bgColor = Colors.white
+    Color? bgColor
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final actualBgColor = bgColor ?? (isDark ? const Color(0xFF1E293B) : Colors.white);
+    final actualTextColor = isDark ? Colors.white : const Color(0xFF1E293B);
     // Get overlay state safely
     final overlayState = Overlay.maybeOf(context, rootOverlay: true);
     if (overlayState == null) return;
@@ -36,7 +39,7 @@ class ToastUtils {
                 margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: bgColor,
+                  color: actualBgColor,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: const [
                     BoxShadow(color: Colors.black12, blurRadius: 15, offset: Offset(0, 8))
@@ -57,7 +60,7 @@ class ToastUtils {
                     Flexible(
                       child: Text(
                         message, 
-                        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 14, fontWeight: FontWeight.bold),
+                        style: TextStyle(color: actualTextColor, fontSize: 14, fontWeight: FontWeight.bold),
                         textAlign: TextAlign.left,
                       )
                     ),

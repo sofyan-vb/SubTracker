@@ -59,7 +59,7 @@ class MyApp extends StatelessWidget {
           themeMode: currentMode,
           theme: ThemeData(
             brightness: Brightness.light,
-            scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+            scaffoldBackgroundColor: Colors.white,
             appBarTheme: const AppBarTheme(
               backgroundColor: Color(0xFFF5F7FA), 
               elevation: 0,
@@ -82,7 +82,7 @@ class MyApp extends StatelessWidget {
           ),
           darkTheme: ThemeData(
             brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF0F172A), // Slate 900
+            scaffoldBackgroundColor: const Color(0xFF0F172A),
             appBarTheme: const AppBarTheme(
               backgroundColor: Color(0xFF0F172A), 
               elevation: 0,
@@ -103,6 +103,19 @@ class MyApp extends StatelessWidget {
               },
             ),
           ),
+          builder: (context, child) {
+            // Kita perlu memberikan warna solid dasar karena scaffold dibuat transparan
+            final isDark = currentMode == ThemeMode.dark || (currentMode == ThemeMode.system && MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+            final baseColor = isDark ? const Color(0xFF09090B) : Colors.white;
+
+            return Stack(
+              children: [
+                Positioned.fill(child: Container(color: baseColor)),
+                const Positioned.fill(child: StaticModernBackground()),
+                if (child != null) child,
+              ],
+            );
+          },
           home: const GateKeeper(), 
         );
       }

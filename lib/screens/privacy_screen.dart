@@ -13,7 +13,7 @@ class PrivacyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF5F7FA);
+    final bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
     final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final textColor = isDark ? Colors.white : const Color(0xFF1E293B);
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
@@ -68,83 +68,6 @@ class PrivacyScreen extends StatelessWidget {
               ),
             ),
             
-            const SizedBox(height: 24),
-            
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(24), border: Border.all(color: Colors.redAccent.withOpacity(0.3))),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.2), shape: BoxShape.circle),
-                      child: const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(tr('Zona Bahaya', 'Danger Zone'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16))
-                  ]),
-                  const SizedBox(height: 12),
-                  Text(tr('Menghapus semua data akan menghilangkan seluruh catatan Anda secara permanen. Tindakan ini tidak dapat dibatalkan.', 'Deleting all data will permanently remove all your records. This action cannot be undone.'), style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5)),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent, 
-                        foregroundColor: Colors.white, 
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      onPressed: () async {
-                        showDialog(
-                          context: context,
-                          builder: (confirmCtx) => AlertDialog(
-                            backgroundColor: cardBg,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: isDark ? Colors.white24 : Colors.grey.shade300)),
-                            title: Text(tr('Reboot Sistem?', 'System Reboot?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                            content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?'), style: TextStyle(color: subTextColor)),
-                            actions: [
-                              TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: textColor.withOpacity(0.6), fontWeight: FontWeight.bold))),
-                              TextButton(
-                                onPressed: () async {
-                                  Navigator.pop(confirmCtx);
-                                  final prefs = await SharedPreferences.getInstance();
-                                  await prefs.clear();
-                                  
-                                  if (context.mounted) {
-                                    final provider = context.read<SubProvider>();
-                                    final subsList = provider.subs.toList();
-                                    for (var sub in subsList) {
-                                      provider.removeSub(sub.id);
-                                    }
-                                    
-                                    themeNotifier.value = 'Hitam';
-                                    userNameNotifier.value = ''; 
-                                    
-                                    ToastUtils.show(context, tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared'));
-                                    Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => const SplashScreen()),
-                                      (route) => false,
-                                    );
-                                  }
-                                }, 
-                                child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
-                              ),
-                            ]
-                          )
-                        );
-                      },
-                      child: Text(tr('Hapus Seluruh Data Aplikasi', 'Delete All App Data'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    ),
-                  )
-                ],
-              ),
-            ),
             const SizedBox(height: 40),
           ],
         ),

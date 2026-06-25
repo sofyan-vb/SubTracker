@@ -12,6 +12,12 @@ class Subscription {
   final List<DateTime> paymentHistory;
   final int usageCount;
   final String currency;
+  final String billingCycle; 
+  final DateTime? trialEndDate;
+  final double? trialPrice;
+  final String? cancellationLink;
+  final bool isAutoRenew;
+  final String? customLogoPath;
 
   Subscription({
     required this.id,
@@ -27,6 +33,12 @@ class Subscription {
     this.paymentHistory = const [],
     this.usageCount = 0,
     this.currency = 'IDR',
+    this.billingCycle = 'Bulanan',
+    this.trialEndDate,
+    this.trialPrice,
+    this.cancellationLink,
+    this.isAutoRenew = true,
+    this.customLogoPath,
   });
 
   Map<String, dynamic> toJson() => {
@@ -43,14 +55,20 @@ class Subscription {
     'paymentHistory': paymentHistory.map((d) => d.toIso8601String()).toList(),
     'usageCount': usageCount,
     'currency': currency,
+    'billingCycle': billingCycle,
+    'trialEndDate': trialEndDate?.toIso8601String(),
+    'trialPrice': trialPrice,
+    'cancellationLink': cancellationLink,
+    'isAutoRenew': isAutoRenew,
+    'customLogoPath': customLogoPath,
   };
 
   factory Subscription.fromJson(Map<String, dynamic> json) => Subscription(
-    id: json['id'],
-    name: json['name'],
-    price: json['price'],
-    dueDate: DateTime.parse(json['dueDate']),
-    category: json['category'],
+    id: json['id'] ?? '',
+    name: json['name'] ?? '',
+    price: (json['price'] ?? 0).toDouble(),
+    dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : DateTime.now(),
+    category: json['category'] ?? '',
     isFinished: json['isFinished'] ?? false, 
     dateAdded: json['dateAdded'] != null ? DateTime.parse(json['dateAdded']) : DateTime.now(),
     isPaused: json['isPaused'] ?? false,
@@ -59,6 +77,12 @@ class Subscription {
     paymentHistory: (json['paymentHistory'] as List<dynamic>?)?.map((d) => DateTime.parse(d)).toList() ?? [],
     usageCount: json['usageCount'] ?? 0,
     currency: json['currency'] ?? 'IDR',
+    billingCycle: json['billingCycle'] ?? 'Bulanan',
+    trialEndDate: json['trialEndDate'] != null ? DateTime.parse(json['trialEndDate']) : null,
+    trialPrice: json['trialPrice'] != null ? (json['trialPrice']).toDouble() : null,
+    cancellationLink: json['cancellationLink'],
+    isAutoRenew: json['isAutoRenew'] ?? true,
+    customLogoPath: json['customLogoPath'],
   );
 
   Subscription copyWith({
@@ -75,6 +99,12 @@ class Subscription {
     List<DateTime>? paymentHistory,
     int? usageCount,
     String? currency,
+    String? billingCycle,
+    DateTime? trialEndDate,
+    double? trialPrice,
+    String? cancellationLink,
+    bool? isAutoRenew,
+    String? customLogoPath,
   }) {
     return Subscription(
       id: id ?? this.id,
@@ -90,6 +120,12 @@ class Subscription {
       paymentHistory: paymentHistory ?? this.paymentHistory,
       usageCount: usageCount ?? this.usageCount,
       currency: currency ?? this.currency,
+      billingCycle: billingCycle ?? this.billingCycle,
+      trialEndDate: trialEndDate ?? this.trialEndDate,
+      trialPrice: trialPrice ?? this.trialPrice,
+      cancellationLink: cancellationLink ?? this.cancellationLink,
+      isAutoRenew: isAutoRenew ?? this.isAutoRenew,
+      customLogoPath: customLogoPath ?? this.customLogoPath,
     );
   }
 }

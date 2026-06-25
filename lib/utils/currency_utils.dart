@@ -66,8 +66,7 @@ class CurrencyUtils {
     String startStr = DateFormat('yyyy-MM-dd').format(start);
     String endStr = DateFormat('yyyy-MM-dd').format(now);
     
-    // Frankfurter API: If start and end are the same, use 'latest' endpoint logic, or just let API handle it.
-    String url = 'https://api.frankfurter.dev/v1/$startStr..$endStr?base=$base&symbols=$target';
+    String url = 'https://api.frankfurter.app/$startStr..$endStr?from=$base&to=$target';
     
     try {
       final response = await http.get(Uri.parse(url));
@@ -100,7 +99,7 @@ class CurrencyUtils {
     return NumberFormat.currency(
       locale: currency['locale'],
       symbol: currency['symbol'] + ' ',
-      decimalDigits: (currencyCode == 'JPY') ? 0 : 4,
+      decimalDigits: (currencyCode == 'JPY') ? 0 : 2,
     );
   }
 

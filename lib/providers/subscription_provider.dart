@@ -262,6 +262,12 @@ class SubProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearHistory() {
+    _subs.removeWhere((sub) => sub.isFinished);
+    _saveData();
+    notifyListeners();
+  }
+
   Future<void> _saveData() async {
     final prefs = await SharedPreferences.getInstance();
     final String userName = prefs.getString('user_name') ?? '';
