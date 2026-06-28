@@ -16,7 +16,7 @@ class LogoWidget extends StatelessWidget {
   });
 
   static String? getLogoUrl(String name) {
-    String lowerName = name.toLowerCase().replaceAll(' ', '');
+    String lowerName = name.toLowerCase().replaceAll(' ', '').replaceAll("'", "").replaceAll('-', '');
     Map<String, String> domains = {
       // Video / Movies
       'netflix': 'netflix.com',
@@ -183,10 +183,34 @@ class LogoWidget extends StatelessWidget {
       'alibaba': 'alibaba.com',
     };
     
-    if (domains.containsKey(lowerName)) {
-      return 'https://logo.clearbit.com/${domains[lowerName]}';
+    // Explicit overrides for logos that fail or user uploaded
+    Map<String, String> explicitUrls = {
+      'pln': 'assets/logos/pln.png',
+      'pdam': 'assets/logos/pdam.png',
+      'indihome': 'assets/logos/indihome.png',
+      'pegipegi': 'assets/logos/pegipegi.png',
+      'mypertamina': 'assets/logos/mypertamina.png',
+      'mcdonalds': 'assets/logos/mcdonalds.png',
+      'alfagift': 'assets/logos/alfagift.png',
+      'klikindomaret': 'assets/logos/klikindomaret.png',
+      'telkom': 'assets/logos/telkom.png',
+      'telkomindonesia': 'assets/logos/telkom.png',
+      'ipl': 'assets/logos/ipl.png',
+      'pgn': 'assets/logos/pgn.png',
+      'duolingoplus': 'assets/logos/duolingoplus.png',
+      'kost': 'assets/logos/kost.png',
+    };
+
+    if (explicitUrls.containsKey(lowerName)) {
+      return explicitUrls[lowerName];
     }
-    return null;
+    
+    if (domains.containsKey(lowerName)) {
+      return 'https://www.google.com/s2/favicons?domain=${domains[lowerName]}&sz=128';
+    }
+    
+    // Guess domain
+    return 'https://www.google.com/s2/favicons?domain=$lowerName.com&sz=128';
   }
 
   @override
@@ -206,6 +230,18 @@ class LogoWidget extends StatelessWidget {
     );
 
     if (url != null) {
+      if (url.startsWith('assets/')) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: Image.asset(
+            url,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => fallback,
+          ),
+        );
+      }
       return ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: Image.network(
@@ -213,6 +249,7 @@ class LogoWidget extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.cover,
+          headers: const {'User-Agent': 'SubTrackerApp/1.0'},
           errorBuilder: (context, error, stackTrace) => fallback,
         ),
       );

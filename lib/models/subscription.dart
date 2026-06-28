@@ -5,6 +5,7 @@ class Subscription {
   final DateTime dueDate;
   final String category;
   final bool isFinished; 
+  final bool isDeleted;
   final DateTime? dateAdded;
   final bool isPaused;
   final bool isTrial;
@@ -26,6 +27,7 @@ class Subscription {
     required this.dueDate,
     required this.category,
     this.isFinished = false, 
+    this.isDeleted = false,
     this.dateAdded,
     this.isPaused = false,
     this.isTrial = false,
@@ -48,6 +50,7 @@ class Subscription {
     'dueDate': dueDate.toIso8601String(),
     'category': category,
     'isFinished': isFinished, 
+    'isDeleted': isDeleted,
     'dateAdded': dateAdded?.toIso8601String() ?? DateTime.now().toIso8601String(),
     'isPaused': isPaused,
     'isTrial': isTrial,
@@ -70,6 +73,7 @@ class Subscription {
     dueDate: json['dueDate'] != null ? DateTime.parse(json['dueDate']) : DateTime.now(),
     category: json['category'] ?? '',
     isFinished: json['isFinished'] ?? false, 
+    isDeleted: json['isDeleted'] ?? false,
     dateAdded: json['dateAdded'] != null ? DateTime.parse(json['dateAdded']) : DateTime.now(),
     isPaused: json['isPaused'] ?? false,
     isTrial: json['isTrial'] ?? false,
@@ -92,6 +96,7 @@ class Subscription {
     DateTime? dueDate,
     String? category,
     bool? isFinished,
+    bool? isDeleted,
     DateTime? dateAdded,
     bool? isPaused,
     bool? isTrial,
@@ -113,6 +118,7 @@ class Subscription {
       dueDate: dueDate ?? this.dueDate,
       category: category ?? this.category,
       isFinished: isFinished ?? this.isFinished,
+      isDeleted: isDeleted ?? this.isDeleted,
       dateAdded: dateAdded ?? this.dateAdded,
       isPaused: isPaused ?? this.isPaused,
       isTrial: isTrial ?? this.isTrial,

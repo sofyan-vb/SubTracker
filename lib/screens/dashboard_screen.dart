@@ -28,6 +28,7 @@ import '../services/notification_service.dart';
 import '../providers/subscription_provider.dart';
 import '../models/subscription.dart';
 import '../widgets/category_filter_menu.dart';
+import '../widgets/logo_widget.dart';
 import '../main.dart';
 import '../widgets/subscription_tile.dart';
 import '../utils/category_utils.dart';
@@ -38,7 +39,7 @@ import 'detail_screen.dart';
 import 'currency_exchange_screen.dart';
 import 'currency_selector_screen.dart';
 import 'help_center_screen.dart';
-
+import '../widgets/logo_widget.dart';
 final ValueNotifier<String> themeNotifier = ValueNotifier<String>('Putih');
 final ValueNotifier<String> userNameNotifier = ValueNotifier<String>('');
 final ValueNotifier<String?> userPhotoNotifier = ValueNotifier<String?>(null); 
@@ -65,6 +66,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isSearching = false;
   final TextEditingController _searchCtrl = TextEditingController();
   bool _isLoadingAdd = false;
+  int? _pressedIndex;
+  bool _isAddPressed = false;
+  int _fabAnimationKey = 0;
 
   @override
   void initState() {
@@ -395,35 +399,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               
               floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-              floatingActionButton: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
-                ),
-                child: FloatingActionButton(
-                  elevation: 0, hoverElevation: 0, highlightElevation: 0, focusElevation: 0,
-                  backgroundColor: Colors.transparent, 
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-                  child: _isLoadingAdd ? WavyDotsProgressIndicator(color: Colors.white, dotSize: 4.0) : const Icon(Icons.add_rounded, size: 36, color: Colors.white), 
-                  onPressed: _isLoadingAdd
-                      ? null
-                      : () async {
-                          setState(() {
-                            _isLoadingAdd = true;
-                          });
-                        
-                        await Future.delayed(const Duration(milliseconds: 1200));
-                        
-                        if (mounted) {
-                          setState(() {
-                            _isLoadingAdd = false;
-                          });
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
-                        }
-                      },
+              floatingActionButton: Listener(
+                onPointerDown: (_) => setState(() => _isAddPressed = true),
+                onPointerUp: (_) => setState(() => _isAddPressed = false),
+                onPointerCancel: (_) => setState(() => _isAddPressed = false),
+                child: AnimatedScale(
+                  scale: _isAddPressed ? 0.85 : 1.0,
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeInOut,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2563EB),
+                      borderRadius: BorderRadius.circular(22),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+                    ),
+                child: TweenAnimationBuilder<double>(
+                  key: ValueKey(_fabAnimationKey),
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.elasticOut,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, -sin(value * pi) * 15),
+                      child: child,
+                    );
+                  },
+                  child: FloatingActionButton(
+                    elevation: 0, hoverElevation: 0, highlightElevation: 0, focusElevation: 0,
+                    backgroundColor: Colors.transparent, 
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+                    child: _isLoadingAdd ? WavyDotsProgressIndicator(color: Colors.white, dotSize: 4.0) : const Icon(Icons.add_rounded, size: 36, color: Colors.white), 
+                    onPressed: _isLoadingAdd
+                        ? null
+                        : () async {
+                            setState(() {
+                              _isLoadingAdd = true;
+                            });
+                          
+                          await Future.delayed(const Duration(milliseconds: 1200));
+                          
+                          if (mounted) {
+                            setState(() {
+                              _isLoadingAdd = false;
+                            });
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const AddScreen()));
+                          }
+                        },
+                  ),
                 ),
               ),
+            ),
+          ),
 
               bottomNavigationBar: BottomAppBar(
                 color: Colors.transparent, 
@@ -466,22 +492,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildBottomNavItem(int index, IconData iconData) {
     bool isSelected = _currentIndex == index;
-    return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        width: 60,
-        height: 60,
-        child: Center(
-          child: AnimatedSwitcher(
+    return InkWell(
+      onTap: () {
+        if (_currentIndex != index) {
+          setState(() {
+            _currentIndex = index;
+            _fabAnimationKey++;
+          });
+        }
+      },
+      customBorder: const CircleBorder(),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: AnimatedSlide(
+          offset: isSelected ? const Offset(0, -0.1) : Offset.zero,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.elasticOut,
+          child: AnimatedContainer(
             duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.symmetric(horizontal: isSelected ? 16 : 8, vertical: 8),
+            decoration: BoxDecoration(
+              color: isSelected ? const Color(0xFF2563EB).withOpacity(0.15) : Colors.transparent,
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Icon(
-              iconData, 
-              key: ValueKey<bool>(isSelected),
-              color: isSelected ? const Color(0xFF2563EB) : Colors.blueGrey.shade300, 
-              size: isSelected ? 28 : 24,
+              iconData,
+              color: isSelected ? const Color(0xFF2563EB) : Colors.blueGrey.shade300,
+              size: 24,
             ),
           ),
         ),
@@ -1009,11 +1047,11 @@ class _HomeViewState extends State<_HomeView> {
                 child: SafeArea(
                   bottom: false,
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 20, right: 20),
+                    padding: const EdgeInsets.only(left: 20, right: 12),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
+                        Flexible(
                           child: Row(
                             children: [
                               GestureDetector(
@@ -1024,27 +1062,29 @@ class _HomeViewState extends State<_HomeView> {
                                   valueListenable: userPhotoNotifier,
                                   builder: (context, photo, child) {
                                     return Container(
-                                      padding: photo == null ? const EdgeInsets.all(10) : EdgeInsets.zero,
+                                      padding: photo == null ? const EdgeInsets.all(8) : EdgeInsets.zero,
                                       decoration: BoxDecoration(
                                         color: Colors.white.withOpacity(0.2),
                                         shape: BoxShape.circle,
                                         border: Border.all(color: Colors.white, width: 2.0),
                                       ),
                                       child: photo == null 
-                                        ? const Icon(Icons.person, size: 24, color: Colors.white)
-                                        : CircleAvatar(radius: 22, backgroundImage: MemoryImage(base64Decode(photo))),
+                                        ? const Icon(Icons.person, size: 20, color: Colors.white)
+                                        : CircleAvatar(radius: 18, backgroundImage: MemoryImage(base64Decode(photo))),
                                     );
                                   }
                                 ),
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
+                              const SizedBox(width: 10),
+                              Flexible(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       _isFirstLaunch ? tr('Selamat datang', 'Welcome') : tr('Selamat datang kembali', 'Welcome back'), 
-                                      style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)
+                                      style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 2),
                                     ValueListenableBuilder<String>(
@@ -1052,7 +1092,7 @@ class _HomeViewState extends State<_HomeView> {
                                       builder: (context, name, child) {
                                         return Text(
                                           name.isEmpty ? 'User' : name, 
-                                          style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: -0.5),
+                                          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w900, letterSpacing: -0.5),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         );
@@ -1067,6 +1107,7 @@ class _HomeViewState extends State<_HomeView> {
                         
                         // Header Icons
                         Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             GestureDetector(
                               onTap: () {
@@ -1076,13 +1117,13 @@ class _HomeViewState extends State<_HomeView> {
                                 ToastUtils.show(context, _sortByPrice ? tr('Diurutkan berdasarkan Harga Termahal', 'Sorted by Highest Price') : tr('Diurutkan berdasarkan Waktu Terdekat', 'Sorted by Earliest Date'), icon: Icons.sort_rounded, iconColor: Colors.blue);
                               },
                               child: Container(
-                                padding: const EdgeInsets.all(10),
-                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.all(8),
+                                margin: const EdgeInsets.only(right: 6),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: Icon(_sortByPrice ? Icons.price_change_rounded : Icons.access_time_rounded, color: Colors.white, size: 22),
+                                child: Icon(_sortByPrice ? Icons.price_change_rounded : Icons.access_time_rounded, color: Colors.white, size: 20),
                               ),
                             ),
                             Consumer<SubProvider>(
@@ -1099,22 +1140,22 @@ class _HomeViewState extends State<_HomeView> {
                                     _showNotificationsSheet(context, bgColor, textColor);
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.all(10),
+                                    padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.2),
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Stack(
                                       clipBehavior: Clip.none,
                                       children: [
-                                        const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 24),
+                                        const Icon(Icons.notifications_none_rounded, color: Colors.white, size: 20),
                                         if (urgentCount > 0)
                                           Positioned(
                                             right: -2, top: -2,
                                             child: Container(
-                                              padding: const EdgeInsets.all(4),
+                                              padding: const EdgeInsets.all(3),
                                               decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
-                                              child: Text('$urgentCount', style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                                              child: Text('$urgentCount', style: const TextStyle(color: Colors.white, fontSize: 7, fontWeight: FontWeight.bold)),
                                             ),
                                           )
                                       ],
@@ -1126,14 +1167,14 @@ class _HomeViewState extends State<_HomeView> {
                             GestureDetector(
                               onTap: () => _showSettingsSheet(context, bgColor, textColor),
                               child: Container(
-                                margin: const EdgeInsets.only(left: 8),
-                                padding: const EdgeInsets.all(10),
+                                margin: const EdgeInsets.only(left: 6),
+                                padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(10),
                                   border: Border.all(color: Colors.white30, width: 1.5),
                                 ),
-                                child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 22),
+                                child: const Icon(Icons.grid_view_rounded, color: Colors.white, size: 20),
                               ),
                             ),
                           ],
@@ -1664,14 +1705,7 @@ class _HomeViewState extends State<_HomeView> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Container(
-                                      width: 36, height: 36,
-                                      decoration: BoxDecoration(
-                                        color: CategoryUtils.getColor(sub.category),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      child: const Center(child: Icon(Icons.subscriptions_rounded, color: Colors.white, size: 18)),
-                                    ),
+                                    LogoWidget(name: sub.name, category: sub.category, customLogoPath: sub.customLogoPath, size: 36, borderRadius: 10),
                                   ],
                                 ),
                                 Column(
@@ -2266,15 +2300,26 @@ class _StatsViewState extends State<_StatsView> {
                                 title: '${percentage.toStringAsFixed(0)}%',
                                 radius: 50,
                                 titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white, shadows: [Shadow(color: Colors.black26, blurRadius: 2)]),
-                                badgeWidget: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 4)],
+                                badgeWidget: _BouncingBubble(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: RadialGradient(
+                                        center: const Alignment(-0.3, -0.5),
+                                        radius: 0.8,
+                                        colors: [
+                                          Colors.white,
+                                          Colors.white.withOpacity(0.8),
+                                          Colors.white.withOpacity(0.4),
+                                        ],
                                       ),
-                                      child: Icon(CategoryUtils.getIcon(sub.category), size: 14, color: CategoryUtils.getColor(sub.category)),
+                                      border: Border.all(color: Colors.white.withOpacity(0.8), width: 1.0),
+                                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 8, offset: const Offset(0, 4))],
                                     ),
+                                    child: Icon(CategoryUtils.getIcon(sub.category), size: 18, color: CategoryUtils.getColor(sub.category)),
+                                  ),
+                                ),
                                 badgePositionPercentageOffset: 1.15,
                               );
                             }).toList();
@@ -2293,9 +2338,12 @@ class _StatsViewState extends State<_StatsView> {
                           padding: const EdgeInsets.only(bottom: 12.0),
                           child: Row(
                             children: [
-                              Container(
-                                width: 14, height: 14,
-                                decoration: BoxDecoration(color: CategoryUtils.getColor(sub.category), shape: BoxShape.circle),
+                              LogoWidget(
+                                name: sub.name,
+                                category: sub.category,
+                                customLogoPath: sub.customLogoPath,
+                                size: 32,
+                                borderRadius: 8,
                               ),
                               const SizedBox(width: 12),
                               Expanded(
@@ -2477,10 +2525,12 @@ class _StatsViewState extends State<_StatsView> {
                     ),
                     child: Row(
                       children: [
-                        Container(
-                          width: 40, height: 40,
-                          decoration: BoxDecoration(color: CategoryUtils.getColor(sub.category).withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                          child: Icon(Icons.subscriptions_rounded, color: CategoryUtils.getColor(sub.category)),
+                        LogoWidget(
+                          name: sub.name,
+                          category: sub.category,
+                          customLogoPath: sub.customLogoPath,
+                          size: 40,
+                          borderRadius: 12,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -2797,3 +2847,39 @@ class _WaveDotLoadingState extends State<WaveDotLoading> with SingleTickerProvid
   Widget build(BuildContext context) { return Row(mainAxisAlignment: MainAxisAlignment.center, children: [_buildDot(0), _buildDot(1), _buildDot(2)]); }
 }
 
+class _BouncingBubble extends StatefulWidget {
+  final Widget child;
+  const _BouncingBubble({required this.child});
+  @override
+  State<_BouncingBubble> createState() => _BouncingBubbleState();
+}
+class _BouncingBubbleState extends State<_BouncingBubble> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _translateAnimation;
+  late Animation<double> _scaleAnimation;
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this)..repeat(reverse: true);
+    _translateAnimation = Tween<double>(begin: -8.0, end: 8.0).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine));
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOutSine));
+  }
+  @override
+  void dispose() { _controller.dispose(); super.dispose(); }
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _translateAnimation.value),
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}

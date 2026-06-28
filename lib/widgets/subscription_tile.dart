@@ -45,8 +45,8 @@ class _SubTileState extends State<SubTile> {
     final minutes = diff.inMinutes % 60;
     final seconds = diff.inSeconds % 60;
 
-    if (days > 0) return tr('Tinggal $days Hari $hours Jam', '$days Days $hours Hours Left');
-    if (hours > 0) return tr('Tinggal $hours Jam $minutes Menit', '$hours Hours $minutes Mins Left');
+    if (days > 0) return tr('Tinggal $days Hari $hours Jam $minutes Menit $seconds Detik', '$days Days $hours Hrs $minutes Mins $seconds Secs Left');
+    if (hours > 0) return tr('Tinggal $hours Jam $minutes Menit $seconds Detik', '$hours Hrs $minutes Mins $seconds Secs Left');
     return tr('Tinggal $minutes Menit $seconds Detik', '$minutes Mins $seconds Secs Left');
   }
 
@@ -56,6 +56,7 @@ class _SubTileState extends State<SubTile> {
     final convertedPrice = CurrencyUtils.convert(widget.sub.price, widget.sub.currency, currencyNotifier.value);
     final bool isDue = widget.sub.dueDate.isBefore(DateTime.now());
     final bool isFinished = widget.sub.isFinished; 
+    final bool isDeleted = widget.sub.isDeleted;
     final String countdownText = _getCountdownText(widget.sub.dueDate);
     final catColor = CategoryUtils.getColor(widget.sub.category);
     final catIcon = CategoryUtils.getIcon(widget.sub.category);
@@ -78,7 +79,46 @@ class _SubTileState extends State<SubTile> {
           endActionPane: ActionPane(
             motion: const ScrollMotion(),
             children: [
-              if (!isFinished)
+              if (isFinished || isDeleted) ...[
+                SlidableAction(
+                  onPressed: (context) {
+                    final provider = context.read<SubProvider>();
+                    final updated = widget.sub.copyWith(
+                      dueDate: isFinished ? DateTime(widget.sub.dueDate.year, widget.sub.dueDate.month + 1, widget.sub.dueDate.day) : widget.sub.dueDate,
+                      isFinished: false,
+                      isDeleted: false
+                    );
+                    provider.updateSub(updated);
+                    if (isFinished) provider.addHistory(widget.sub.name, widget.sub.price, DateTime.now());
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(tr('Langganan dipulihkan', 'Subscription restored'), style: TextStyle(color: textColor)),
+                      backgroundColor: cardBg,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ));
+                  },
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  icon: Icons.restore,
+                  label: tr('Pulihkan', 'Restore'),
+                ),
+                SlidableAction(
+                  onPressed: (context) {
+                    final provider = context.read<SubProvider>();
+                    provider.removeSub(widget.sub.id);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(tr('Dihapus permanen', 'Permanently deleted'), style: TextStyle(color: textColor)),
+                      backgroundColor: cardBg,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ));
+                  },
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete_forever,
+                  label: tr('Hapus', 'Delete'),
+                ),
+              ] else ...[
                 SlidableAction(
                   onPressed: (context) {
                     final provider = context.read<SubProvider>();
@@ -94,61 +134,40 @@ class _SubTileState extends State<SubTile> {
                   foregroundColor: Colors.white,
                   icon: Icons.check_circle_outline,
                   label: tr('Selesai', 'Done'),
-                )
-              else
+                ),
                 SlidableAction(
                   onPressed: (context) {
                     final provider = context.read<SubProvider>();
-                    final updated = widget.sub.copyWith(
-                      dueDate: DateTime(widget.sub.dueDate.year, widget.sub.dueDate.month + 1, widget.sub.dueDate.day),
-                      isFinished: false
-                    );
-                    provider.updateSub(updated);
-                    provider.addHistory(widget.sub.name, widget.sub.price, DateTime.now());
+                    provider.togglePause(widget.sub.id);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr('Langganan diperpanjang', 'Subscription renewed'), style: TextStyle(color: textColor)),
+                      content: Text(widget.sub.isPaused ? 'Langganan dilanjutkan' : 'Langganan di-pause', style: TextStyle(color: textColor)),
                       backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ));
                   },
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: Colors.orangeAccent,
                   foregroundColor: Colors.white,
-                  icon: Icons.autorenew,
-                  label: tr('Perpanjang', 'Renew'),
+                  icon: widget.sub.isPaused ? Icons.play_arrow : Icons.pause,
+                  label: widget.sub.isPaused ? 'Resume' : 'Pause',
                 ),
-              SlidableAction(
-                onPressed: (context) {
-                  final provider = context.read<SubProvider>();
-                  provider.togglePause(widget.sub.id);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(widget.sub.isPaused ? 'Langganan dilanjutkan' : 'Langganan di-pause', style: TextStyle(color: textColor)),
-                    backgroundColor: cardBg,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ));
-                },
-                backgroundColor: Colors.orangeAccent,
-                foregroundColor: Colors.white,
-                icon: widget.sub.isPaused ? Icons.play_arrow : Icons.pause,
-                label: widget.sub.isPaused ? 'Resume' : 'Pause',
-              ),
-              SlidableAction(
-                onPressed: (context) {
-                  final provider = context.read<SubProvider>();
-                  provider.deleteSub(widget.sub.id);
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(tr('Langganan dihapus', 'Subscription deleted'), style: TextStyle(color: textColor)),
-                    backgroundColor: cardBg,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ));
-                },
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-                icon: Icons.delete_outline,
-                label: tr('Hapus', 'Delete'),
-              ),
+                SlidableAction(
+                  onPressed: (context) {
+                    final provider = context.read<SubProvider>();
+                    provider.deleteSub(widget.sub.id);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(tr('Langganan dihapus', 'Subscription deleted'), style: TextStyle(color: textColor)),
+                      backgroundColor: cardBg,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ));
+                  },
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete_outline,
+                  label: tr('Hapus', 'Delete'),
+                ),
+              ],
             ],
           ),
           child: Material(
@@ -159,7 +178,7 @@ class _SubTileState extends State<SubTile> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Row(
                   children: [
-                    LogoWidget(name: widget.sub.name, category: widget.sub.category, size: 48, borderRadius: 12),
+                    LogoWidget(name: widget.sub.name, category: widget.sub.category, customLogoPath: widget.sub.customLogoPath, size: 48, borderRadius: 12),
                     const SizedBox(width: 16),
                     Expanded(
                       child: Column(
@@ -195,11 +214,13 @@ class _SubTileState extends State<SubTile> {
                           const SizedBox(height: 4),
                           widget.sub.isPaused 
                               ? const Text('Sedang di-pause', style: TextStyle(color: Colors.orangeAccent, fontSize: 11, fontWeight: FontWeight.w600))
-                              : isFinished
-                                  ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600))
-                                  : isDue 
-                                      ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
-                                      : Text(countdownText, style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.w500)),
+                              : isDeleted
+                                  ? MarqueeText(text: tr('Langganan telah dihapus.', 'Subscription has been deleted.'), style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
+                                  : isFinished
+                                      ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600))
+                                      : isDue 
+                                          ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
+                                          : Text(countdownText, style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
@@ -208,7 +229,13 @@ class _SubTileState extends State<SubTile> {
                       children: [
                         Text(currencyFormat.format(convertedPrice / widget.sub.splitCount), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w900)),
                         const SizedBox(height: 4),
-                        if (isFinished)
+                        if (isDeleted)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
+                            child: const Text('DELETED', style: TextStyle(color: Colors.redAccent, fontSize: 8, fontWeight: FontWeight.bold)),
+                          )
+                        else if (isFinished)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.1), borderRadius: BorderRadius.circular(4)),

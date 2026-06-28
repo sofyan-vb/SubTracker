@@ -52,8 +52,8 @@ class _DetailScreenState extends State<DetailScreen> {
     final minutes = diff.inMinutes % 60;
     final seconds = diff.inSeconds % 60;
 
-    if (days > 0) return tr('Tinggal $days Hari $hours Jam', '$days Days $hours Hours Left');
-    if (hours > 0) return tr('Tinggal $hours Jam $minutes Menit', '$hours Hours $minutes Mins Left');
+    if (days > 0) return tr('Tinggal $days Hari $hours Jam $minutes Menit $seconds Detik', '$days Days $hours Hrs $minutes Mins $seconds Secs Left');
+    if (hours > 0) return tr('Tinggal $hours Jam $minutes Menit $seconds Detik', '$hours Hrs $minutes Mins $seconds Secs Left');
     return tr('Tinggal $minutes Menit $seconds Detik', '$minutes Mins $seconds Secs Left');
   }
 
@@ -132,7 +132,7 @@ class _DetailScreenState extends State<DetailScreen> {
           TextButton(
             onPressed: () {
               final int? m = int.tryParse(_monthCtrl.text);
-              if (m != null && m > 0) { Navigator.pop(ctx); _processRenewal(m); } 
+              if (m != null && m > 0) { Navigator.pop(ctx); _processAutoRenewal(); } 
               else { ToastUtils.show(context, tr('Masukkan angka valid', 'Enter valid number'), icon: Icons.error_outline, iconColor: Colors.redAccent); }
             }, 
             child: Text(tr('Simpan', 'Save'), style: const TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold))
@@ -142,16 +142,37 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  void _processRenewal(int monthsToAdd) {
+  void _processAutoRenewal() {
     final provider = context.read<SubProvider>();
-    final newDate = DateTime(currentSub.dueDate.year, currentSub.dueDate.month + monthsToAdd, currentSub.dueDate.day, currentSub.dueDate.hour, currentSub.dueDate.minute);
+    DateTime newDate;
+    String cycle = currentSub.billingCycle;
+    
+    if (cycle == 'Tahunan' || cycle == 'Yearly') {
+      newDate = DateTime(currentSub.dueDate.year + 1, currentSub.dueDate.month, currentSub.dueDate.day, currentSub.dueDate.hour, currentSub.dueDate.minute);
+    } else if (cycle == 'Mingguan' || cycle == 'Weekly') {
+      newDate = currentSub.dueDate.add(const Duration(days: 7));
+    } else if (cycle == 'Harian' || cycle == 'Daily') {
+      newDate = currentSub.dueDate.add(const Duration(days: 1));
+    } else {
+      newDate = DateTime(currentSub.dueDate.year, currentSub.dueDate.month + 1, currentSub.dueDate.day, currentSub.dueDate.hour, currentSub.dueDate.minute);
+    }
+    
     final newHistory = List<DateTime>.from(currentSub.paymentHistory);
     newHistory.add(DateTime.now());
 
     final updatedSub = currentSub.copyWith(dueDate: newDate, isFinished: false, paymentHistory: newHistory);
     provider.removeSub(currentSub.id); provider.addSub(updatedSub);
     setState(() { currentSub = updatedSub; });
-    ToastUtils.show(context, tr('Diperpanjang $monthsToAdd Bulan', 'Renewed for $monthsToAdd Month(s)'));
+    ToastUtils.show(context, tr('Layanan berhasil diperpanjang', 'Service successfully renewed'));
+  }
+
+  void _cancelSubscription() {
+    final provider = context.read<SubProvider>();
+    final updatedSub = currentSub.copyWith(isFinished: true);
+    provider.removeSub(currentSub.id); provider.addSub(updatedSub);
+    setState(() { currentSub = updatedSub; });
+    ToastUtils.show(context, tr('Layanan ditandai selesai', 'Service marked as finished'));
+    Navigator.pop(context); 
   }
 
   void _useServiceToday() {
@@ -233,16 +254,62 @@ class _DetailScreenState extends State<DetailScreen> {
                          )
                        ]
                     ),
-                    LogoWidget(name: currentSub.name, category: currentSub.category, customLogoPath: currentSub.customLogoPath, size: 80, borderRadius: 24),
+                    LogoWidget(name: currentSub.name, category: currentSub.category, customLogoPath: currentSub.customLogoPath, size: 80, borderRadius: 0, showBackground: false),
                     const SizedBox(height: 16),
                     Text(currentSub.name, style: TextStyle(color: textColor, fontSize: 28, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
                     const SizedBox(height: 4),
-                    Text(currentSub.category, style: TextStyle(color: subTextColor, fontSize: 15)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(CategoryUtils.getIcon(currentSub.category), size: 15, color: subTextColor),
+                        const SizedBox(width: 6),
+                        Text(currentSub.category, style: TextStyle(color: subTextColor, fontSize: 15)),
+                      ],
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
 
+              Builder(
+                builder: (context) {
+                  if (currentSub.isFinished) return const SizedBox.shrink();
+                  
+                  final now = DateTime.now();
+                  final dueDay = DateTime(currentSub.dueDate.year, currentSub.dueDate.month, currentSub.dueDate.day);
+                  final difference = dueDay.difference(DateTime(now.year, now.month, now.day)).inDays;
+                  final isDueSoon = difference <= 3;
+                  
+                  if (isDueSoon) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+                      child: Text(
+                        difference < 0 
+                          ? tr('Tagihan ini sudah melewati jatuh tempo!', 'This bill is past due!') 
+                          : tr('Tagihan ini akan segera jatuh tempo dalam $difference hari.', 'This bill is due in $difference days.'),
+                        style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600, fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  } else {
+                    final notifDate = dueDay.subtract(const Duration(days: 3));
+                    final diffToNotif = notifDate.difference(now);
+                    final d = diffToNotif.inDays;
+                    final h = diffToNotif.inHours % 24;
+                    final m = diffToNotif.inMinutes % 60;
+                    final s = diffToNotif.inSeconds % 60;
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+                      child: Text(
+                        tr('Notifikasi tagihan akan muncul dalam:\n$d Hari $h Jam $m Menit $s Detik', 'Billing notification will appear in:\n$d Days $h Hrs $m Mins $s Secs'),
+                        style: TextStyle(color: subTextColor, fontWeight: FontWeight.w600, fontSize: 13, height: 1.5),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                }
+              ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -295,10 +362,10 @@ class _DetailScreenState extends State<DetailScreen> {
                             _buildInfoRow(tr('Harga reguler', 'Regular price'), currencyFormat.format(convertedPrice), subTextColor, textColor, isBold: true),
                             if (currentSub.trialPrice != null) ...[
                               const SizedBox(height: 16),
-                              _buildInfoRow(tr('Trial price', 'Trial price'), currencyFormat.format(currentSub.trialPrice!), subTextColor, textColor, isBold: true),
+                              _buildInfoRow(tr('Harga uji coba', 'Trial price'), currencyFormat.format(currentSub.trialPrice!), subTextColor, textColor, isBold: true),
                             ],
                             const SizedBox(height: 16),
-                            Text(tr('SubTrack only tracks this locally. Confirm cancellation or billing changes with the provider.', 'SubTrack only tracks this locally. Confirm cancellation or billing changes with the provider.'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                            Text(tr('SubTrack hanya melacak secara lokal. Konfirmasikan pembatalan atau perubahan tagihan dengan penyedia.', 'SubTrack only tracks this locally. Confirm cancellation or billing changes with the provider.'), style: TextStyle(color: subTextColor, fontSize: 12)),
                           ],
                         ),
                       ),
@@ -320,15 +387,15 @@ class _DetailScreenState extends State<DetailScreen> {
                           const SizedBox(height: 16),
                           Divider(color: dividerColor, height: 1),
                           const SizedBox(height: 16),
-                          _buildInfoRow(tr('Status', 'Status'), currentSub.isFinished ? tr('Finished', 'Finished') : _getCountdownText(currentSub.dueDate), subTextColor, textColor, isBold: true),
+                          _buildInfoRow(tr('Status', 'Status'), currentSub.isFinished ? tr('Selesai', 'Finished') : _getCountdownText(currentSub.dueDate), subTextColor, textColor, isBold: true),
                           const SizedBox(height: 16),
-                          _buildInfoRow(tr('Next renewal', 'Next renewal'), dateFormat.format(currentSub.dueDate), subTextColor, textColor, isBold: true),
+                          _buildInfoRow(tr('Perpanjangan berikutnya', 'Next renewal'), dateFormat.format(currentSub.dueDate), subTextColor, textColor, isBold: true),
                           const SizedBox(height: 16),
                           _buildInfoRow(tr('Siklus Tagihan', 'Billing cycle'), currentSub.billingCycle, subTextColor, textColor, isBold: true),
                           const SizedBox(height: 16),
                           _buildInfoRow(tr('Metode Pembayaran', 'Payment handling'), currentSub.isAutoRenew ? tr('Perpanjang otomatis', 'Auto-renewing') : tr('Pembayaran manual', 'Manual payment'), subTextColor, textColor, isBold: true),
                           const SizedBox(height: 16),
-                          Text(tr('SubTrack does not manage or move money. This only tells us to show renewal reminders before your bank, card, or provider charges you.', 'SubTrack does not manage or move money. This only tells us to show renewal reminders before your bank, card, or provider charges you.'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                          Text(tr('Aplikasi tidak mengelola uang Anda. Ini hanya pengingat perpanjangan agar Anda bisa mengecek tagihan dari bank/penyedia Anda.', 'SubTrack does not manage or move money. This only tells us to show renewal reminders before your bank, card, or provider charges you.'), style: TextStyle(color: subTextColor, fontSize: 12)),
                           const SizedBox(height: 16),
                           _buildInfoRow(tr('Harga Berlangganan', 'Recurring price'), currencyFormat.format(convertedPrice), subTextColor, textColor, isBold: true),
                         ],
@@ -345,14 +412,14 @@ class _DetailScreenState extends State<DetailScreen> {
                             children: [
                               Icon(Icons.link_rounded, color: const Color(0xFF4F46E5), size: 20),
                               const SizedBox(width: 8),
-                              Text(tr(tr('Tindakan & Pembatalan', 'Actions & Cancellation'), tr('Tindakan & Pembatalan', 'Actions & Cancellation')), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text(tr('Tindakan & Pembatalan', 'Actions & Cancellation'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                           const SizedBox(height: 16),
                           Divider(color: dividerColor, height: 1),
                           const SizedBox(height: 16),
                           if (currentSub.cancellationLink != null && currentSub.cancellationLink!.isNotEmpty) ...[
-                            Text(tr('Cancel link', 'Cancel link'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                            Text(tr('Tautan pembatalan', 'Cancel link'), style: TextStyle(color: subTextColor, fontSize: 12)),
                             const SizedBox(height: 4),
                             InkWell(
                               onTap: () async {
@@ -368,30 +435,8 @@ class _DetailScreenState extends State<DetailScreen> {
                             width: double.infinity,
                             child: OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
-                              icon: const Icon(Icons.edit_calendar_rounded, size: 18, color: Color(0xFF4F46E5)),
-                              label: Text(tr(tr('Tambah ke Kalender', 'Add to Calendar'), tr('Tambah ke Kalender', 'Add to Calendar')), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                              onPressed: _addToCalendar,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          if (currentSub.splitCount > 1) ...[
-                            SizedBox(
-                              width: double.infinity,
-                              child: OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
-                                icon: const Icon(Icons.chat_rounded, size: 18, color: Color(0xFF10B981)),
-                                label: Text(tr(tr('Bagi Tagihan via WhatsApp', 'Split Bill via WhatsApp'), tr('Bagi Tagihan via WhatsApp', 'Split Bill via WhatsApp')), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                                onPressed: _tagihTeman,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                          ],
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
                               icon: const Icon(Icons.edit_document, size: 18, color: Color(0xFF4F46E5)),
-                              label: Text(tr(tr('Edit Langganan', 'Edit Subscription'), tr('Edit Langganan', 'Edit Subscription')), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                              label: Text(tr('Edit Langganan', 'Edit Subscription'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                               onPressed: () {
                                 Navigator.push(context, MaterialPageRoute(builder: (_) => EditScreen(sub: currentSub))).then((_) {
                                   final provider = context.read<SubProvider>();
@@ -402,14 +447,62 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
-                              icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.redAccent),
-                              label: Text(tr('Batalkan langganan', 'Cancel subscription'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                              onPressed: _deleteSub,
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final now = DateTime.now();
+                              final diff = currentSub.dueDate.difference(DateTime(now.year, now.month, now.day)).inDays;
+                              final isDueSoon = diff <= 3 && !currentSub.isFinished;
+                              
+                              if (isDueSoon) {
+                                // Saat jatuh tempo: tampilkan 2 tombol
+                                return Column(
+                                  children: [
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                          backgroundColor: const Color(0xFF10B981),
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                        ),
+                                        icon: const Icon(Icons.task_alt_rounded, size: 18),
+                                        label: Text(tr('Tandai Selesai', 'Mark as Finished'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        onPressed: _cancelSubscription,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                          backgroundColor: const Color(0xFF2563EB),
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                        ),
+                                        icon: const Icon(Icons.autorenew_rounded, size: 18),
+                                        label: Text(tr('Perpanjang Layanan', 'Renew Service'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                        onPressed: _processAutoRenewal,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                // Belum jatuh tempo: tombol hapus biasa
+                                return SizedBox(
+                                  width: double.infinity,
+                                  child: OutlinedButton.icon(
+                                    style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), side: BorderSide(color: dividerColor)),
+                                    icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.redAccent),
+                                    label: Text(tr('Hapus Langganan', 'Delete Subscription'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                                    onPressed: _deleteSub,
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ],
                       ),

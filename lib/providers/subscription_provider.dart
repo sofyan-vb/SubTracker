@@ -97,11 +97,12 @@ class SubProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  List<Subscription> get activeSubs => subs.where((s) => !s.isFinished).toList();
-  List<Subscription> get historySubs => _subs.where((s) => s.isFinished).toList();
+  List<Subscription> get activeSubs => subs.where((s) => !s.isFinished && !s.isDeleted).toList();
+  List<Subscription> get historySubs => _subs.where((s) => s.isFinished || s.isDeleted).toList();
 
   List<Subscription> get subs {
     List<Subscription> filtered = _subs.where((sub) {
+      if (sub.isDeleted || sub.isFinished) return false;
       bool matchesSearch = sub.name.toLowerCase().contains(_searchQuery.toLowerCase());
       bool matchesCategory = _categoryFilter == 'Semua Layanan' || sub.category == _categoryFilter;
       return matchesSearch && matchesCategory;
@@ -190,10 +191,13 @@ class SubProvider extends ChangeNotifier {
   }
 
   void deleteSub(String id) {
-    _subs.removeWhere((s) => s.id == id);
-    NotificationService.cancelNotification(id.hashCode);
-    _saveData();
-    notifyListeners();
+    final index = _subs.indexWhere((s) => s.id == id);
+    if (index != -1) {
+      _subs[index] = _subs[index].copyWith(isDeleted: true);
+      NotificationService.cancelNotification(id.hashCode);
+      _saveData();
+      notifyListeners();
+    }
   }
 
   void renewSub(String id) {
@@ -263,7 +267,7 @@ class SubProvider extends ChangeNotifier {
   }
 
   void clearHistory() {
-    _subs.removeWhere((sub) => sub.isFinished);
+    _subs.removeWhere((s) => s.isFinished || s.isDeleted);
     _saveData();
     notifyListeners();
   }

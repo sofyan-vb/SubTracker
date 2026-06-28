@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../widgets/category_selection_sheet.dart';
+import '../utils/app_examples.dart';
 import '../utils/toast_utils.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -318,9 +320,7 @@ class _EditScreenState extends State<EditScreen> {
                       },
                       child: Stack(
                         children: [
-                          _customLogoPath != null
-                              ? ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.file(File(_customLogoPath!), width: 56, height: 56, fit: BoxFit.cover))
-                              : LogoWidget(name: _nameCtrl.text, category: _selectedCategory, size: 56, borderRadius: 16),
+                          LogoWidget(name: _nameCtrl.text, category: _selectedCategory, customLogoPath: _customLogoPath, size: 56, borderRadius: 16),
                           Positioned(
                             right: 0, bottom: 0,
                             child: Container(
@@ -374,21 +374,48 @@ class _EditScreenState extends State<EditScreen> {
                   child: Column(
                     children: [
                       ListTile(
-                        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF2563EB).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.category, color: Color(0xFF2563EB), size: 20)),
+                        leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF8B5CF6).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.category, color: Color(0xFF8B5CF6), size: 20)),
                         title: Text(tr('Kategori', 'Category'), style: TextStyle(color: subTextColor, fontSize: 13)),
-                        subtitle: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _selectedCategory.isEmpty ? null : _selectedCategory,
-                            hint: Text(tr('Pilih kategori', 'Choose category'), style: TextStyle(color: textColor)),
-                            isExpanded: true, dropdownColor: cardBg, style: TextStyle(color: textColor, fontWeight: FontWeight.w500),
-                            items: categories.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
-                            onChanged: (val) {
-                              if (val == tr('+ Tambah Kategori Baru', '+ Add New Category')) {
-                                _showAddCustomCategoryDialog();
-                              } else {
-                                setState(() { _selectedCategory = val!; _isShortcutUsed = false; });
-                              }
-                            }
+                        subtitle: GestureDetector(
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => CategorySelectionSheet(
+                                currentCategory: _selectedCategory,
+                                isID: languageNotifier.value == 'ID',
+                                onCategorySelected: (category) {
+                                  setState(() {
+                                    _selectedCategory = category;
+                                    _isShortcutUsed = false;
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            color: Colors.transparent,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _selectedCategory.isEmpty
+                                  ? Text(tr('Pilih kategori', 'Choose category'), style: TextStyle(color: hintColor))
+                                  : Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 10,
+                                          backgroundColor: CategoryUtils.getColor(_selectedCategory),
+                                          child: Icon(CategoryUtils.getIcon(_selectedCategory), size: 12, color: Colors.white),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(_selectedCategory, style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
+                                      ],
+                                    ),
+                                Icon(Icons.arrow_drop_down, color: hintColor),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -653,157 +680,21 @@ class _EditScreenState extends State<EditScreen> {
   }
 
   Widget _buildModernCategoryIcons(List<String> categories, Color cardBg, Color textColor, bool isDark) {
-    Map<String, List<Map<String, dynamic>>> appExamples = {
-      'Hiburan': [
-        {'name': 'Netflix', 'color': const Color(0xFFE50914), 'icon': Icons.movie},
-        {'name': 'Disney+', 'color': const Color(0xFF113CCF), 'icon': Icons.movie_filter},
-        {'name': 'Prime Video', 'color': const Color(0xFF00A8E1), 'icon': Icons.ondemand_video},
-        {'name': 'HBO Go', 'color': const Color(0xFF5A1C8E), 'icon': Icons.live_tv},
-        {'name': 'Vidio', 'color': const Color(0xFFED2324), 'icon': Icons.play_circle_filled},
-        {'name': 'YouTube Premium', 'color': const Color(0xFFFF0000), 'icon': Icons.play_arrow},
-        {'name': 'Viu', 'color': const Color(0xFFFFCC00), 'icon': Icons.ondemand_video},
-        {'name': 'WeTV', 'color': const Color(0xFF00BFFF), 'icon': Icons.ondemand_video},
-        {'name': 'iQIYI', 'color': const Color(0xFF00E676), 'icon': Icons.ondemand_video},
-        {'name': 'Catchplay', 'color': const Color(0xFF000000), 'icon': Icons.ondemand_video},
-        {'name': 'Apple TV+', 'color': const Color(0xFF000000), 'icon': Icons.apple},
-        {'name': 'Crunchyroll', 'color': const Color(0xFFF47521), 'icon': Icons.ondemand_video},
-        {'name': 'Mola TV', 'color': const Color(0xFF000000), 'icon': Icons.live_tv},
-        {'name': 'MAXstream', 'color': const Color(0xFFED1C24), 'icon': Icons.live_tv},
-        {'name': 'Vision+', 'color': const Color(0xFFED1C24), 'icon': Icons.live_tv},
-        {'name': 'Hulu', 'color': const Color(0xFF1CE783), 'icon': Icons.live_tv},
-        {'name': 'Paramount+', 'color': const Color(0xFF0064FF), 'icon': Icons.live_tv},
-        {'name': 'Peacock', 'color': const Color(0xFF000000), 'icon': Icons.live_tv},
-        {'name': 'Bilibili', 'color': const Color(0xFF00A1D6), 'icon': Icons.live_tv},
-        {'name': 'Viki', 'color': const Color(0xFF00A5D2), 'icon': Icons.live_tv},
-      ],
-      'Musik': [
-        {'name': 'Spotify', 'color': const Color(0xFF1DB954), 'icon': Icons.music_note},
-        {'name': 'Apple Music', 'color': const Color(0xFFFA243C), 'icon': Icons.music_note},
-        {'name': 'YouTube Music', 'color': const Color(0xFFFF0000), 'icon': Icons.music_video},
-        {'name': 'Joox', 'color': const Color(0xFF24B351), 'icon': Icons.library_music},
-        {'name': 'Resso', 'color': const Color(0xFF000000), 'icon': Icons.library_music},
-        {'name': 'SoundCloud', 'color': const Color(0xFFFF5500), 'icon': Icons.library_music},
-        {'name': 'Tidal', 'color': const Color(0xFF000000), 'icon': Icons.library_music},
-        {'name': 'Deezer', 'color': const Color(0xFF00C7F2), 'icon': Icons.library_music},
-        {'name': 'Amazon Music', 'color': const Color(0xFF00A8E1), 'icon': Icons.library_music},
-        {'name': 'Pandora', 'color': const Color(0xFF005483), 'icon': Icons.library_music},
-        {'name': 'Audiomack', 'color': const Color(0xFFFFA200), 'icon': Icons.library_music},
-      ],
-      'Software': [
-        {'name': 'Adobe CC', 'color': const Color(0xFFFF0000), 'icon': Icons.brush},
-        {'name': 'Microsoft 365', 'color': const Color(0xFF00A4EF), 'icon': Icons.dashboard},
-        {'name': 'Canva Pro', 'color': const Color(0xFF00C4CC), 'icon': Icons.design_services},
-        {'name': 'ChatGPT Plus', 'color': const Color(0xFF10A37F), 'icon': Icons.smart_toy},
-        {'name': 'GitHub Copilot', 'color': const Color(0xFF000000), 'icon': Icons.code},
-        {'name': 'Notion', 'color': const Color(0xFF000000), 'icon': Icons.note},
-        {'name': 'Figma', 'color': const Color(0xFFF24E1E), 'icon': Icons.brush},
-        {'name': 'Evernote', 'color': const Color(0xFF00A82D), 'icon': Icons.note},
-        {'name': 'Zoom', 'color': const Color(0xFF2D8CFF), 'icon': Icons.video_call},
-        {'name': 'Slack', 'color': const Color(0xFF4A154B), 'icon': Icons.chat},
-        {'name': 'Midjourney', 'color': const Color(0xFF000000), 'icon': Icons.brush},
-        {'name': 'Claude', 'color': const Color(0xFFD97757), 'icon': Icons.smart_toy},
-        {'name': 'Gemini', 'color': const Color(0xFF1A73E8), 'icon': Icons.smart_toy},
-        {'name': 'Perplexity', 'color': const Color(0xFF21BCA5), 'icon': Icons.search},
-        {'name': 'JetBrains', 'color': const Color(0xFF000000), 'icon': Icons.code},
-        {'name': 'AutoCAD', 'color': const Color(0xFFE60000), 'icon': Icons.architecture},
-        {'name': 'Grammarly', 'color': const Color(0xFF15A97D), 'icon': Icons.text_snippet},
-      ],
-      'Utilitas': [
-        {'name': 'PDAM', 'color': const Color(0xFF2563EB), 'icon': Icons.water_drop},
-        {'name': 'PLN', 'color': const Color(0xFFF59E0B), 'icon': Icons.electric_bolt},
-        {'name': 'IndiHome', 'color': const Color(0xFFED1C24), 'icon': Icons.wifi},
-        {'name': 'Telkomsel', 'color': const Color(0xFFED1C24), 'icon': Icons.phone_android},
-        {'name': 'by.U', 'color': const Color(0xFF005BAC), 'icon': Icons.phone_android},
-        {'name': 'XL', 'color': const Color(0xFF00B2E5), 'icon': Icons.phone_android},
-        {'name': 'Indosat', 'color': const Color(0xFFFFD400), 'icon': Icons.phone_android},
-        {'name': 'Smartfren', 'color': const Color(0xFFED1C24), 'icon': Icons.phone_android},
-        {'name': 'Tri', 'color': const Color(0xFFE3000F), 'icon': Icons.phone_android},
-        {'name': 'Axis', 'color': const Color(0xFF6B1D7C), 'icon': Icons.phone_android},
-        {'name': 'MyRepublic', 'color': const Color(0xFF6B2C91), 'icon': Icons.wifi},
-        {'name': 'Biznet', 'color': const Color(0xFF00A859), 'icon': Icons.wifi},
-        {'name': 'First Media', 'color': const Color(0xFFED1C24), 'icon': Icons.wifi},
-        {'name': 'Oxygen', 'color': const Color(0xFF000000), 'icon': Icons.wifi},
-        {'name': 'BPJS', 'color': const Color(0xFF00A859), 'icon': Icons.health_and_safety},
-        {'name': 'MNC Play', 'color': const Color(0xFF0F1568), 'icon': Icons.wifi},
-        {'name': 'CBN', 'color': const Color(0xFF1C75BC), 'icon': Icons.wifi},
-        {'name': 'Iconnet', 'color': const Color(0xFF00A859), 'icon': Icons.wifi},
-        {'name': 'Megavision', 'color': const Color(0xFFE30613), 'icon': Icons.wifi},
-        {'name': 'Transvision', 'color': const Color(0xFF003D7C), 'icon': Icons.live_tv},
-      ],
-      'Game': [
-        {'name': 'PlayStation Plus', 'color': const Color(0xFF003791), 'icon': Icons.gamepad},
-        {'name': 'Xbox Game Pass', 'color': const Color(0xFF107C10), 'icon': Icons.gamepad},
-        {'name': 'Nintendo Switch Online', 'color': const Color(0xFFE60012), 'icon': Icons.gamepad},
-        {'name': 'Steam', 'color': const Color(0xFF000000), 'icon': Icons.videogame_asset},
-        {'name': 'EA Play', 'color': const Color(0xFFFF0000), 'icon': Icons.videogame_asset},
-        {'name': 'Ubisoft+', 'color': const Color(0xFF000000), 'icon': Icons.videogame_asset},
-        {'name': 'Riot Games', 'color': const Color(0xFFD32F2F), 'icon': Icons.videogame_asset},
-        {'name': 'Roblox Premium', 'color': const Color(0xFF000000), 'icon': Icons.videogame_asset},
-        {'name': 'Epic Games', 'color': const Color(0xFF000000), 'icon': Icons.videogame_asset},
-        {'name': 'GeForce Now', 'color': const Color(0xFF76B900), 'icon': Icons.videogame_asset},
-        {'name': 'Twitch', 'color': const Color(0xFF9146FF), 'icon': Icons.videogame_asset},
-        {'name': 'Discord Nitro', 'color': const Color(0xFF5865F2), 'icon': Icons.chat},
-      ],
-      'Cloud Storage': [
-        {'name': 'Google One', 'color': const Color(0xFF4285F4), 'icon': Icons.cloud},
-        {'name': 'iCloud+', 'color': const Color(0xFF000000), 'icon': Icons.cloud},
-        {'name': 'Dropbox', 'color': const Color(0xFF0061FE), 'icon': Icons.cloud},
-        {'name': 'OneDrive', 'color': const Color(0xFF00A4EF), 'icon': Icons.cloud},
-        {'name': 'Mega', 'color': const Color(0xFFD9272E), 'icon': Icons.cloud},
-        {'name': 'Box', 'color': const Color(0xFF0061D5), 'icon': Icons.cloud},
-        {'name': 'pCloud', 'color': const Color(0xFF00B0FF), 'icon': Icons.cloud},
-        {'name': 'MediaFire', 'color': const Color(0xFF1296DF), 'icon': Icons.cloud},
-        {'name': 'Terabox', 'color': const Color(0xFF0084FF), 'icon': Icons.cloud},
-        {'name': 'Sync', 'color': const Color(0xFF00B2E2), 'icon': Icons.cloud},
-      ],
-      'Edukasi': [
-        {'name': 'Ruangguru', 'color': const Color(0xFF0054A6), 'icon': Icons.school},
-        {'name': 'Zenius', 'color': const Color(0xFF5A1C8E), 'icon': Icons.school},
-        {'name': 'Udemy', 'color': const Color(0xFFA435F0), 'icon': Icons.school},
-        {'name': 'Coursera', 'color': const Color(0xFF0056D2), 'icon': Icons.school},
-        {'name': 'Skillshare', 'color': const Color(0xFF00FF84), 'icon': Icons.school},
-        {'name': 'Duolingo', 'color': const Color(0xFF58CC02), 'icon': Icons.school},
-        {'name': 'Memrise', 'color': const Color(0xFFFFB000), 'icon': Icons.school},
-        {'name': 'MasterClass', 'color': const Color(0xFF000000), 'icon': Icons.school},
-        {'name': 'Quipper', 'color': const Color(0xFF00A859), 'icon': Icons.school},
-        {'name': 'Brainly', 'color': const Color(0xFF000000), 'icon': Icons.school},
-        {'name': 'Kahoot', 'color': const Color(0xFF46178F), 'icon': Icons.school},
-        {'name': 'LinkedIn Learning', 'color': const Color(0xFF0A66C2), 'icon': Icons.school},
-        {'name': 'edX', 'color': const Color(0xFFB32332), 'icon': Icons.school},
-        {'name': 'Codecademy', 'color': const Color(0xFF000000), 'icon': Icons.school},
-      ],
-      'Belanja': [
-        {'name': 'Shopee', 'color': const Color(0xFFEE4D2D), 'icon': Icons.shopping_cart},
-        {'name': 'Tokopedia', 'color': const Color(0xFF00AA5B), 'icon': Icons.shopping_bag},
-        {'name': 'Lazada', 'color': const Color(0xFF0F1568), 'icon': Icons.shopping_cart},
-        {'name': 'Blibli', 'color': const Color(0xFF0095DA), 'icon': Icons.shopping_bag},
-        {'name': 'Bukalapak', 'color': const Color(0xFFE31E52), 'icon': Icons.shopping_cart},
-        {'name': 'Amazon Prime', 'color': const Color(0xFFFF9900), 'icon': Icons.shopping_cart},
-        {'name': 'AliExpress', 'color': const Color(0xFFFF4747), 'icon': Icons.shopping_cart},
-        {'name': 'Gojek', 'color': const Color(0xFF00AA13), 'icon': Icons.motorcycle},
-        {'name': 'Grab', 'color': const Color(0xFF00B14F), 'icon': Icons.motorcycle},
-        {'name': 'Maxim', 'color': const Color(0xFFFFCC00), 'icon': Icons.motorcycle},
-        {'name': 'Traveloka', 'color': const Color(0xFF00A1E4), 'icon': Icons.flight},
-        {'name': 'Tiket.com', 'color': const Color(0xFF0064D2), 'icon': Icons.flight},
-        {'name': 'Zalora', 'color': const Color(0xFF000000), 'icon': Icons.shopping_bag},
-        {'name': 'Sociolla', 'color': const Color(0xFFE5007D), 'icon': Icons.shopping_bag},
-        {'name': 'Agoda', 'color': const Color(0xFF000000), 'icon': Icons.hotel},
-        {'name': 'Airbnb', 'color': const Color(0xFFFF5A5F), 'icon': Icons.hotel},
-        {'name': 'eBay', 'color': const Color(0xFFE53238), 'icon': Icons.shopping_cart},
-        {'name': 'Alibaba', 'color': const Color(0xFFFF6A00), 'icon': Icons.shopping_cart},
-      ],
-    };
-    appExamples['Entertainment'] = appExamples['Hiburan']!;
-    appExamples['Music'] = appExamples['Musik']!;
-    appExamples['Utilities'] = appExamples['Utilitas']!;
-    appExamples['Gaming'] = appExamples['Game']!;
-    appExamples['Education'] = appExamples['Edukasi']!;
-    appExamples['Shopping'] = appExamples['Belanja']!;
+    Map<String, List<Map<String, dynamic>>> appExamples = AppExamples.getAppData();
+    
+    List<Map<String, dynamic>> allAppsWithCategory = [];
+    appExamples.forEach((cat, apps) {
+      for (var app in apps) {
+        allAppsWithCategory.add({
+          ...app,
+          'categoryName': cat,
+        });
+      }
+    });
 
-    final allApps = appExamples.values.expand((e) => e).toList();
     final filteredApps = _searchQuery.isEmpty 
-        ? (appExamples[_selectedCategory] ?? [])
-        : allApps.where((app) => app['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+        ? (_selectedCategory.isEmpty ? allAppsWithCategory : allAppsWithCategory.where((app) => app['categoryName'] == _selectedCategory).toList())
+        : allAppsWithCategory.where((app) => app['name'].toString().toLowerCase().contains(_searchQuery.toLowerCase())).toList();
     
     if (filteredApps.isEmpty) return const SizedBox.shrink();
 
@@ -820,6 +711,7 @@ class _EditScreenState extends State<EditScreen> {
           return GestureDetector(
             onTap: () => setState(() {
               _nameCtrl.text = app['name'];
+              _selectedCategory = app['categoryName'];
               if (app['name'] == 'Gojek (GoClub)') _nameCtrl.text = 'Gojek';
               if (app['name'] == 'Grab (GrabUnlimited)') _nameCtrl.text = 'Grab';
             }),
@@ -834,7 +726,7 @@ class _EditScreenState extends State<EditScreen> {
               ),
               child: Row(
                 children: [
-                  LogoWidget(name: app['name'], category: _selectedCategory.isEmpty ? 'Lainnya' : _selectedCategory, size: 24, borderRadius: 6),
+                  LogoWidget(name: app['name'], category: app['categoryName'], size: 24, borderRadius: 6),
                   if (isAppSelected) ...[
                     const SizedBox(width: 8),
                     Text(app['name'], style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
