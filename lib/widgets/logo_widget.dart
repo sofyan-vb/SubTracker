@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../utils/category_utils.dart';
 
@@ -6,6 +7,8 @@ class LogoWidget extends StatelessWidget {
   final String category;
   final double size;
   final double borderRadius;
+  final String? customLogoPath;
+  final bool showBackground;
 
   const LogoWidget({
     super.key,
@@ -13,6 +16,8 @@ class LogoWidget extends StatelessWidget {
     required this.category,
     this.size = 40,
     this.borderRadius = 12,
+    this.customLogoPath,
+    this.showBackground = true,
   });
 
   static String? getLogoUrl(String name) {
@@ -222,12 +227,25 @@ class LogoWidget extends StatelessWidget {
     Widget fallback = Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: showBackground ? BoxDecoration(
         color: catColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(borderRadius),
-      ),
+      ) : null,
       child: Icon(catIcon, color: catColor, size: size * 0.5),
     );
+
+    if (customLogoPath != null && customLogoPath!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.file(
+          File(customLogoPath!),
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => fallback,
+        ),
+      );
+    }
 
     if (url != null) {
       if (url.startsWith('assets/')) {
