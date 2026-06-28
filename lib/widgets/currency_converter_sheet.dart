@@ -45,7 +45,7 @@ class _CurrencyConverterSheetState extends State<CurrencyConverterSheet> {
             children: [
               const Icon(Icons.currency_exchange_rounded, color: Color(0xFF2563EB)),
               const SizedBox(width: 12),
-              Text(tr('Kalkulator Kurs', 'Exchange Calculator'), style: TextStyle(color: widget.textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(tr('Kalkulator Kurs', 'Exchange Calculator', 'Calculadora de cambio'), style: TextStyle(color: widget.textColor, fontSize: 18, fontWeight: FontWeight.bold)),
             ],
           ),
           const SizedBox(height: 24),
@@ -99,7 +99,7 @@ class _CurrencyConverterSheetState extends State<CurrencyConverterSheet> {
             ],
           ),
           const SizedBox(height: 24),
-          Text(tr('Hasil Konversi', 'Conversion Result'), style: TextStyle(color: widget.textColor.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(tr('Hasil Konversi', 'Conversion Result', 'Resultado de la conversión'), style: TextStyle(color: widget.textColor.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           SizedBox(
             height: 250,

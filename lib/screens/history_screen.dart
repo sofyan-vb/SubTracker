@@ -36,7 +36,7 @@ class HistoryScreen extends StatelessWidget {
           valueListenable: languageNotifier,
           builder: (context, lang, child) {
             return Text(
-              tr('Riwayat Tagihan', 'Billing History'),
+              tr('Riwayat Tagihan', 'Billing History', 'Historial de facturación'),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: -0.5),
             );
           }
@@ -64,7 +64,7 @@ class HistoryScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.table_chart_rounded, color: Colors.green),
                     const SizedBox(width: 8),
-                    Text(tr('Ekspor CSV', 'Export CSV')),
+                    Text(tr('Ekspor CSV', 'Export CSV', 'Exportar CSV')),
                   ],
                 ),
               ),
@@ -74,7 +74,7 @@ class HistoryScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.picture_as_pdf_rounded, color: Colors.redAccent),
                     const SizedBox(width: 8),
-                    Text(tr('Ekspor PDF', 'Export PDF')),
+                    Text(tr('Ekspor PDF', 'Export PDF', 'Exportar PDF')),
                   ],
                 ),
               ),
@@ -133,7 +133,7 @@ class HistoryScreen extends StatelessWidget {
                     valueListenable: languageNotifier,
                     builder: (context, lang, child) {
                       return Text(
-                        tr('Belum ada riwayat tagihan.', 'No billing history yet.'),
+                        tr('Belum ada riwayat tagihan.', 'No billing history yet.', 'Aún no hay historial de facturación.'),
                         style: TextStyle(color: textColor.withValues(alpha: 0.5), fontSize: 14, fontWeight: FontWeight.bold),
                       );
                     }

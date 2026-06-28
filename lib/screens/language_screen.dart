@@ -28,7 +28,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
           valueListenable: languageNotifier,
           builder: (context, lang, child) {
             return Text(
-              tr('Bahasa Aplikasi', 'App Language'),
+              tr('Bahasa Aplikasi', 'App Language', 'Idioma de la aplicación'),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: -0.5),
             );
           }
@@ -66,6 +66,19 @@ class _LanguageScreenState extends State<LanguageScreen> {
               RadioListTile<String>(
                 title: Text('Bahasa Indonesia', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                 value: 'ID',
+                groupValue: languageNotifier.value, 
+                activeColor: const Color(0xFF2563EB),
+                onChanged: (val) async {
+                  languageNotifier.value = val!; 
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('app_lang', val); 
+                  setState((){});
+                },
+              ),
+              Divider(color: isDark ? Colors.white12 : Colors.grey.shade200, height: 1),
+              RadioListTile<String>(
+                title: Text('Bahasa Spanyol (Spanish)', style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                value: 'ES',
                 groupValue: languageNotifier.value, 
                 activeColor: const Color(0xFF2563EB),
                 onChanged: (val) async {

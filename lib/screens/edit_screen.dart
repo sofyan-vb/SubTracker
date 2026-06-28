@@ -79,7 +79,7 @@ class _EditScreenState extends State<EditScreen> {
     }
     _cancelLinkCtrl.text = sub.cancellationLink ?? '';
     _isAutoRenew = sub.isAutoRenew;
-    _selectedStatus = sub.isFinished ? tr('Non-Aktif', 'Inactive') : tr('Aktif', 'Active');
+    _selectedStatus = sub.isFinished ? tr('Non-Aktif', 'Inactive', 'Inactivo') : tr('Aktif', 'Active', 'Activo');
     _customLogoPath = sub.customLogoPath;
   }
 
@@ -197,12 +197,12 @@ class _EditScreenState extends State<EditScreen> {
           builder: (ctx, setDialogState) {
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Text(tr('Kategori Baru', 'New Category'), style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(tr('Kategori Baru', 'New Category', 'Nueva categoría'), style: const TextStyle(fontWeight: FontWeight.bold)),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextField(controller: newCatCtrl, decoration: InputDecoration(hintText: tr('Nama Kategori', 'Category Name'))),
+                    TextField(controller: newCatCtrl, decoration: InputDecoration(hintText: tr('Nama Kategori', 'Category Name', 'Nombre de categoría'))),
                     const SizedBox(height: 24),
                     Wrap(
                       spacing: 12, runSpacing: 12,
@@ -223,7 +223,7 @@ class _EditScreenState extends State<EditScreen> {
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel'))),
+                TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Batal', 'Cancel', 'Cancelar'))),
                 TextButton(
                   onPressed: () async {
                     if (newCatCtrl.text.isNotEmpty) {
@@ -232,7 +232,7 @@ class _EditScreenState extends State<EditScreen> {
                       setState(() { _selectedCategory = newCatCtrl.text; });
                     }
                   }, 
-                  child: Text(tr('Simpan', 'Save'), style: const TextStyle(fontWeight: FontWeight.bold))
+                  child: Text(tr('Simpan', 'Save', 'Ahorrar'), style: const TextStyle(fontWeight: FontWeight.bold))
                 ),
               ],
             );
@@ -245,10 +245,10 @@ class _EditScreenState extends State<EditScreen> {
   @override
   Widget build(BuildContext context) {
     final List<String> categories = CategoryUtils.getAllCategories(languageNotifier.value == 'ID');
-    categories.add(tr('+ Tambah Kategori Baru', '+ Add New Category'));
-    final List<String> statuses = [tr('Aktif', 'Active'), tr('Non-Aktif', 'Inactive')];
-    final List<String> notifTypes = [tr('Notifikasi Biasa', 'Standard Notification'), tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)')];
-    final List<String> billingCycles = [tr('Bulanan', 'Monthly'), tr('Tahunan', 'Yearly')];
+    categories.add(tr('+ Tambah Kategori Baru', '+ Add New Category', '+ Agregar nueva categoría'));
+    final List<String> statuses = [tr('Aktif', 'Active', 'Activo'), tr('Non-Aktif', 'Inactive', 'Inactivo')];
+    final List<String> notifTypes = [tr('Notifikasi Biasa', 'Standard Notification', 'Notificación estándar'), tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)', 'Alarma musical (suena continuamente)')];
+    final List<String> billingCycles = [tr('Bulanan', 'Monthly', 'Mensual'), tr('Tahunan', 'Yearly', 'Anual')];
 
     if (_selectedStatus.isEmpty) _selectedStatus = statuses.first;
     if (_selectedNotifType.isEmpty) _selectedNotifType = notifTypes.first;
@@ -275,7 +275,7 @@ class _EditScreenState extends State<EditScreen> {
               icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(tr('Edit Langganan', 'Edit subscription'), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+            title: Text(tr('Edit Langganan', 'Edit subscription', 'Editar suscripción'), style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             centerTitle: true,
           ),
           body: SingleChildScrollView(
@@ -293,7 +293,7 @@ class _EditScreenState extends State<EditScreen> {
                     style: TextStyle(color: textColor, fontSize: 14),
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.search, color: Color(0xFF2563EB)),
-                      hintText: tr('Cari layanan / katalog', 'Search catalog'),
+                      hintText: tr('Cari layanan', 'Search services', 'Servicios de búsqueda'),
                       hintStyle: TextStyle(color: hintColor),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 16)
@@ -304,7 +304,7 @@ class _EditScreenState extends State<EditScreen> {
                 _buildModernCategoryIcons(categories, cardBg, textColor, isDark),
                 
                 const SizedBox(height: 24),
-                Text(tr('Detail Utama', 'Main Details'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(tr('Detail Utama', 'Main Details', 'Detalles principales'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 
                 // Name and Price
@@ -339,7 +339,7 @@ class _EditScreenState extends State<EditScreen> {
                         decoration: BoxDecoration(color: cardBg, borderRadius: BorderRadius.circular(16), border: Border.all(color: isDark ? Colors.white24 : Colors.black12)),
                         child: TextField(
                           controller: _nameCtrl, style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
-                          decoration: InputDecoration(hintText: tr('Nama Layanan', 'Service Name'), hintStyle: TextStyle(color: hintColor, fontWeight: FontWeight.normal), border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(vertical: 16))
+                          decoration: InputDecoration(hintText: tr('Nama Layanan', 'Service Name', 'Nombre del servicio'), hintStyle: TextStyle(color: hintColor, fontWeight: FontWeight.normal), border: InputBorder.none, contentPadding: const EdgeInsets.symmetric(vertical: 16))
                         ),
                       ),
                     ),
@@ -358,14 +358,14 @@ class _EditScreenState extends State<EditScreen> {
                         controller: _priceCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 16),
                         inputFormatters: isZeroDecimal ? [ThousandsSeparatorInputFormatter()] : [],
-                        decoration: InputDecoration(prefixText: '${format.currencySymbol} ', prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold), hintText: tr('Harga', 'Price'), hintStyle: TextStyle(color: hintColor, fontWeight: FontWeight.normal), border: InputBorder.none)
+                        decoration: InputDecoration(prefixText: '${format.currencySymbol} ', prefixStyle: TextStyle(color: textColor, fontWeight: FontWeight.bold), hintText: tr('Harga', 'Price', 'Precio'), hintStyle: TextStyle(color: hintColor, fontWeight: FontWeight.normal), border: InputBorder.none)
                       ),
                     );
                   }
                 ),
                 
                 const SizedBox(height: 24),
-                Text(tr('Informasi Tagihan', 'Billing Info'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(tr('Informasi Tagihan', 'Billing Info', 'Información de facturación'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 
                 // Billing Info (Category, Cycle, Next Renewal)
@@ -375,7 +375,7 @@ class _EditScreenState extends State<EditScreen> {
                     children: [
                       ListTile(
                         leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF8B5CF6).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.category, color: Color(0xFF8B5CF6), size: 20)),
-                        title: Text(tr('Kategori', 'Category'), style: TextStyle(color: subTextColor, fontSize: 13)),
+                        title: Text(tr('Kategori', 'Category', 'Categoría'), style: TextStyle(color: subTextColor, fontSize: 13)),
                         subtitle: GestureDetector(
                           onTap: () {
                             showModalBottomSheet(
@@ -401,7 +401,7 @@ class _EditScreenState extends State<EditScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 _selectedCategory.isEmpty
-                                  ? Text(tr('Pilih kategori', 'Choose category'), style: TextStyle(color: hintColor))
+                                  ? Text(tr('Pilih kategori', 'Choose category', 'Elige categoría'), style: TextStyle(color: hintColor))
                                   : Row(
                                       children: [
                                         CircleAvatar(
@@ -422,7 +422,7 @@ class _EditScreenState extends State<EditScreen> {
                       Divider(color: dividerColor, height: 1, indent: 60),
                       ListTile(
                         leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFF10B981).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.autorenew_rounded, color: Color(0xFF10B981), size: 20)),
-                        title: Text(tr('Siklus', 'Cycle'), style: TextStyle(color: subTextColor, fontSize: 13)),
+                        title: Text(tr('Siklus', 'Cycle', 'Ciclo'), style: TextStyle(color: subTextColor, fontSize: 13)),
                         subtitle: DropdownButtonHideUnderline(
                           child: DropdownButton<String>(
                             value: _billingCycle,
@@ -435,7 +435,7 @@ class _EditScreenState extends State<EditScreen> {
                       Divider(color: dividerColor, height: 1, indent: 60),
                       ListTile(
                         leading: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFFF59E0B).withOpacity(0.1), shape: BoxShape.circle), child: const Icon(Icons.calendar_month, color: Color(0xFFF59E0B), size: 20)),
-                        title: Text(tr('Tanggal Perpanjangan', 'Next renewal date'), style: TextStyle(color: subTextColor, fontSize: 13)),
+                        title: Text(tr('Tanggal Perpanjangan', 'Next renewal date', 'Próxima fecha de renovación'), style: TextStyle(color: subTextColor, fontSize: 13)),
                         subtitle: Row(
                           children: [
                             Expanded(child: GestureDetector(onTap: () => _selectDate(context, isTrial: false), child: Padding(padding: const EdgeInsets.symmetric(vertical: 8), child: Text(DateFormat('MMM dd, yyyy').format(_selectedDate), style: TextStyle(color: textColor, fontWeight: FontWeight.w500))))),
@@ -447,7 +447,7 @@ class _EditScreenState extends State<EditScreen> {
                       SwitchListTile(
                         value: _isAutoRenew,
                         onChanged: (v) => setState(() => _isAutoRenew = v),
-                        title: Text(tr('Perpanjangan Otomatis', 'Auto-renewing'), style: TextStyle(color: textColor, fontWeight: FontWeight.w500, fontSize: 15)),
+                        title: Text(tr('Perpanjangan Otomatis', 'Auto-renewing', 'Renovación automática'), style: TextStyle(color: textColor, fontWeight: FontWeight.w500, fontSize: 15)),
                         activeColor: const Color(0xFF2563EB),
                       )
                     ],
@@ -463,7 +463,7 @@ class _EditScreenState extends State<EditScreen> {
                     data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       leading: const Icon(Icons.card_giftcard_rounded, color: Color(0xFFEC4899)),
-                      title: Text(tr('Pelacakan Uji Coba', 'Trial Tracking'), style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
+                      title: Text(tr('Pelacakan Uji Coba', 'Trial Tracking', 'Seguimiento de prueba'), style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -473,7 +473,7 @@ class _EditScreenState extends State<EditScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(tr('Sedang uji coba gratis', 'On free trial'), style: TextStyle(color: textColor)),
+                                  Text(tr('Sedang uji coba gratis', 'On free trial', 'En prueba gratuita'), style: TextStyle(color: textColor)),
                                   Switch(value: _isTrial, onChanged: (v) => setState(() => _isTrial = v), activeColor: const Color(0xFF2563EB)),
                                 ],
                               ),
@@ -484,7 +484,7 @@ class _EditScreenState extends State<EditScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                     decoration: BoxDecoration(color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(12)),
-                                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(_trialEndDate != null ? DateFormat('MMM dd, yyyy').format(_trialEndDate!) : tr('Pilih tanggal berakhir', 'Select end date'), style: TextStyle(color: _trialEndDate != null ? textColor : hintColor)), Icon(Icons.calendar_month, color: hintColor, size: 20)]),
+                                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text(_trialEndDate != null ? DateFormat('MMM dd, yyyy').format(_trialEndDate!) : tr('Pilih tanggal berakhir', 'Select end date', 'Seleccionar fecha de finalización'), style: TextStyle(color: _trialEndDate != null ? textColor : hintColor)), Icon(Icons.calendar_month, color: hintColor, size: 20)]),
                                   ),
                                 ),
                                 const SizedBox(height: 12),
@@ -500,7 +500,7 @@ class _EditScreenState extends State<EditScreen> {
                                         controller: _trialPriceCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                         style: TextStyle(color: textColor),
                                         inputFormatters: isZeroDecimal ? [ThousandsSeparatorInputFormatter()] : [],
-                                        decoration: InputDecoration(prefixText: '${format.currencySymbol} ', prefixStyle: TextStyle(color: textColor), hintText: tr('Harga normal setelah trial', 'Regular price after trial'), hintStyle: TextStyle(color: hintColor), border: InputBorder.none)
+                                        decoration: InputDecoration(prefixText: '${format.currencySymbol} ', prefixStyle: TextStyle(color: textColor), hintText: tr('Harga normal setelah trial', 'Regular price after trial', 'Precio regular después de la prueba.'), hintStyle: TextStyle(color: hintColor), border: InputBorder.none)
                                       ),
                                     );
                                   }
@@ -523,7 +523,7 @@ class _EditScreenState extends State<EditScreen> {
                     data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                     child: ExpansionTile(
                       leading: const Icon(Icons.settings_rounded, color: Color(0xFF64748B)),
-                      title: Text(tr('Pengaturan Lanjutan', 'Advanced Settings'), style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
+                      title: Text(tr('Pengaturan Lanjutan', 'Advanced Settings', 'Configuración avanzada'), style: TextStyle(color: textColor, fontWeight: FontWeight.w500)),
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -535,7 +535,7 @@ class _EditScreenState extends State<EditScreen> {
                                 decoration: BoxDecoration(color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(12)),
                                 child: TextField(
                                   controller: _cancelLinkCtrl, style: TextStyle(color: textColor),
-                                  decoration: InputDecoration(hintText: tr('Tautan pembatalan', 'Cancellation link'), hintStyle: TextStyle(color: hintColor), border: InputBorder.none, icon: Icon(Icons.link, color: hintColor, size: 20))
+                                  decoration: InputDecoration(hintText: tr('Tautan pembatalan', 'Cancellation link', 'Enlace de cancelación'), hintStyle: TextStyle(color: hintColor), border: InputBorder.none, icon: Icon(Icons.link, color: hintColor, size: 20))
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -576,7 +576,7 @@ class _EditScreenState extends State<EditScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(tr('Split Bill (Orang)', 'Split Bill (People)'), style: TextStyle(color: textColor)),
+                                  Text(tr('Split Bill (Orang)', 'Split Bill (People)', 'Factura dividida (personas)'), style: TextStyle(color: textColor)),
                                   Row(
                                     children: [
                                       IconButton(icon: Icon(Icons.remove_circle_outline, color: textColor), onPressed: _splitCount > 1 ? () => setState(() => _splitCount--) : null),
@@ -589,8 +589,8 @@ class _EditScreenState extends State<EditScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(tr('Sudah dinonaktifkan', 'Already cancelled'), style: TextStyle(color: textColor)),
-                                  Switch(value: _selectedStatus == tr('Non-Aktif', 'Inactive'), onChanged: (v) => setState(() => _selectedStatus = v ? statuses.last : statuses.first), activeColor: Colors.redAccent),
+                                  Text(tr('Sudah dinonaktifkan', 'Already cancelled', 'Ya cancelado'), style: TextStyle(color: textColor)),
+                                  Switch(value: _selectedStatus == tr('Non-Aktif', 'Inactive', 'Inactivo'), onChanged: (v) => setState(() => _selectedStatus = v ? statuses.last : statuses.first), activeColor: Colors.redAccent),
                                 ],
                               ),
                             ]
@@ -616,7 +616,7 @@ class _EditScreenState extends State<EditScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               onPressed: () async { 
                 if (_selectedCategory.isEmpty) {
-                  ToastUtils.show(context, tr('Pilih kategori terlebih dahulu', 'Select a category first'), icon: Icons.warning_rounded, iconColor: Colors.redAccent);
+                  ToastUtils.show(context, tr('Pilih kategori terlebih dahulu', 'Select a category first', 'Seleccione una categoría primero'), icon: Icons.warning_rounded, iconColor: Colors.redAccent);
                   return;
                 }
                 if (_nameCtrl.text.isNotEmpty && _priceCtrl.text.isNotEmpty) {
@@ -624,7 +624,7 @@ class _EditScreenState extends State<EditScreen> {
                   DateTime scheduledDateTime = exactDateTime.subtract(Duration(days: _reminderDays));
 
                   if (scheduledDateTime.isBefore(DateTime.now()) && _selectedStatus == statuses.first) {
-                    ToastUtils.show(context, tr('Jadwal pengingat sudah terlewat', 'Reminder schedule has passed'), icon: Icons.info_outline, iconColor: Colors.blueAccent);
+                    ToastUtils.show(context, tr('Jadwal pengingat sudah terlewat', 'Reminder schedule has passed', 'El calendario de recordatorios ha pasado'), icon: Icons.info_outline, iconColor: Colors.blueAccent);
                   }
 
                   final newSub = Subscription(
@@ -653,25 +653,25 @@ class _EditScreenState extends State<EditScreen> {
                   final savedName = prefs.getString('user_name') ?? ''; 
                   
                   final notifTitle = savedName.isEmpty 
-                      ? tr('Tagihan ${newSub.name} 💸', '${newSub.name} Bill 💸')
-                      : tr('Halo $savedName! Tagihan ${newSub.name} 💸', 'Hi $savedName! ${newSub.name} Bill 💸');
+                      ? tr('Tagihan ${newSub.name} 💸', '${newSub.name} Bill 💸', '${newSub.name} Factura 💸')
+                      : tr('Halo $savedName! Tagihan ${newSub.name} 💸', 'Hi $savedName! ${newSub.name} Bill 💸', 'Hola $savedName! ${newSub.name} Factura 💸');
                   
-                  final notifBody = tr('Pembayaran layanan sebesar Rp ${_priceCtrl.text} telah tiba waktunya.', 'Your service payment of ${_priceCtrl.text} is due.');
-                  final bool isUsingAlarm = _selectedNotifType == tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)');
+                  final notifBody = tr('Pembayaran layanan sebesar Rp ${_priceCtrl.text} telah tiba waktunya.', 'Your service payment of ${_priceCtrl.text} is due.', 'Su pago de servicio de ${_priceCtrl.text} vence.');
+                  final bool isUsingAlarm = _selectedNotifType == tr('Alarm Lagu (Terus Berdering)', 'Music Alarm (Rings Continuously)', 'Alarma musical (suena continuamente)');
 
                   if (_selectedStatus == statuses.first) {
                     try { NotificationService.scheduleNotification(newSub.id.hashCode, notifTitle, notifBody, scheduledDateTime, isAlarm: isUsingAlarm); } catch (_) {}
                   }
                   if (mounted) {
-                    ToastUtils.show(context, tr('Berhasil diperbarui', 'Successfully updated'));
+                    ToastUtils.show(context, tr('Berhasil diperbarui', 'Successfully updated', 'Actualizado exitosamente'));
                     Navigator.pop(context); 
                   }
                 } else {
-                  ToastUtils.show(context, tr('Mohon isi nama dan harga', 'Please fill name and price'), icon: Icons.error_outline, iconColor: Colors.redAccent);
+                  ToastUtils.show(context, tr('Mohon isi nama dan harga', 'Please fill name and price', 'Por favor complete nombre y precio'), icon: Icons.error_outline, iconColor: Colors.redAccent);
                 }
               },
               icon: const Icon(Icons.check_rounded, size: 24),
-              label: Text(tr('Simpan Perubahan', 'Save Changes'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              label: Text(tr('Simpan Perubahan', 'Save Changes', 'Guardar cambios'), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
         );

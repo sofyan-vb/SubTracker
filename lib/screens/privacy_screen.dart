@@ -28,7 +28,7 @@ class PrivacyScreen extends StatelessWidget {
           valueListenable: languageNotifier,
           builder: (context, lang, child) {
             return Text(
-              tr('Privasi & Keamanan', 'Privacy & Security'),
+              tr('Privasi & Keamanan', 'Privacy & Security', 'Privacidad y seguridad'),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: -0.5),
             );
           }
@@ -54,16 +54,16 @@ class PrivacyScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tr('Perlindungan Data Anda', 'Your Data Protection'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(tr('Perlindungan Data Anda', 'Your Data Protection', 'Tu protección de datos'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 12),
-                  Text(tr('Di SubTrack IQ, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTrack IQ, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.'), style: TextStyle(color: subTextColor, height: 1.5, fontSize: 13)),
+                  Text(tr('Di SubTrack IQ, kami menganggap privasi pengguna sebagai hal yang mutlak. Aplikasi ini dirancang menggunakan arsitektur Offline-First.', 'At SubTrack IQ, we take user privacy absolutely seriously. This app is designed using an Offline-First architecture.', 'En SubTrack IQ, nos tomamos absolutamente en serio la privacidad del usuario. Esta aplicación está diseñada utilizando una arquitectura sin conexión.'), style: TextStyle(color: subTextColor, height: 1.5, fontSize: 13)),
                   const SizedBox(height: 24),
                   
-                  _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection'), tr('SubTrack IQ tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubTrack IQ does not collect your personal data. You use this app anonymously.'), textColor, subTextColor),
-                  _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage'), tr('Semua data tagihan dan nama Anda murni disimpan dan dienkripsi di dalam memori internal HP Anda. Tidak ada data yang dikirim ke Cloud.', 'All your bills and name are purely saved and encrypted locally in your phone. No data is sent to the Cloud.'), textColor, subTextColor),
-                  _buildPrivacyPoint('3', tr('Sistem Notifikasi Pintar', 'Smart Notification System'), tr('Pengingat tagihan berjalan langsung di latar belakang sistem HP Anda tanpa perlu menghubungi server eksternal.', 'Bill reminders run locally on your phone background without needing to contact external servers.'), textColor, subTextColor),
-                  _buildPrivacyPoint('4', tr('Akses Pihak Ketiga', 'Third-Party Access'), tr('Kami menjamin 100% bahwa data finansial Anda tidak akan pernah dijual atau dibagikan ke pihak ketiga manapun untuk tujuan iklan.', 'We 100% guarantee that your financial data will never be sold or shared to any third parties for advertising.'), textColor, subTextColor),
-                  _buildPrivacyPoint('5', tr('Kendali Penuh Pengguna', 'Full User Control'), tr('Anda memegang kendali mutlak. Anda bebas mengatur, mengubah, hingga memusnahkan seluruh catatan Anda kapan saja.', 'You hold absolute control. You are free to manage, edit, or destroy all your records anytime.'), textColor, subTextColor),
+                  _buildPrivacyPoint('1', tr('Pengumpulan Data', 'Data Collection', 'Recopilación de datos'), tr('SubTrack IQ tidak mengumpulkan atau merekam data identitas pribadi Anda. Anda menggunakan aplikasi ini secara anonim.', 'SubTrack IQ does not collect your personal data. You use this app anonymously.', 'SubTrack IQ no recopila sus datos personales. Utiliza esta aplicación de forma anónima.'), textColor, subTextColor),
+                  _buildPrivacyPoint('2', tr('Penyimpanan Lokal (On-Device)', 'Local Storage', 'Almacenamiento local'), tr('Semua data tagihan dan nama Anda murni disimpan dan dienkripsi di dalam memori internal HP Anda. Tidak ada data yang dikirim ke Cloud.', 'All your bills and name are purely saved and encrypted locally in your phone. No data is sent to the Cloud.', 'Todas sus facturas y su nombre se guardan y cifran exclusivamente localmente en su teléfono. No se envían datos a la nube.'), textColor, subTextColor),
+                  _buildPrivacyPoint('3', tr('Sistem Notifikasi Pintar', 'Smart Notification System', 'Sistema de notificación inteligente'), tr('Pengingat tagihan berjalan langsung di latar belakang sistem HP Anda tanpa perlu menghubungi server eksternal.', 'Bill reminders run locally on your phone background without needing to contact external servers.', 'Los recordatorios de facturas se ejecutan localmente en el fondo de su teléfono sin necesidad de contactar servidores externos.'), textColor, subTextColor),
+                  _buildPrivacyPoint('4', tr('Akses Pihak Ketiga', 'Third-Party Access', 'Acceso de terceros'), tr('Kami menjamin 100% bahwa data finansial Anda tidak akan pernah dijual atau dibagikan ke pihak ketiga manapun untuk tujuan iklan.', 'We 100% guarantee that your financial data will never be sold or shared to any third parties for advertising.', 'Garantizamos al 100% que sus datos financieros nunca serán vendidos ni compartidos con terceros con fines publicitarios.'), textColor, subTextColor),
+                  _buildPrivacyPoint('5', tr('Kendali Penuh Pengguna', 'Full User Control', 'Control total del usuario'), tr('Anda memegang kendali mutlak. Anda bebas mengatur, mengubah, hingga memusnahkan seluruh catatan Anda kapan saja.', 'You hold absolute control. You are free to manage, edit, or destroy all your records anytime.', 'Tienes el control absoluto. Eres libre de administrar, editar o destruir todos tus registros en cualquier momento.'), textColor, subTextColor),
                 ],
               ),
             ),

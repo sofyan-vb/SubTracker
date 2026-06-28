@@ -48,8 +48,10 @@ final ValueNotifier<String> currencyNotifier = ValueNotifier<String>('IDR');
 final ValueNotifier<String> ringtoneNotifier = ValueNotifier<String>('Default');
 final ValueNotifier<String> alarmNotifier = ValueNotifier<String>('alarm_lagu');
 
-String tr(String idText, String enText) {
-  return languageNotifier.value == 'ID' ? idText : enText;
+String tr(String idText, String enText, [String? esText]) {
+  if (languageNotifier.value == 'ID') return idText;
+  if (languageNotifier.value == 'ES') return esText ?? enText;
+  return enText;
 }
 
 class DashboardScreen extends StatefulWidget {
@@ -110,7 +112,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       await prefs.setBool('has_shown_welcome_toast', true);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          ToastUtils.show(context, tr('Selamat datang di SubTrack IQ!', 'Welcome to SubTrack IQ!'));
+          ToastUtils.show(context, tr('Selamat datang di SubTrack IQ!', 'Welcome to SubTrack IQ!', '¡Bienvenido a SubTrack IQ!'));
         }
       });
     }
@@ -145,11 +147,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tr('Urutkan Berdasarkan', 'Sort By'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                  Text(tr('Urutkan Berdasarkan', 'Sort By', 'Ordenar por'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 16),
-                  _buildSortTile(context, provider, tr('Terdekat', 'Closest'), Icons.calendar_today, textColor),
-                  _buildSortTile(context, provider, tr('Termahal', 'Highest Price'), Icons.arrow_upward, textColor),
-                  _buildSortTile(context, provider, tr('Termurah', 'Lowest Price'), Icons.arrow_downward, textColor),
+                  _buildSortTile(context, provider, tr('Terdekat', 'Closest', 'Más cercano'), Icons.calendar_today, textColor),
+                  _buildSortTile(context, provider, tr('Termahal', 'Highest Price', 'Precio más alto'), Icons.arrow_upward, textColor),
+                  _buildSortTile(context, provider, tr('Termurah', 'Lowest Price', 'Precio más bajo'), Icons.arrow_downward, textColor),
                   _buildSortTile(context, provider, 'A-Z', Icons.sort_by_alpha, textColor),
                   const SizedBox(height: 20),
                 ],
@@ -373,9 +375,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
                 elevation: 0,
                 title: Text(
-                  _currentIndex == 1 ? tr('Kalender', 'Calendar') : 
-                  _currentIndex == 2 ? tr('Statistik', 'Statistics') : 
-                  tr('Pengaturan', 'Settings'),
+                  _currentIndex == 1 ? tr('Kalender', 'Calendar', 'Calendario') : 
+                  _currentIndex == 2 ? tr('Statistik', 'Statistics', 'Estadística') : 
+                  tr('Pengaturan', 'Settings', 'Ajustes'),
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -0.5)
                 ),
                 centerTitle: false,
@@ -639,7 +641,7 @@ class _HomeViewState extends State<_HomeView> {
                   }
                 ),
                 const SizedBox(height: 6),
-                Text(tr('Pengguna Aktif', 'Active User'), style: TextStyle(color: subTextCol, fontSize: 13)),
+                Text(tr('Pengguna Aktif', 'Active User', 'Usuario activo'), style: TextStyle(color: subTextCol, fontSize: 13)),
                 const SizedBox(height: 24),
                 
                 Consumer<SubProvider>(
@@ -651,14 +653,14 @@ class _HomeViewState extends State<_HomeView> {
                         Column(
                           children: [
                             Text('${provider.activeSubs.length}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF2563EB))),
-                            Text(tr('Langganan', 'Subscriptions'), style: TextStyle(fontSize: 11, color: subTextCol)),
+                            Text(tr('Langganan', 'Subscriptions', 'Suscripciones'), style: TextStyle(fontSize: 11, color: subTextCol)),
                           ],
                         ),
                         Container(width: 1, height: 30, color: isDark ? Colors.white24 : Colors.grey.shade200),
                         Column(
                           children: [
                             Text(currencyFormat.format(provider.totalMonthly), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.redAccent)),
-                            Text(tr('Pengeluaran', 'Expenses'), style: TextStyle(fontSize: 11, color: subTextCol)),
+                            Text(tr('Pengeluaran', 'Expenses', 'Gastos'), style: TextStyle(fontSize: 11, color: subTextCol)),
                           ],
                         ),
                       ],
@@ -688,7 +690,7 @@ class _HomeViewState extends State<_HomeView> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(tr('Pilih Kategori', 'Select Category'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(tr('Pilih Kategori', 'Select Category', 'Seleccionar categoría'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               Wrap(
                 spacing: 10, runSpacing: 10,
@@ -705,7 +707,7 @@ class _HomeViewState extends State<_HomeView> {
                         color: isSelected ? const Color(0xFF2563EB) : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(cat == 'Semua' ? tr('Semua Layanan', 'All Services') : cat, style: TextStyle(color: isSelected ? Colors.white : textColor, fontWeight: FontWeight.bold, fontSize: 13)),
+                      child: Text(cat == 'Semua' ? tr('Semua Layanan', 'All Services', 'Todos los servicios') : cat, style: TextStyle(color: isSelected ? Colors.white : textColor, fontWeight: FontWeight.bold, fontSize: 13)),
                     ),
                   );
                 }).toList(),
@@ -746,14 +748,14 @@ class _HomeViewState extends State<_HomeView> {
                     children: [
                       Icon(Icons.notifications_active_rounded, color: textColor),
                       const SizedBox(width: 12),
-                      Text(tr('Notifikasi Tagihan', 'Bill Notifications'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                      Text(tr('Notifikasi Tagihan', 'Bill Notifications', 'Notificaciones de facturas'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                     ],
                   ),
                   const SizedBox(height: 16),
                     upcomingSubs.isEmpty 
                       ? Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Center(child: Text(tr('Tidak ada tagihan saat ini', 'No bills currently'), style: TextStyle(color: textColor.withValues(alpha: 0.5)))),
+                          child: Center(child: Text(tr('Tidak ada tagihan saat ini', 'No bills currently', 'No hay facturas actualmente'), style: TextStyle(color: textColor.withValues(alpha: 0.5)))),
                         )
                     : ListView.builder(
                         shrinkWrap: true,
@@ -763,7 +765,7 @@ class _HomeViewState extends State<_HomeView> {
                           final sub = upcomingSubs[i];
                           final subDate = _extractDateSafely(sub);
                           int daysLeft = subDate != null ? subDate.difference(now).inDays : 0;
-                          String daysLeftStr = daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft';
+                          String daysLeftStr = daysLeft <= 0 ? tr('Hari Ini', 'Today', 'Hoy') : 'H-$daysLeft';
 
                           return ListTile(
                             contentPadding: EdgeInsets.zero,
@@ -773,7 +775,7 @@ class _HomeViewState extends State<_HomeView> {
                               child: const Icon(Icons.warning_rounded, color: Colors.redAccent, size: 20),
                             ),
                             title: Text(sub.name, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-                            subtitle: Text(tr('Sekarang waktunya tagihan', 'Now its bill time'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 10)),
+                            subtitle: Text(tr('Sekarang waktunya tagihan', 'Now its bill time', 'Ahora es el momento de facturar'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 10)),
                             trailing: Text(daysLeftStr, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
                           );
                         }
@@ -824,9 +826,9 @@ class _HomeViewState extends State<_HomeView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(isDark ? tr('Mode Terang', 'Light Mode') : tr('Mode Gelap', 'Dark Mode'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(isDark ? tr('Mode Terang', 'Light Mode', 'Modo de luz') : tr('Mode Gelap', 'Dark Mode', 'Modo oscuro'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(tr('Ubah tema aplikasi sesuai kenyamanan mata Anda.', 'Change the app theme for your eye comfort.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
+                            Text(tr('Ubah tema aplikasi sesuai kenyamanan mata Anda.', 'Change the app theme for your eye comfort.', 'Cambie el tema de la aplicación para su comodidad visual.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
                           ],
                         ),
                       ),
@@ -855,9 +857,9 @@ class _HomeViewState extends State<_HomeView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(tr('Sinkronisasi Google Drive', 'Sync Google Drive'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(tr('Sinkronisasi Google Drive', 'Sync Google Drive', 'Sincronizar Google Drive'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(tr('Simpan dan pulihkan cadangan data Anda secara aman menggunakan akun Google Drive pribadi Anda.', 'Safely backup and restore your data using your personal Google Drive account.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
+                            Text(tr('Simpan dan pulihkan cadangan data Anda secara aman menggunakan akun Google Drive pribadi Anda.', 'Safely backup and restore your data using your personal Google Drive account.', 'Haga una copia de seguridad y restaure sus datos de forma segura utilizando su cuenta personal de Google Drive.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
                           ],
                         ),
                       ),
@@ -886,9 +888,9 @@ class _HomeViewState extends State<_HomeView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(tr('Sinkronisasi Firebase', 'Sync Firebase'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                            Text(tr('Sinkronisasi Firebase', 'Sync Firebase', 'Sincronizar base de fuego'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(tr('Sinkronkan data ke cloud Firebase agar dapat diakses secara sinkron dan real-time dari perangkat lain.', 'Sync data to Firebase cloud to access synchronously and real-time from other devices.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
+                            Text(tr('Sinkronkan data ke cloud Firebase agar dapat diakses secara sinkron dan real-time dari perangkat lain.', 'Sync data to Firebase cloud to access synchronously and real-time from other devices.', 'Sincronice datos con la nube de Firebase para acceder de forma sincrónica y en tiempo real desde otros dispositivos.'), style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 12, height: 1.3)),
                           ],
                         ),
                       ),
@@ -923,10 +925,10 @@ class _HomeViewState extends State<_HomeView> {
     final namaBulanSingkat = languageNotifier.value == 'ID' ? namaBulanSingkatID : namaBulanSingkatEN;
 
     final hour = DateTime.now().hour;
-    String greeting = tr('Selamat Pagi', 'Good Morning');
-    if (hour >= 12 && hour < 15) greeting = tr('Selamat Siang', 'Good Afternoon');
-    else if (hour >= 15 && hour < 18) greeting = tr('Selamat Sore', 'Good Evening');
-    else if (hour >= 18 || hour < 4) greeting = tr('Selamat Malam', 'Good Night');
+    String greeting = tr('Selamat Pagi', 'Good Morning', 'Buen día');
+    if (hour >= 12 && hour < 15) greeting = tr('Selamat Siang', 'Good Afternoon', 'Buenas tardes');
+    else if (hour >= 15 && hour < 18) greeting = tr('Selamat Sore', 'Good Evening', 'Buenas noches');
+    else if (hour >= 18 || hour < 4) greeting = tr('Selamat Malam', 'Good Night', 'Buenas noches');
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     Color bgColor = isDark ? const Color(0xFF0F172A) : Colors.white;
@@ -1017,11 +1019,11 @@ class _HomeViewState extends State<_HomeView> {
       
       if (pieSections.isEmpty) {
         pieSections.add(PieChartSectionData(color: Colors.grey[300], value: 100, title: '', radius: 20));
-        legendWidgets.add(Text(tr('Belum ada data', 'No data yet'), style: TextStyle(color: subTextColor, fontSize: 11)));
+        legendWidgets.add(Text(tr('Belum ada data', 'No data yet', 'Aún no hay datos'), style: TextStyle(color: subTextColor, fontSize: 11)));
       }
     } else {
       pieSections.add(PieChartSectionData(color: Colors.grey[300], value: 100, title: '', radius: 20));
-      legendWidgets.add(Text(tr('Belum ada data', 'No data yet'), style: TextStyle(color: subTextColor, fontSize: 11)));
+      legendWidgets.add(Text(tr('Belum ada data', 'No data yet', 'Aún no hay datos'), style: TextStyle(color: subTextColor, fontSize: 11)));
     }
 
     return CustomScrollView(
@@ -1081,7 +1083,7 @@ class _HomeViewState extends State<_HomeView> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      _isFirstLaunch ? tr('Selamat datang', 'Welcome') : tr('Selamat datang kembali', 'Welcome back'), 
+                                      _isFirstLaunch ? tr('Selamat datang', 'Welcome', 'Bienvenido') : tr('Selamat datang kembali', 'Welcome back', 'Bienvenido de nuevo'), 
                                       style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -1114,7 +1116,7 @@ class _HomeViewState extends State<_HomeView> {
                                 setState(() {
                                   _sortByPrice = !_sortByPrice;
                                 });
-                                ToastUtils.show(context, _sortByPrice ? tr('Diurutkan berdasarkan Harga Termahal', 'Sorted by Highest Price') : tr('Diurutkan berdasarkan Waktu Terdekat', 'Sorted by Earliest Date'), icon: Icons.sort_rounded, iconColor: Colors.blue);
+                                ToastUtils.show(context, _sortByPrice ? tr('Diurutkan berdasarkan Harga Termahal', 'Sorted by Highest Price', 'Ordenado por precio más alto') : tr('Diurutkan berdasarkan Waktu Terdekat', 'Sorted by Earliest Date', 'Ordenado por fecha más temprana'), icon: Icons.sort_rounded, iconColor: Colors.blue);
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(8),
@@ -1204,7 +1206,7 @@ class _HomeViewState extends State<_HomeView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(tr('Analitik Pengeluaran', 'Spending Analytics'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
+                        Text(tr('Analitik Pengeluaran', 'Spending Analytics', 'Análisis de gastos'), style: TextStyle(color: textColor, fontSize: 15, fontWeight: FontWeight.bold)),
                         Row(
                           children: [
                             GestureDetector(
@@ -1236,7 +1238,7 @@ class _HomeViewState extends State<_HomeView> {
                                                     child: const Icon(Icons.history_rounded, color: Color(0xFF2563EB), size: 18),
                                                   ),
                                                   const SizedBox(width: 12),
-                                                  Text(tr('Riwayat Pembayaran', 'Payment History'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.bold)),
+                                                  Text(tr('Riwayat Pembayaran', 'Payment History', 'Historial de pagos'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.bold)),
                                                 ],
                                               ),
                                               IconButton(
@@ -1249,7 +1251,7 @@ class _HomeViewState extends State<_HomeView> {
                                           if (deletedSubs.isEmpty)
                                             Padding(
                                               padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Text(tr('Belum ada riwayat pembayaran', 'No payment history yet'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
+                                              child: Text(tr('Belum ada riwayat pembayaran', 'No payment history yet', 'Aún no hay historial de pagos'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
                                             )
                                           else
                                             Flexible(
@@ -1411,7 +1413,7 @@ class _HomeViewState extends State<_HomeView> {
                       children: [
                         Row(
                           children: [
-                            Text(tr('Total Tagihan Bulanan', 'Total Monthly Spending'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
+                            Text(tr('Total Tagihan Bulanan', 'Total Monthly Spending', 'Gasto mensual total'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500)),
                             const SizedBox(width: 8),
                             GestureDetector(
                               onTap: () {
@@ -1441,7 +1443,7 @@ class _HomeViewState extends State<_HomeView> {
                                                     child: const Icon(Icons.history_rounded, color: Colors.redAccent, size: 18),
                                                   ),
                                                   const SizedBox(width: 12),
-                                                  Text(tr('Layanan Dihapus', 'Deleted Services'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.bold)),
+                                                  Text(tr('Layanan Dihapus', 'Deleted Services', 'Servicios eliminados'), style: const TextStyle(color: Color(0xFF1E293B), fontSize: 16, fontWeight: FontWeight.bold)),
                                                 ],
                                               ),
                                               IconButton(icon: const Icon(Icons.close_rounded, color: Colors.black54), onPressed: () => Navigator.pop(ctx)),
@@ -1451,7 +1453,7 @@ class _HomeViewState extends State<_HomeView> {
                                           if (deletedSubs.isEmpty)
                                             Padding(
                                               padding: const EdgeInsets.symmetric(vertical: 20),
-                                              child: Text(tr('Belum ada layanan yang dihapus', 'No deleted services yet'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
+                                              child: Text(tr('Belum ada layanan yang dihapus', 'No deleted services yet', 'Aún no hay servicios eliminados'), style: const TextStyle(color: Colors.black54, fontSize: 14)),
                                             )
                                           else
                                             Flexible(
@@ -1483,7 +1485,7 @@ class _HomeViewState extends State<_HomeView> {
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
                               child: Text(
-                                '${provider.activeSubs.length} ${tr('Aktif', 'Active')}',
+                                '${provider.activeSubs.length} ${tr('Aktif', 'Active', 'Activo')}',
                                 style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)
                               ),
                             ),
@@ -1575,7 +1577,7 @@ class _HomeViewState extends State<_HomeView> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(tr('Insight Cepat', 'Quick Insight'), style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.bold)),
+                            Text(tr('Insight Cepat', 'Quick Insight', 'Información rápida'), style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
                             Builder(builder: (context) {
                               if (provider.activeSubs.isEmpty || categoryTotals.isEmpty) {
@@ -1627,7 +1629,7 @@ class _HomeViewState extends State<_HomeView> {
                               children: [
                                 Icon(Icons.category_rounded, color: const Color(0xFF2563EB), size: 16),
                                 const SizedBox(width: 6),
-                                Text(_selectedCategory == 'Semua' ? tr('Semua Layanan', 'All Services') : _selectedCategory, style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                                Text(_selectedCategory == 'Semua' ? tr('Semua Layanan', 'All Services', 'Todos los servicios') : _selectedCategory, style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold)),
                                 const SizedBox(width: 4),
                                 Icon(Icons.keyboard_arrow_down_rounded, color: textColor, size: 16),
                               ],
@@ -1640,7 +1642,7 @@ class _HomeViewState extends State<_HomeView> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(tr('Tagihan Mendatang', 'Upcoming Bills'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+                        Text(tr('Tagihan Mendatang', 'Upcoming Bills', 'Próximas facturas'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => HistoryScreen(bgColor: bgColor, textColor: textColor, cardBg: cardBg)));
@@ -1655,7 +1657,7 @@ class _HomeViewState extends State<_HomeView> {
                               children: [
                                 Icon(Icons.history_rounded, color: textColor, size: 14),
                                 const SizedBox(width: 4),
-                                Text(tr('Riwayat', 'History'), style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                                Text(tr('Riwayat', 'History', 'Historia'), style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -1674,7 +1676,7 @@ class _HomeViewState extends State<_HomeView> {
               child: SizedBox(
                 height: 140,
                 child: upcomingSubs.isEmpty 
-                  ? Center(child: Text(tr('Tidak ada tagihan', 'No upcoming bills'), style: TextStyle(color: subTextColor)))
+                  ? Center(child: Text(tr('Tidak ada tagihan', 'No upcoming bills', 'No hay facturas próximas'), style: TextStyle(color: subTextColor)))
                   : ListView.builder(
                       physics: const BouncingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
@@ -1713,7 +1715,7 @@ class _HomeViewState extends State<_HomeView> {
                                   children: [
                                     Text(sub.name, style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
                                     const SizedBox(height: 2),
-                                    Text('${daysLeft <= 0 ? tr('Hari Ini', 'Today') : 'H-$daysLeft'}', style: TextStyle(color: const Color(0xFF2563EB), fontSize: 11, fontWeight: FontWeight.bold)),
+                                    Text('${daysLeft <= 0 ? tr('Hari Ini', 'Today', 'Hoy') : 'H-$daysLeft'}', style: TextStyle(color: const Color(0xFF2563EB), fontSize: 11, fontWeight: FontWeight.bold)),
                                     const SizedBox(height: 6),
                                     Text(currencyFormat.format(CurrencyUtils.convert(sub.price, sub.currency, currencyNotifier.value)), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w900)),
                                   ],
@@ -1920,7 +1922,7 @@ class _CalendarViewState extends State<_CalendarView> {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                    child: Text('${tr('Jadwal:', 'Schedule:', 'Cronograma:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 
@@ -1949,7 +1951,7 @@ class _CalendarViewState extends State<_CalendarView> {
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: subTextColor.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.bold))),
+                    child: Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today', 'Libre de facturas hoy'), style: TextStyle(color: subTextColor.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.bold))),
                     ),
                   )
                 else
@@ -2062,7 +2064,7 @@ class _CalendarViewState extends State<_CalendarView> {
                 
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('${tr('Jadwal:', 'Schedule:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
+                  child: Text('${tr('Jadwal:', 'Schedule:', 'Cronograma:')} $stringTanggalPilih', style: TextStyle(color: textColor, fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
                 
                 if (selectedHoliday != null)
@@ -2086,7 +2088,7 @@ class _CalendarViewState extends State<_CalendarView> {
                 
                 Expanded(
                   child: subsOnSelectedDate.isEmpty
-                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today'), style: TextStyle(color: subTextColor.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.bold)))
+                      ? Center(child: Text(tr('Bebas tagihan di hari ini', 'Free of bills today', 'Libre de facturas hoy'), style: TextStyle(color: subTextColor.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.bold)))
                       : ListView.builder(
                           padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100), 
                           physics: const BouncingScrollPhysics(),
@@ -2168,7 +2170,7 @@ class _StatsViewState extends State<_StatsView> {
               ],
             ),
             const SizedBox(height: 8),
-            Text(tr('Tren Pengeluaran', 'Spending Trend'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.w500)),
+            Text(tr('Tren Pengeluaran', 'Spending Trend', 'Tendencia del gasto'), style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.w500)),
             
             const SizedBox(height: 24),
             
@@ -2253,12 +2255,12 @@ class _StatsViewState extends State<_StatsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Analisis Cepat', 'Quick Analysis'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
+                        Text(tr('Analisis Cepat', 'Quick Analysis', 'Análisis rápido'), style: TextStyle(color: textColor, fontSize: 14, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Text(
                           totalMonthly > 500000 
-                            ? tr('Pengeluaran Anda cukup tinggi bulan ini. Coba cek langganan yang jarang terpakai.', 'Your spending is quite high this month. Try checking unused subscriptions.') 
-                            : tr('Pengeluaran Anda sangat stabil dan terkendali. Pertahankan!', 'Your spending is very stable and controlled. Keep it up!'),
+                            ? tr('Pengeluaran Anda cukup tinggi bulan ini. Coba cek langganan yang jarang terpakai.', 'Your spending is quite high this month. Try checking unused subscriptions.', 'Tu gasto es bastante alto este mes. Intente comprobar las suscripciones no utilizadas.') 
+                            : tr('Pengeluaran Anda sangat stabil dan terkendali. Pertahankan!', 'Your spending is very stable and controlled. Keep it up!', 'Tu gasto es muy estable y controlado. ¡Avanza!'),
                           style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5),
                         ),
                       ],
@@ -2270,7 +2272,7 @@ class _StatsViewState extends State<_StatsView> {
             
             
             if (provider.activeSubs.isNotEmpty) ...[
-              Text(tr('Distribusi Layanan', 'Service Distribution'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(tr('Distribusi Layanan', 'Service Distribution', 'Distribución de servicios'), style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(20),
@@ -2391,7 +2393,7 @@ class _StatsViewState extends State<_StatsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('Proyeksi Tagihan Tahunan', 'Annual Billing Projection'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                          Text(tr('Proyeksi Tagihan Tahunan', 'Annual Billing Projection', 'Proyección de Facturación Anual'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 4),
                           FittedBox(
                             fit: BoxFit.scaleDown,
@@ -2402,7 +2404,7 @@ class _StatsViewState extends State<_StatsView> {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Text(tr('Total biaya yang akan Anda keluarkan jika seluruh langganan saat ini berlanjut selama 1 tahun penuh.', 'Total cost if your current subscriptions continue for a full year.'), style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11, height: 1.4)),
+                          Text(tr('Total biaya yang akan Anda keluarkan jika seluruh langganan saat ini berlanjut selama 1 tahun penuh.', 'Total cost if your current subscriptions continue for a full year.', 'Costo total si sus suscripciones actuales continúan durante un año completo.'), style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 11, height: 1.4)),
                         ],
                       ),
                     ),
@@ -2437,7 +2439,7 @@ class _StatsViewState extends State<_StatsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tr('Beban Langganan Harian', 'Daily Subscription Burden'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                          Text(tr('Beban Langganan Harian', 'Daily Subscription Burden', 'Carga de suscripción diaria'), style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 4),
                           FittedBox(
                             fit: BoxFit.scaleDown,
@@ -2449,7 +2451,7 @@ class _StatsViewState extends State<_StatsView> {
                             ),
                           ),
                           const SizedBox(height: 6),
-                          Text(tr('Tanpa sadar, ini adalah jumlah uang Anda yang terus mengalir keluar setiap harinya.', 'Without realizing it, this is the amount of your money flowing out every single day.'), style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11, height: 1.4)),
+                          Text(tr('Tanpa sadar, ini adalah jumlah uang Anda yang terus mengalir keluar setiap harinya.', 'Without realizing it, this is the amount of your money flowing out every single day.', 'Sin darte cuenta, esta es la cantidad de dinero que sale todos los días.'), style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 11, height: 1.4)),
                         ],
                       ),
                     ),
@@ -2460,7 +2462,7 @@ class _StatsViewState extends State<_StatsView> {
             ],
 
             Text(
-              tr('Kategori Pengeluaran', 'Recent by Category'),
+              tr('Kategori Pengeluaran', 'Recent by Category', 'Reciente por categoría'),
               style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)
             ),
             const SizedBox(height: 16),
@@ -2468,7 +2470,7 @@ class _StatsViewState extends State<_StatsView> {
             if (breakdown.isEmpty)
               Center(child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Text(tr('Belum ada data', 'No data yet'), style: TextStyle(color: subTextColor)),
+                child: Text(tr('Belum ada data', 'No data yet', 'Aún no hay datos'), style: TextStyle(color: subTextColor)),
               )),
               
             ...breakdown.entries.map((entry) {
@@ -2505,7 +2507,7 @@ class _StatsViewState extends State<_StatsView> {
             const SizedBox(height: 32),
             if (provider.activeSubs.isNotEmpty) ...[
               Text(
-                tr('Layanan Termahal', 'Most Expensive Services'),
+                tr('Layanan Termahal', 'Most Expensive Services', 'Servicios más caros'),
                 style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)
               ),
               const SizedBox(height: 16),
@@ -2604,10 +2606,10 @@ class _SettingsViewState extends State<_SettingsView> {
           await prefs.setString('saved_subs', data);
           
           if (mounted) {
-            ToastUtils.show(context, tr('Data berhasil dipulihkan! Tutup dan buka ulang aplikasi.', 'Data restored successfully! Close and reopen app.'));
+            ToastUtils.show(context, tr('Data berhasil dipulihkan! Tutup dan buka ulang aplikasi.', 'Data restored successfully! Close and reopen app.', '¡Datos restaurados exitosamente! Cierra y vuelve a abrir la aplicación.'));
           }
         } else {
-          if (mounted) ToastUtils.show(context, tr('Format file backup tidak valid', 'Invalid backup format'), icon: Icons.error_outline, iconColor: Colors.redAccent);
+          if (mounted) ToastUtils.show(context, tr('Format file backup tidak valid', 'Invalid backup format', 'Formato de copia de seguridad no válido'), icon: Icons.error_outline, iconColor: Colors.redAccent);
         }
       }
     } catch(e) {
@@ -2648,26 +2650,26 @@ class _SettingsViewState extends State<_SettingsView> {
                   inactiveThumbColor: Colors.grey,
                   inactiveTrackColor: isDark ? Colors.white24 : Colors.grey.shade300,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
-                  subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date'), style: TextStyle(color: subTextColor, fontSize: 11)),
+                  title: Text(tr('Notifikasi Pengingat', 'Reminder Notifications', 'Notificaciones de recordatorio'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+                  subtitle: Text(tr('Alarm berbunyi saat tagihan', 'Alarm rings on due date', 'Suena la alarma en la fecha de vencimiento'), style: TextStyle(color: subTextColor, fontSize: 11)),
                   value: _notifEnabled,
                   onChanged: (val) {
                     setState(() => _notifEnabled = val);
-                    ToastUtils.show(context, val ? tr('Notifikasi Diaktifkan', 'Notifications Enabled') : tr('Notifikasi Dimatikan', 'Notifications Disabled'));
+                    ToastUtils.show(context, val ? tr('Notifikasi Diaktifkan', 'Notifications Enabled', 'Notificaciones habilitadas') : tr('Notifikasi Dimatikan', 'Notifications Disabled', 'Notificaciones deshabilitadas'));
                   },
                 ),
               ),
             ),
 
             
-            _buildGroupHeader(Icons.person, tr('Preferensi Pengguna', 'User Preferences')),
+            _buildGroupHeader(Icons.person, tr('Preferensi Pengguna', 'User Preferences', 'Preferencias de usuario')),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.account_circle, tr('Profil Saya', 'My Profile'), tr('Ubah Nama & Foto', 'Edit Name & Photo'), () {
+              child: _buildSettingTile(Icons.account_circle, tr('Profil Saya', 'My Profile', 'Mi perfil'), tr('Ubah Nama & Foto', 'Edit Name & Photo', 'Editar nombre y foto'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen(bgColor: scaffoldBg, textColor: textColor, cardBg: cardBg)));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', () {
+              child: _buildSettingTile(Icons.language_rounded, tr('Bahasa Aplikasi', 'App Language', 'Idioma de la aplicación'), languageNotifier.value == 'ID' ? 'Bahasa Indonesia' : 'English', () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const LanguageScreen()));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
@@ -2675,7 +2677,7 @@ class _SettingsViewState extends State<_SettingsView> {
               child: ValueListenableBuilder<String>(
                 valueListenable: currencyNotifier,
                 builder: (context, currency, child) {
-                  return _buildSettingTile(Icons.attach_money_rounded, tr('Mata Uang', 'Currency'), '${CurrencyUtils.data[currency]!['name']} ($currency)', _showCurrencySelector, cardBg, textColor, subTextColor, widget.theme);
+                  return _buildSettingTile(Icons.attach_money_rounded, tr('Mata Uang', 'Currency', 'Divisa'), '${CurrencyUtils.data[currency]!['name']} ($currency)', _showCurrencySelector, cardBg, textColor, subTextColor, widget.theme);
                 }
               ),
             ),
@@ -2686,7 +2688,7 @@ class _SettingsViewState extends State<_SettingsView> {
                   return ValueListenableBuilder<String>(
                     valueListenable: alarmNotifier,
                     builder: (context, alarm, child) {
-                      return _buildSettingTile(Icons.library_music_rounded, tr('Nada Notifikasi', 'Notification Sound'), "${ringtone == 'default_system' ? 'DEFAULT' : ringtone.replaceAll('ringtone_', '').toUpperCase()} | ${alarm.replaceAll('alarm_', '').toUpperCase()}", () {
+                      return _buildSettingTile(Icons.library_music_rounded, tr('Nada Notifikasi', 'Notification Sound', 'Sonido de notificación'), "${ringtone == 'default_system' ? 'DEFAULT' : ringtone.replaceAll('ringtone_', '').toUpperCase()} | ${alarm.replaceAll('alarm_', '').toUpperCase()}", () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationSoundScreen()));
                       }, cardBg, textColor, subTextColor, widget.theme);
                     }
@@ -2696,51 +2698,51 @@ class _SettingsViewState extends State<_SettingsView> {
             ),
 
             const SizedBox(height: 8),
-            _buildGroupHeader(Icons.storage_rounded, tr('Manajemen Data', 'Data Management')),
+            _buildGroupHeader(Icons.storage_rounded, tr('Manajemen Data', 'Data Management', 'Gestión de datos')),
 
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Exchange Calculator'), tr('Hitung estimasi konversi mata uang', 'Calculate estimated currency conversion'), () {
+              child: _buildSettingTile(Icons.currency_exchange_rounded, tr('Kalkulator Kurs', 'Exchange Calculator', 'Calculadora de cambio'), tr('Hitung estimasi konversi mata uang', 'Calculate estimated currency conversion', 'Calcular la conversión de moneda estimada'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => CurrencyExchangeScreen()));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.save_rounded, tr('Cadangkan Data', 'Backup Data'), tr('Ekspor ke File JSON', 'Export to JSON File'), _backupData, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.save_rounded, tr('Cadangkan Data', 'Backup Data', 'Datos de copia de seguridad'), tr('Ekspor ke File JSON', 'Export to JSON File', 'Exportar a archivo JSON'), _backupData, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.restore_rounded, tr('Pulihkan Data', 'Restore Data'), tr('Impor dari File', 'Import from File'), _restoreData, cardBg, textColor, subTextColor, widget.theme),
+              child: _buildSettingTile(Icons.restore_rounded, tr('Pulihkan Data', 'Restore Data', 'Restaurar datos'), tr('Impor dari File', 'Import from File', 'Importar desde archivo'), _restoreData, cardBg, textColor, subTextColor, widget.theme),
             ),
             const SizedBox(height: 8),
-            _buildGroupHeader(Icons.security_rounded, tr('Sistem & Privasi', 'System & Privacy')),
+            _buildGroupHeader(Icons.security_rounded, tr('Sistem & Privasi', 'System & Privacy', 'Sistema y privacidad')),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data'), tr('Kebijakan Privasi', 'Privacy Policy'), () {
+              child: _buildSettingTile(Icons.security_rounded, tr('Privasi & Data', 'Privacy & Data', 'Privacidad y datos'), tr('Kebijakan Privasi', 'Privacy Policy', 'política de privacidad'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyScreen()));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.warning_rounded, tr('Zona Bahaya', 'Danger Zone'), tr('Aksi Berisiko', 'Risky Actions'), () {
+              child: _buildSettingTile(Icons.warning_rounded, tr('Zona Bahaya', 'Danger Zone', 'Zona de peligro'), tr('Aksi Berisiko', 'Risky Actions', 'Acciones riesgosas'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const DangerZoneScreen()));
               }, cardBg, textColor, subTextColor, widget.theme, iconColor: Colors.redAccent, titleColor: Colors.redAccent),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.help_outline_rounded, tr('Pusat Bantuan', 'Help Center'), tr('FAQ & Bantuan Aplikasi', 'FAQ & App Help'), () {
+              child: _buildSettingTile(Icons.help_outline_rounded, tr('Pusat Bantuan', 'Help Center', 'Centro de ayuda'), tr('FAQ & Bantuan Aplikasi', 'FAQ & App Help', 'Preguntas frecuentes y ayuda de la aplicación'), () {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpCenterScreen()));
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.bug_report_rounded, tr('Laporkan Bug / Saran', 'Report Bug / Suggestion'), tr('Bantu kami jadi lebih baik', 'Help us get better'), () async {
+              child: _buildSettingTile(Icons.bug_report_rounded, tr('Laporkan Bug / Saran', 'Report Bug / Suggestion', 'Informar error/sugerencia'), tr('Bantu kami jadi lebih baik', 'Help us get better', 'Ayúdanos a mejorar'), () async {
                 final Uri emailLaunchUri = Uri(scheme: 'mailto', path: 'support@subtrackiq.com', query: 'subject=Laporan%20Bug%20/%20Saran%20SubTrack%20IQ');
                 try { await launchUrl(emailLaunchUri); } catch (e) { ToastUtils.show(context, 'Tidak dapat membuka email client'); }
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
-              child: _buildSettingTile(Icons.star_rate_rounded, tr('Beri Rating Aplikasi', 'Rate Our App'), tr('Dukung kami di Play Store', 'Support us on Play Store'), () async {
+              child: _buildSettingTile(Icons.star_rate_rounded, tr('Beri Rating Aplikasi', 'Rate Our App', 'Califica nuestra aplicación'), tr('Dukung kami di Play Store', 'Support us on Play Store', 'Apóyanos en Play Store'), () async {
                 final Uri url = Uri.parse('https://play.google.com/store/apps/details?id=com.sofyan.subtrackiq');
-                try { await launchUrl(url, mode: LaunchMode.externalApplication); } catch (e) { ToastUtils.show(context, tr('Tidak dapat membuka Play Store', 'Cannot open Play Store')); }
+                try { await launchUrl(url, mode: LaunchMode.externalApplication); } catch (e) { ToastUtils.show(context, tr('Tidak dapat membuka Play Store', 'Cannot open Play Store', 'No se puede abrir Play Store')); }
               }, cardBg, textColor, subTextColor, widget.theme),
             ),
             FadeInSlide(delay: Duration.zero,
               child: _buildSettingTile(
-                Icons.info_rounded, tr('Tentang SubTrack IQ', 'About SubTrack IQ'), 'Version 1.0.0',
+                Icons.info_rounded, tr('Tentang SubTrack IQ', 'About SubTrack IQ', 'Acerca de SubTrack IQ'), 'Version 1.0.0',
                 () => showAboutDialog(
                   context: context,
                   applicationName: 'SubTrack IQ',

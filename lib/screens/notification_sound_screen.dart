@@ -65,7 +65,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
           valueListenable: languageNotifier,
           builder: (context, lang, child) {
             return Text(
-              tr('Suara Notifikasi & Alarm', 'Notification & Alarm Sound'),
+              tr('Suara Notifikasi & Alarm', 'Notification & Alarm Sound', 'Notificación y sonido de alarma'),
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 18, letterSpacing: -0.5),
             );
           }
@@ -86,7 +86,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.only(left: 8, bottom: 8),
-              child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
+              child: Text(tr('Suara Notifikasi Biasa', 'Regular Notification', 'Notificación periódica'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 14)),
             ),
             Container(
               decoration: BoxDecoration(
@@ -109,7 +109,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
                           await prefs.setString('app_ringtone', val); 
                           setState((){});
                           _previewSound(val);
-                          if (context.mounted) ToastUtils.show(context, tr('Suara notifikasi diubah', 'Notification sound changed'));
+                          if (context.mounted) ToastUtils.show(context, tr('Suara notifikasi diubah', 'Notification sound changed', 'El sonido de notificación cambió'));
                         },
                       ),
                       if (r != 'ringtone_synth') Divider(color: isDark ? Colors.white12 : Colors.grey.shade200, height: 1),
@@ -123,7 +123,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
             
             Padding(
               padding: const EdgeInsets.only(left: 8, bottom: 8),
-              child: Text(tr('Suara Alarm Tagihan', 'Billing Alarm Sound'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)),
+              child: Text(tr('Suara Alarm Tagihan', 'Billing Alarm Sound', 'Sonido de alarma de facturación'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14)),
             ),
             Container(
               decoration: BoxDecoration(
@@ -147,7 +147,7 @@ class _NotificationSoundScreenState extends State<NotificationSoundScreen> {
                           await prefs.setString('app_alarm', val); 
                           setState((){});
                           _previewSound(val, isAlarm: true);
-                          if (context.mounted) ToastUtils.show(context, tr('Suara alarm diubah', 'Alarm sound changed'));
+                          if (context.mounted) ToastUtils.show(context, tr('Suara alarm diubah', 'Alarm sound changed', 'El sonido de la alarma cambió'));
                         },
                       ),
                       if (r != 'alarm_classic') Divider(color: isDark ? Colors.white12 : Colors.grey.shade200, height: 1),

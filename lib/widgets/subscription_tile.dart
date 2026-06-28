@@ -38,16 +38,16 @@ class _SubTileState extends State<SubTile> {
 
   String _getCountdownText(DateTime dueDate) {
     final diff = dueDate.difference(DateTime.now());
-    if (diff.isNegative) return tr('Waktunya Pembayaran!', 'Payment Due!');
+    if (diff.isNegative) return tr('Waktunya Pembayaran!', 'Payment Due!', '¡Pago vencido!');
     
     final days = diff.inDays;
     final hours = diff.inHours % 24;
     final minutes = diff.inMinutes % 60;
     final seconds = diff.inSeconds % 60;
 
-    if (days > 0) return tr('Tinggal $days Hari $hours Jam $minutes Menit $seconds Detik', '$days Days $hours Hrs $minutes Mins $seconds Secs Left');
-    if (hours > 0) return tr('Tinggal $hours Jam $minutes Menit $seconds Detik', '$hours Hrs $minutes Mins $seconds Secs Left');
-    return tr('Tinggal $minutes Menit $seconds Detik', '$minutes Mins $seconds Secs Left');
+    if (days > 0) return tr('Tinggal $days Hari $hours Jam $minutes Menit $seconds Detik', '$days Days $hours Hrs $minutes Mins $seconds Secs Left', '$days Días $hours Horas $minutes Minutos $seconds Segundos restantes');
+    if (hours > 0) return tr('Tinggal $hours Jam $minutes Menit $seconds Detik', '$hours Hrs $minutes Mins $seconds Secs Left', '$hours Horas $minutes Minutos $seconds Segundos restantes');
+    return tr('Tinggal $minutes Menit $seconds Detik', '$minutes Mins $seconds Secs Left', '$minutes Minutos $seconds Segundos restantes');
   }
 
   @override
@@ -91,7 +91,7 @@ class _SubTileState extends State<SubTile> {
                     provider.updateSub(updated);
                     if (isFinished) provider.addHistory(widget.sub.name, widget.sub.price, DateTime.now());
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr('Langganan dipulihkan', 'Subscription restored'), style: TextStyle(color: textColor)),
+                      content: Text(tr('Langganan dipulihkan', 'Subscription restored', 'Suscripción restaurada'), style: TextStyle(color: textColor)),
                       backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -100,14 +100,14 @@ class _SubTileState extends State<SubTile> {
                   backgroundColor: const Color(0xFF2563EB),
                   foregroundColor: Colors.white,
                   icon: Icons.restore,
-                  label: tr('Pulihkan', 'Restore'),
+                  label: tr('Pulihkan', 'Restore', 'Restaurar'),
                 ),
                 SlidableAction(
                   onPressed: (context) {
                     final provider = context.read<SubProvider>();
                     provider.removeSub(widget.sub.id);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr('Dihapus permanen', 'Permanently deleted'), style: TextStyle(color: textColor)),
+                      content: Text(tr('Dihapus permanen', 'Permanently deleted', 'Eliminado permanentemente'), style: TextStyle(color: textColor)),
                       backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -116,7 +116,7 @@ class _SubTileState extends State<SubTile> {
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
                   icon: Icons.delete_forever,
-                  label: tr('Hapus', 'Delete'),
+                  label: tr('Hapus', 'Delete', 'Borrar'),
                 ),
               ] else ...[
                 SlidableAction(
@@ -124,7 +124,7 @@ class _SubTileState extends State<SubTile> {
                     final provider = context.read<SubProvider>();
                     provider.markAsPaid(widget.sub);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr('Langganan ditandai selesai', 'Subscription marked as paid'), style: TextStyle(color: textColor)),
+                      content: Text(tr('Langganan ditandai selesai', 'Subscription marked as paid', 'Suscripción marcada como pagada'), style: TextStyle(color: textColor)),
                       backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -133,7 +133,7 @@ class _SubTileState extends State<SubTile> {
                   backgroundColor: const Color(0xFF10B981),
                   foregroundColor: Colors.white,
                   icon: Icons.check_circle_outline,
-                  label: tr('Selesai', 'Done'),
+                  label: tr('Selesai', 'Done', 'Hecho'),
                 ),
                 SlidableAction(
                   onPressed: (context) {
@@ -156,7 +156,7 @@ class _SubTileState extends State<SubTile> {
                     final provider = context.read<SubProvider>();
                     provider.deleteSub(widget.sub.id);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text(tr('Langganan dihapus', 'Subscription deleted'), style: TextStyle(color: textColor)),
+                      content: Text(tr('Langganan dihapus', 'Subscription deleted', 'Suscripción eliminada'), style: TextStyle(color: textColor)),
                       backgroundColor: cardBg,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -165,7 +165,7 @@ class _SubTileState extends State<SubTile> {
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
                   icon: Icons.delete_outline,
-                  label: tr('Hapus', 'Delete'),
+                  label: tr('Hapus', 'Delete', 'Borrar'),
                 ),
               ],
             ],
@@ -215,9 +215,9 @@ class _SubTileState extends State<SubTile> {
                           widget.sub.isPaused 
                               ? const Text('Sedang di-pause', style: TextStyle(color: Colors.orangeAccent, fontSize: 11, fontWeight: FontWeight.w600))
                               : isDeleted
-                                  ? MarqueeText(text: tr('Langganan telah dihapus.', 'Subscription has been deleted.'), style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
+                                  ? MarqueeText(text: tr('Langganan telah dihapus.', 'Subscription has been deleted.', 'La suscripción ha sido eliminada.'), style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
                                   : isFinished
-                                      ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600))
+                                      ? MarqueeText(text: tr('Pembayaran sudah selesai.', 'Payment completed.', 'Pago completado.'), style: const TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.w600))
                                       : isDue 
                                           ? MarqueeText(text: countdownText, style: const TextStyle(color: Colors.redAccent, fontSize: 11, fontWeight: FontWeight.w600))
                                           : Text(countdownText, style: TextStyle(color: subTextColor, fontSize: 11, fontWeight: FontWeight.w500)),

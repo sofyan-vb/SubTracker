@@ -90,11 +90,11 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(tr('Selamat Datang di', 'Welcome to'), style: TextStyle(fontSize: 18, color: subTextColor)),
+              Text(tr('Selamat Datang di', 'Welcome to', 'Bienvenido a'), style: TextStyle(fontSize: 18, color: subTextColor)),
               Text('SubTrack IQ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: textColor, letterSpacing: -1.0)),
               const SizedBox(height: 24),
 
-              Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
+              Text(tr('Syarat & Ketentuan Penggunaan', 'Terms & Conditions of Use', 'Términos y condiciones de uso'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor)),
               const SizedBox(height: 12),
               
               Expanded(
@@ -112,44 +112,39 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          tr('Dengan menggunakan aplikasi SubTrack IQ, Anda secara otomatis menyetujui seluruh ketentuan berikut:', 'By using the SubTrack IQ application, you automatically agree to all of the following terms:'),
+                          tr('Dengan menggunakan aplikasi SubTrack IQ, Anda secara otomatis menyetujui seluruh ketentuan berikut:', 'By using the SubTrack IQ application, you automatically agree to all of the following terms:', 'Al utilizar la aplicación SubTrack IQ, automáticamente acepta todos los términos siguientes:'),
                           style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, height: 1.5),
                         ),
                         const SizedBox(height: 20),
 
                         _buildTermItem(
                           '1', 
-                          tr('PENYIMPANAN DATA LOKAL', 'LOCAL DATA STORAGE'), 
-                          tr('Semua data yang Anda masukkan ke dalam aplikasi ini (termasuk nama langganan, harga, tenggat waktu, dan pengaturan lainnya) disimpan secara eksklusif di dalam memori internal perangkat Anda. Kami tidak memiliki akses ke data tersebut, tidak mencadangkannya di cloud, dan tidak membagikannya ke pihak ketiga manapun.', 
-                             'All data you enter into this app (including subscription names, prices, deadlines, and other settings) is stored exclusively in your device\'s internal memory. We do not have access to this data, do not back it up to the cloud, and do not share it with any third parties.'),
+                          tr('PENYIMPANAN DATA LOKAL', 'LOCAL DATA STORAGE', 'ALMACENAMIENTO DE DATOS LOCALES'), 
+                          tr('Semua data yang Anda masukkan ke dalam aplikasi ini (termasuk nama langganan, harga, tenggat waktu, dan pengaturan lainnya) disimpan secara eksklusif di dalam memori internal perangkat Anda. Kami tidak memiliki akses ke data tersebut, tidak mencadangkannya di cloud, dan tidak membagikannya ke pihak ketiga manapun.', 'All data you enter into this app (including subscription names, prices, deadlines, and other settings) is stored exclusively in your device\'s internal memory. We do not have access to this data, do not back it up to the cloud, and do not share it with any third parties.', 'Todos los datos que ingresa en esta aplicación (incluidos los nombres de las suscripciones, los precios, los plazos y otras configuraciones) se almacenan exclusivamente en la memoria interna de su dispositivo. No tenemos acceso a estos datos, no realizamos copias de seguridad de ellos en la nube y no los compartimos con terceros.'),
                           isDark
                         ),
                         _buildTermItem(
                           '2', 
-                          tr('IZIN SISTEM PERANGKAT', 'DEVICE SYSTEM PERMISSIONS'), 
-                          tr('Untuk memastikan fitur pengingat berjalan dengan sempurna, aplikasi ini mewajibkan pengguna untuk memberikan izin akses Notifikasi dan Alarm Tepat Waktu (Exact Alarms). Anda bertanggung jawab untuk memastikan bahwa pengaturan penghemat baterai (Battery Saver) di perangkat Anda tidak memblokir aplikasi ini berjalan di latar belakang.', 
-                             'To ensure the reminder feature runs perfectly, this app requires users to grant access to Notifications and Exact Alarms. You are responsible for ensuring that the Battery Saver settings on your device do not block this app from running in the background.'),
+                          tr('IZIN SISTEM PERANGKAT', 'DEVICE SYSTEM PERMISSIONS', 'PERMISOS DEL SISTEMA DEL DISPOSITIVO'), 
+                          tr('Untuk memastikan fitur pengingat berjalan dengan sempurna, aplikasi ini mewajibkan pengguna untuk memberikan izin akses Notifikasi dan Alarm Tepat Waktu (Exact Alarms). Anda bertanggung jawab untuk memastikan bahwa pengaturan penghemat baterai (Battery Saver) di perangkat Anda tidak memblokir aplikasi ini berjalan di latar belakang.', 'To ensure the reminder feature runs perfectly, this app requires users to grant access to Notifications and Exact Alarms. You are responsible for ensuring that the Battery Saver settings on your device do not block this app from running in the background.', 'Para garantizar que la función de recordatorio funcione perfectamente, esta aplicación requiere que los usuarios otorguen acceso a Notificaciones y Alarmas Exactas. Usted es responsable de garantizar que la configuración de Ahorro de batería en su dispositivo no bloquee la ejecución de esta aplicación en segundo plano.'),
                           isDark
                         ),
                         _buildTermItem(
                           '3', 
-                          tr('PEMBATASAN TANGGUNG JAWAB', 'LIMITATION OF LIABILITY'), 
-                          tr('SubTrack IQ dirancang sebagai alat bantu produktivitas semata. Segala bentuk kerugian finansial, denda keterlambatan pembayaran langganan, atau pemutusan layanan yang disebabkan oleh kelalaian pengguna, kegagalan perangkat dalam memunculkan notifikasi, atau bug sistem, berada sepenuhnya di luar tanggung jawab pengembang.', 
-                             'SubTrack IQ is designed solely as a productivity tool. Any form of financial loss, subscription late payment fines, or service termination caused by user negligence, device failure to show notifications, or system bugs, are entirely beyond the developer\'s responsibility.'),
+                          tr('PEMBATASAN TANGGUNG JAWAB', 'LIMITATION OF LIABILITY', 'LIMITACIÓN DE RESPONSABILIDAD'), 
+                          tr('SubTrack IQ dirancang sebagai alat bantu produktivitas semata. Segala bentuk kerugian finansial, denda keterlambatan pembayaran langganan, atau pemutusan layanan yang disebabkan oleh kelalaian pengguna, kegagalan perangkat dalam memunculkan notifikasi, atau bug sistem, berada sepenuhnya di luar tanggung jawab pengembang.', 'SubTrack IQ is designed solely as a productivity tool. Any form of financial loss, subscription late payment fines, or service termination caused by user negligence, device failure to show notifications, or system bugs, are entirely beyond the developer\'s responsibility.', 'SubTrack IQ está diseñado únicamente como una herramienta de productividad. Cualquier forma de pérdida financiera, multas por pagos atrasados ​​de suscripción o terminación del servicio causada por negligencia del usuario, falla del dispositivo para mostrar notificaciones o errores del sistema, están completamente fuera de la responsabilidad del desarrollador.'),
                           isDark
                         ),
                         _buildTermItem(
                           '4', 
-                          tr('PENGHAPUSAN APLIKASI', 'APP UNINSTALLATION'), 
-                          tr('Karena data disimpan secara lokal, menghapus (uninstall) aplikasi dari perangkat Anda akan mengakibatkan hilangnya seluruh data catatan langganan secara permanen tanpa kemungkinan pemulihan.', 
-                             'Because data is stored locally, uninstalling the app from your device will result in the permanent loss of all subscription record data without the possibility of recovery.'),
+                          tr('PENGHAPUSAN APLIKASI', 'APP UNINSTALLATION', 'DESINSTALACIÓN DE LA APLICACIÓN'), 
+                          tr('Karena data disimpan secara lokal, menghapus (uninstall) aplikasi dari perangkat Anda akan mengakibatkan hilangnya seluruh data catatan langganan secara permanen tanpa kemungkinan pemulihan.', 'Because data is stored locally, uninstalling the app from your device will result in the permanent loss of all subscription record data without the possibility of recovery.', 'Debido a que los datos se almacenan localmente, desinstalar la aplicación de su dispositivo resultará en la pérdida permanente de todos los datos del registro de suscripción sin posibilidad de recuperación.'),
                           isDark
                         ),
                         _buildTermItem(
                           '5', 
-                          tr('PEMBARUAN KETENTUAN', 'TERMS UPDATE'), 
-                          tr('Pengembang berhak untuk mengubah, memodifikasi, atau memperbarui Syarat & Ketentuan ini kapan saja tanpa pemberitahuan sebelumnya, demi menyesuaikan dengan kebijakan keamanan atau penambahan fitur baru.', 
-                             'The developer reserves the right to change, modify, or update these Terms & Conditions at any time without prior notice, to adapt to security policies or the addition of new features.'),
+                          tr('PEMBARUAN KETENTUAN', 'TERMS UPDATE', 'ACTUALIZACIÓN DE TÉRMINOS'), 
+                          tr('Pengembang berhak untuk mengubah, memodifikasi, atau memperbarui Syarat & Ketentuan ini kapan saja tanpa pemberitahuan sebelumnya, demi menyesuaikan dengan kebijakan keamanan atau penambahan fitur baru.', 'The developer reserves the right to change, modify, or update these Terms & Conditions at any time without prior notice, to adapt to security policies or the addition of new features.', 'El desarrollador se reserva el derecho de cambiar, modificar o actualizar estos Términos y Condiciones en cualquier momento sin previo aviso, para adaptarse a políticas de seguridad o la incorporación de nuevas funciones.'),
                           isDark
                         ),
                         
@@ -157,11 +152,11 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                         Divider(color: borderCol, thickness: 1),
                         const SizedBox(height: 16),
                         
-                        Text(tr('Aplikasi ini dirancang dan dikembangkan secara independen.', 'This application is designed and developed independently.'), style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5)),
+                        Text(tr('Aplikasi ini dirancang dan dikembangkan secara independen.', 'This application is designed and developed independently.', 'Esta aplicación está diseñada y desarrollada de forma independiente.'), style: TextStyle(color: subTextColor, fontSize: 12, height: 1.5)),
                         const SizedBox(height: 4),
-                        Text(tr('Dibuat oleh: Sofyan Ibnu', 'Created by: Sofyan Ibnu'), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                        Text(tr('Dibuat oleh: Sofyan Ibnu', 'Created by: Sofyan Ibnu', 'Creado por: Sofyan Ibnu'), style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 2),
-                        Text(tr('Tahun Rilis: 2026', 'Release Year: 2026'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                        Text(tr('Tahun Rilis: 2026', 'Release Year: 2026', 'Año de lanzamiento: 2026'), style: TextStyle(color: subTextColor, fontSize: 12)),
                         const SizedBox(height: 16),
                         Divider(color: borderCol, thickness: 1),
                         const SizedBox(height: 16),
@@ -175,7 +170,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
               const SizedBox(height: 12),
               GestureDetector(
                 onTap: _hasScrolledToBottom ? () => setState(() => _isAgreed = !_isAgreed) : () {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Harap scroll sampai ke bawah terlebih dahulu', 'Please scroll to the bottom first')), behavior: SnackBarBehavior.floating));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(tr('Harap scroll sampai ke bawah terlebih dahulu', 'Please scroll to the bottom first', 'Por favor, desplácese hacia abajo primero.')), behavior: SnackBarBehavior.floating));
                 },
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -195,7 +190,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        tr('Saya telah membaca dan menyetujui Syarat & Ketentuan', 'I have read and agree to the Terms & Conditions'),
+                        tr('Saya telah membaca dan menyetujui Syarat & Ketentuan', 'I have read and agree to the Terms & Conditions', 'He leído y acepto los Términos y condiciones'),
                         style: TextStyle(color: _hasScrolledToBottom ? textColor : subTextColor, fontSize: 13, fontWeight: FontWeight.w500),
                       ),
                     ),
@@ -208,7 +203,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                 children: [
                   TextButton(
                     onPressed: _isLoading ? null : _declineTerms,
-                    child: Text(tr('Tolak', 'Decline'), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
+                    child: Text(tr('Tolak', 'Decline', 'Rechazar'), style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold)),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -224,7 +219,7 @@ class _TermsScreenState extends State<TermsScreen> with TickerProviderStateMixin
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT'), style: TextStyle(color: _isAgreed ? Colors.white : Colors.white30, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+                              Text(tr('TERIMA & LANJUT', 'ACCEPT & NEXT', 'ACEPTAR Y SIGUIENTE'), style: TextStyle(color: _isAgreed ? Colors.white : Colors.white30, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
                             ],
                           ),
                   ),

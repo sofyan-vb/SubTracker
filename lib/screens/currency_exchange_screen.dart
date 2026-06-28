@@ -151,7 +151,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(tr('Kalkulator Kurs', 'Exchange Rate'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+        title: Text(tr('Kalkulator Kurs', 'Exchange Rate', 'Tipo de cambio'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
         centerTitle: true,
         bottom: TabBar(
           controller: _tabController,
@@ -161,8 +161,8 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           tabs: [
-            Tab(text: tr('Konversi', 'Convert')),
-            Tab(text: tr('Statistik', 'Statistics')),
+            Tab(text: tr('Konversi', 'Convert', 'Convertir')),
+            Tab(text: tr('Statistik', 'Statistics', 'Estadística')),
           ],
         ),
       ),
@@ -186,7 +186,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
         children: [
           
           _buildCurrencyInputBox(
-            label: tr('Dari', 'From'),
+            label: tr('Dari', 'From', 'De'),
             currency: _convBase,
             controller: _baseCtrl,
             cardColor: cardColor,
@@ -228,7 +228,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
           ),
 
           _buildCurrencyInputBox(
-            label: tr('Ke', 'To'),
+            label: tr('Ke', 'To', 'A'),
             currency: _convTarget,
             controller: _targetCtrl,
             cardColor: cardColor,
@@ -424,7 +424,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
       padding: const EdgeInsets.all(24),
       children: [
         Text(
-          tr('Statistik Kurs', 'Exchange Stats'),
+          tr('Statistik Kurs', 'Exchange Stats', 'Estadísticas de intercambio'),
           style: TextStyle(
             color: textColor,
             fontSize: 20,
@@ -434,8 +434,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
         ),
         const SizedBox(height: 8),
         Text(
-          tr('Pilih negara di bawah ini untuk melihat tren pergerakan nilai tukar mata uangnya dibandingkan USD.', 
-             'Select a country below to see its exchange rate trend compared to USD.'),
+          tr('Pilih negara di bawah ini untuk melihat tren pergerakan nilai tukar mata uangnya dibandingkan USD.', 'Select a country below to see its exchange rate trend compared to USD.', 'Seleccione un país a continuación para ver la tendencia del tipo de cambio en comparación con el USD.'),
           style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 14),
         ),
         const SizedBox(height: 16),
@@ -528,7 +527,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      tr('Nilai Saat Ini', 'Current Rate'),
+                      tr('Nilai Saat Ini', 'Current Rate', 'Tarifa actual'),
                       style: TextStyle(color: textColor.withOpacity(0.5), fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 4),
@@ -567,7 +566,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                         children: [
                           const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 18),
                           const SizedBox(width: 4),
-                          Text(tr('Tertinggi', 'Highest'), style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text(tr('Tertinggi', 'Highest', 'más alto'), style: TextStyle(color: const Color(0xFF10B981).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -592,7 +591,7 @@ class _CurrencyExchangeScreenState extends State<CurrencyExchangeScreen> with Si
                         children: [
                           const Icon(Icons.trending_down_rounded, color: Color(0xFFEF4444), size: 18),
                           const SizedBox(width: 4),
-                          Text(tr('Terendah', 'Lowest'), style: TextStyle(color: const Color(0xFFEF4444).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
+                          Text(tr('Terendah', 'Lowest', 'Más bajo'), style: TextStyle(color: const Color(0xFFEF4444).withOpacity(0.8), fontSize: 12, fontWeight: FontWeight.bold)),
                         ],
                       ),
                       const SizedBox(height: 8),

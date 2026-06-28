@@ -26,44 +26,44 @@ class HelpCenterScreen extends StatelessWidget {
 
     final List<Map<String, dynamic>> faqs = [
       {
-        'q': tr('Bagaimana cara menambah langganan?', 'How to add a subscription?'),
-        'a': tr('Anda dapat menambah langganan dengan menekan tombol + di tengah bawah pada halaman utama.', 'You can add a subscription by pressing the + button at the bottom center on the main page.'),
+        'q': tr('Bagaimana cara menambah langganan?', 'How to add a subscription?', '¿Cómo agregar una suscripción?'),
+        'a': tr('Anda dapat menambah langganan dengan menekan tombol + di tengah bawah pada halaman utama.', 'You can add a subscription by pressing the + button at the bottom center on the main page.', 'Puede agregar una suscripción presionando el botón + en la parte inferior central de la página principal.'),
         'icon': Icons.add_circle_outline_rounded,
         'color': Colors.blue,
       },
       {
-        'q': tr('Bagaimana cara mengedit langganan?', 'How to edit a subscription?'),
-        'a': tr('Buka detail langganan dengan mengetuk salah satu item di halaman utama, lalu klik ikon pensil (Edit) di pojok kanan atas.', 'Open subscription details by tapping an item on the main page, then click the pencil (Edit) icon at the top right corner.'),
+        'q': tr('Bagaimana cara mengedit langganan?', 'How to edit a subscription?', '¿Cómo editar una suscripción?'),
+        'a': tr('Buka detail langganan dengan mengetuk salah satu item di halaman utama, lalu klik ikon pensil (Edit) di pojok kanan atas.', 'Open subscription details by tapping an item on the main page, then click the pencil (Edit) icon at the top right corner.', 'Abra los detalles de la suscripción tocando un elemento en la página principal, luego haga clic en el ícono de lápiz (Editar) en la esquina superior derecha.'),
         'icon': Icons.edit_note_rounded,
         'color': Colors.purple,
       },
       {
-        'q': tr('Apakah data saya aman?', 'Is my data secure?'),
-        'a': tr('Semua data langganan Anda disimpan secara lokal di perangkat Anda (Offline-First). Kami tidak mengirimkannya ke server mana pun kecuali Anda mencadangkannya sendiri.', 'All your subscription data is stored locally on your device (Offline-First). We do not send it to any server unless you back it up yourself.'),
+        'q': tr('Apakah data saya aman?', 'Is my data secure?', '¿Están mis datos seguros?'),
+        'a': tr('Semua data langganan Anda disimpan secara lokal di perangkat Anda (Offline-First). Kami tidak mengirimkannya ke server mana pun kecuali Anda mencadangkannya sendiri.', 'All your subscription data is stored locally on your device (Offline-First). We do not send it to any server unless you back it up yourself.', 'Todos los datos de su suscripción se almacenan localmente en su dispositivo (primero sin conexión). No lo enviamos a ningún servidor a menos que usted mismo haga una copia de seguridad.'),
         'icon': Icons.security_rounded,
         'color': Colors.green,
       },
       {
-        'q': tr('Bagaimana cara mengatur notifikasi pengingat?', 'How to set reminder notifications?'),
-        'a': tr('Buka menu Pengaturan > Suara Notifikasi & Alarm untuk memilih nada dering. Anda juga bisa menonaktifkan notifikasi melalui toggle di Pengaturan.', 'Go to Settings > Notification & Alarm Sound to choose a ringtone. You can also disable notifications via the toggle in Settings.'),
+        'q': tr('Bagaimana cara mengatur notifikasi pengingat?', 'How to set reminder notifications?', '¿Cómo configurar notificaciones de recordatorio?'),
+        'a': tr('Buka menu Pengaturan > Suara Notifikasi & Alarm untuk memilih nada dering. Anda juga bisa menonaktifkan notifikasi melalui toggle di Pengaturan.', 'Go to Settings > Notification & Alarm Sound to choose a ringtone. You can also disable notifications via the toggle in Settings.', 'Vaya a Configuración > Notificación y sonido de alarma para elegir un tono de llamada. También puede desactivar las notificaciones a través del interruptor en Configuración.'),
         'icon': Icons.notifications_active_rounded,
         'color': Colors.pink,
       },
       {
-        'q': tr('Bagaimana cara mengubah mata uang?', 'How to change the currency?'),
-        'a': tr('Buka halaman Pengaturan, lalu pilih menu Mata Uang untuk mengubahnya.', 'Go to the Settings page, then select the Currency menu to change it.'),
+        'q': tr('Bagaimana cara mengubah mata uang?', 'How to change the currency?', '¿Cómo cambiar la moneda?'),
+        'a': tr('Buka halaman Pengaturan, lalu pilih menu Mata Uang untuk mengubahnya.', 'Go to the Settings page, then select the Currency menu to change it.', 'Vaya a la página Configuración, luego seleccione el menú Moneda para cambiarlo.'),
         'icon': Icons.currency_exchange_rounded,
         'color': Colors.orange,
       },
       {
-        'q': tr('Bagaimana cara menghapus langganan?', 'How to delete a subscription?'),
-        'a': tr('Geser langganan ke kiri pada daftar utama untuk menampilkan tombol hapus, atau buka detail langganan dan pilih hapus.', 'Swipe left on a subscription in the main list to reveal the delete button, or open subscription details and select delete.'),
+        'q': tr('Bagaimana cara menghapus langganan?', 'How to delete a subscription?', '¿Cómo eliminar una suscripción?'),
+        'a': tr('Geser langganan ke kiri pada daftar utama untuk menampilkan tombol hapus, atau buka detail langganan dan pilih hapus.', 'Swipe left on a subscription in the main list to reveal the delete button, or open subscription details and select delete.', 'Deslice el dedo hacia la izquierda en una suscripción en la lista principal para revelar el botón de eliminar, o abra los detalles de la suscripción y seleccione eliminar.'),
         'icon': Icons.delete_sweep_rounded,
         'color': Colors.redAccent,
       },
       {
-        'q': tr('Apakah aplikasi ini membutuhkan internet?', 'Does this app require internet?'),
-        'a': tr('Aplikasi dapat berjalan 100% offline. Internet hanya diperlukan untuk update nilai tukar kurs harian dan membagikan cadangan (backup).', 'The app can run 100% offline. Internet is only required for daily exchange rate updates and sharing backups.'),
+        'q': tr('Apakah aplikasi ini membutuhkan internet?', 'Does this app require internet?', '¿Esta aplicación requiere internet?'),
+        'a': tr('Aplikasi dapat berjalan 100% offline. Internet hanya diperlukan untuk update nilai tukar kurs harian dan membagikan cadangan (backup).', 'The app can run 100% offline. Internet is only required for daily exchange rate updates and sharing backups.', 'La aplicación puede ejecutarse 100% sin conexión. Solo se requiere Internet para las actualizaciones diarias del tipo de cambio y para compartir copias de seguridad.'),
         'icon': Icons.wifi_off_rounded,
         'color': Colors.teal,
       },
@@ -85,7 +85,7 @@ class HelpCenterScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(tr('Pusat Bantuan', 'Help Center'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+        title: Text(tr('Pusat Bantuan', 'Help Center', 'Centro de ayuda'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -115,9 +115,9 @@ class HelpCenterScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tr('Butuh Bantuan?', 'Need Help?'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text(tr('Butuh Bantuan?', 'Need Help?', '¿Necesitar ayuda?'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
                         const SizedBox(height: 6),
-                        Text(tr('Temukan jawaban untuk pertanyaan umum di bawah ini.', 'Find answers to common questions below.'), style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                        Text(tr('Temukan jawaban untuk pertanyaan umum di bawah ini.', 'Find answers to common questions below.', 'Encuentre respuestas a preguntas comunes a continuación.'), style: const TextStyle(color: Colors.white70, fontSize: 13)),
                       ],
                     ),
                   ),
@@ -125,7 +125,7 @@ class HelpCenterScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            Text(tr('Pertanyaan Umum (FAQ)', 'Frequently Asked Questions'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(tr('Pertanyaan Umum (FAQ)', 'Frequently Asked Questions', 'Preguntas frecuentes'), style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ...faqs.map((faq) {
               final Color iconColor = faq['color'] as Color;
@@ -180,9 +180,9 @@ class HelpCenterScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.mark_email_unread_rounded, color: textColor.withOpacity(0.5), size: 32),
                   const SizedBox(height: 12),
-                  Text(tr('Punya Pertanyaan Lain?', 'Have Other Questions?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+                  Text(tr('Punya Pertanyaan Lain?', 'Have Other Questions?', '¿Tiene otras preguntas?'), style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
-                  Text(tr('Hubungi tim dukungan kami.', 'Contact our support team.'), style: TextStyle(color: subTextColor, fontSize: 12)),
+                  Text(tr('Hubungi tim dukungan kami.', 'Contact our support team.', 'Póngase en contacto con nuestro equipo de soporte.'), style: TextStyle(color: subTextColor, fontSize: 12)),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -192,7 +192,7 @@ class HelpCenterScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: _launchEmail,
-                    child: Text(tr('Hubungi Support', 'Contact Support'), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(tr('Hubungi Support', 'Contact Support', 'Contactar con soporte'), style: const TextStyle(fontWeight: FontWeight.bold)),
                   )
                 ],
               ),

@@ -28,17 +28,17 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
       context: context,
       builder: (confirmCtx) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-        title: Text(tr('Hapus Riwayat?', 'Clear History?'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
-        content: Text(tr('Seluruh riwayat tagihan yang sudah dibayar akan dihapus. Langganan aktif tetap aman. Lanjutkan?', 'All paid billing history will be deleted. Active subscriptions remain safe. Continue?'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+        title: Text(tr('Hapus Riwayat?', 'Clear History?', '¿Borrar historial?'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
+        content: Text(tr('Seluruh riwayat tagihan yang sudah dibayar akan dihapus. Langganan aktif tetap aman. Lanjutkan?', 'All paid billing history will be deleted. Active subscriptions remain safe. Continue?', 'Se eliminará todo el historial de facturación pagada. Las suscripciones activas permanecen seguras. ¿Continuar?'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
+          TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel', 'Cancelar'), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
           TextButton(
             onPressed: () {
               Navigator.pop(confirmCtx);
               context.read<SubProvider>().clearHistory();
-              if (mounted) ToastUtils.show(context, tr('Riwayat tagihan berhasil dihapus', 'Billing history successfully cleared'));
+              if (mounted) ToastUtils.show(context, tr('Riwayat tagihan berhasil dihapus', 'Billing history successfully cleared', 'Historial de facturación borrado correctamente'));
             },
-            child: Text(tr('Ya, Hapus', 'Yes, Delete'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text(tr('Ya, Hapus', 'Yes, Delete', 'Sí, eliminar'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       )
@@ -51,10 +51,10 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
       context: context,
       builder: (confirmCtx) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-        title: Text(tr('Reset Preferensi?', 'Reset Preferences?'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
-        content: Text(tr('Pengaturan seperti tema, bahasa, dan suara akan dikembalikan ke awal. Data langganan tetap aman. Lanjutkan?', 'Settings like theme, language, and sounds will be reset to default. Subscription data remains safe. Continue?'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+        title: Text(tr('Reset Preferensi?', 'Reset Preferences?', '¿Restablecer preferencias?'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
+        content: Text(tr('Pengaturan seperti tema, bahasa, dan suara akan dikembalikan ke awal. Data langganan tetap aman. Lanjutkan?', 'Settings like theme, language, and sounds will be reset to default. Subscription data remains safe. Continue?', 'Las configuraciones como tema, idioma y sonidos se restablecerán a sus valores predeterminados. Los datos de suscripción permanecen seguros. ¿Continuar?'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
+          TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel', 'Cancelar'), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
           TextButton(
             onPressed: () async {
               Navigator.pop(confirmCtx);
@@ -69,9 +69,9 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
               ringtoneNotifier.value = 'ringtone_default';
               alarmNotifier.value = 'alarm_lagu';
               
-              if (mounted) ToastUtils.show(context, tr('Preferensi berhasil direset', 'Preferences successfully reset'));
+              if (mounted) ToastUtils.show(context, tr('Preferensi berhasil direset', 'Preferences successfully reset', 'Las preferencias se restablecieron correctamente'));
             },
-            child: Text(tr('Ya, Reset', 'Yes, Reset'), style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+            child: Text(tr('Ya, Reset', 'Yes, Reset', 'Sí, restablecer'), style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
           ),
         ],
       )
@@ -84,10 +84,10 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
       context: context,
       builder: (confirmCtx) => AlertDialog(
         backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
-        title: Text(tr('Reboot Sistem?', 'System Reboot?'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
-        content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
+        title: Text(tr('Reboot Sistem?', 'System Reboot?', '¿Reiniciar el sistema?'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
+        content: Text(tr('Semua data langganan, profil, dan pengaturan akan terhapus. Lanjutkan?', 'All subscriptions, profiles, and settings will be deleted. Continue?', 'Se eliminarán todas las suscripciones, perfiles y configuraciones. ¿Continuar?'), style: TextStyle(color: isDark ? Colors.white70 : Colors.black87)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel'), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
+          TextButton(onPressed: () => Navigator.pop(confirmCtx), child: Text(tr('Batal', 'Cancel', 'Cancelar'), style: TextStyle(color: isDark ? Colors.white54 : Colors.black54))),
           TextButton(
             onPressed: () async {
               Navigator.pop(confirmCtx);
@@ -103,7 +103,7 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
                 
                 userNameNotifier.value = ''; 
                 
-                ToastUtils.show(context, tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared'));
+                ToastUtils.show(context, tr('Sistem berhasil di-reboot. Semua data telah dikosongkan', 'System rebooted. All data cleared', 'Sistema reiniciado. Todos los datos borrados'));
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (context) => const SplashScreen()),
@@ -111,7 +111,7 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
                 );
               }
             }, 
-            child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
+            child: Text(tr('Ya, Hapus Semua', 'Yes, Delete All', 'Sí, eliminar todo'), style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold))
           ),
         ]
       )
@@ -159,7 +159,7 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          tr('Zona Bahaya', 'Danger Zone'),
+          tr('Zona Bahaya', 'Danger Zone', 'Zona de peligro'),
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20, letterSpacing: -0.5),
         ),
         leading: IconButton(
@@ -186,7 +186,7 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: Text(
-                      tr('Hati-hati! Tindakan di halaman ini dapat mengubah atau menghapus data secara permanen.', 'Caution! Actions on this page can modify or delete data permanently.'),
+                      tr('Hati-hati! Tindakan di halaman ini dapat mengubah atau menghapus data secara permanen.', 'Caution! Actions on this page can modify or delete data permanently.', '¡Precaución! Las acciones en esta página pueden modificar o eliminar datos de forma permanente.'),
                       style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, fontSize: 13, height: 1.4),
                     ),
                   ),
@@ -195,29 +195,29 @@ class _DangerZoneScreenState extends State<DangerZoneScreen> {
             ),
             const SizedBox(height: 32),
 
-            Text(tr('Pembersihan Data', 'Data Cleanup'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(tr('Pembersihan Data', 'Data Cleanup', 'Limpieza de datos'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             _buildDangerTile(
-              tr('Hapus Riwayat', 'Clear History'),
-              tr('Menghapus log tagihan yang sudah lalu', 'Delete past billing logs'),
+              tr('Hapus Riwayat', 'Clear History', 'Borrar historial'),
+              tr('Menghapus log tagihan yang sudah lalu', 'Delete past billing logs', 'Eliminar registros de facturación anteriores'),
               Icons.auto_delete_rounded,
               const Color(0xFFF59E0B), // Amber 500
               _clearHistory,
             ),
             _buildDangerTile(
-              tr('Hapus Seluruh Data Aplikasi', 'Delete All App Data'),
-              tr('Hapus seluruh langganan dan pengaturan permanen', 'Delete all subscriptions and settings permanently'),
+              tr('Hapus Seluruh Data Aplikasi', 'Delete All App Data', 'Eliminar todos los datos de la aplicación'),
+              tr('Hapus seluruh langganan dan pengaturan permanen', 'Delete all subscriptions and settings permanently', 'Eliminar todas las suscripciones y configuraciones de forma permanente'),
               Icons.delete_sweep_rounded,
               const Color(0xFFEF4444), // Red 500
               _deleteAllData,
             ),
             
             const SizedBox(height: 24),
-            Text(tr('Sistem', 'System'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
+            Text(tr('Sistem', 'System', 'Sistema'), style: TextStyle(color: isDark ? Colors.white : Colors.black, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             _buildDangerTile(
-              tr('Reset Preferensi', 'Reset Preferences'),
-              tr('Kembalikan pengaturan tema, bahasa, dll ke bawaan', 'Reset theme, language, etc to default'),
+              tr('Reset Preferensi', 'Reset Preferences', 'Restablecer preferencias'),
+              tr('Kembalikan pengaturan tema, bahasa, dll ke bawaan', 'Reset theme, language, etc to default', 'Restablecer tema, idioma, etc. a sus valores predeterminados'),
               Icons.restore_page_rounded,
               const Color(0xFF3B82F6), // Blue 500
               _resetPreferences,

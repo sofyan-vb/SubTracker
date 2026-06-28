@@ -108,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr('Semua kolom wajib diisi!', 'All fields are required!')),
+            content: Text(tr('Semua kolom wajib diisi!', 'All fields are required!', '¡Todos los campos son obligatorios!')),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           )
@@ -121,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(tr('Format email tidak valid', 'Invalid email format')),
+            content: Text(tr('Format email tidak valid', 'Invalid email format', 'Formato de correo electrónico no válido')),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           )
@@ -146,9 +146,9 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
   }
 
   String _getButtonText() {
-    if (_state == SplashState.form) return tr('SIMPAN & MASUK', 'SAVE & ENTER');
-    if (_state == SplashState.onboarding && _onboardingPageIndex < 2) return tr('LANJUT', 'NEXT');
-    return tr('MASUK', 'ENTER');
+    if (_state == SplashState.form) return tr('SIMPAN & MASUK', 'SAVE & ENTER', 'GUARDAR Y ENTRAR');
+    if (_state == SplashState.onboarding && _onboardingPageIndex < 2) return tr('LANJUT', 'NEXT', 'PRÓXIMO');
+    return tr('MASUK', 'ENTER', 'INGRESAR');
   }
 
   @override
@@ -258,16 +258,16 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
                                   child: Column(
                                     children: [
-                                      Text(tr('Mari Berkenalan!', 'Let\'s Get Started!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
+                                      Text(tr('Mari Berkenalan!', 'Let\'s Get Started!', '¡Empecemos!'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
                                       const SizedBox(height: 8),
-                                      Text(tr('Masukkan nama pengguna', 'Enter username'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontSize: 14)),
+                                      Text(tr('Masukkan nama pengguna', 'Enter username', 'Ingrese el nombre de usuario'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontSize: 14)),
                                       const SizedBox(height: 32),
                                       
                                       TextField(
                                         controller: _nameCtrl,
                                         style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         decoration: InputDecoration(
-                                          labelText: tr('Nama Pengguna', 'Username'),
+                                          labelText: tr('Nama Pengguna', 'Username', 'Nombre de usuario'),
                                           labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
                                           prefixIcon: const Icon(Icons.person, color: Color(0xFF1E293B), size: 22),
                                           filled: true, fillColor: Colors.grey[100],
@@ -283,7 +283,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         keyboardType: TextInputType.emailAddress,
                                         decoration: InputDecoration(
-                                          labelText: tr('Alamat Email', 'Email Address'),
+                                          labelText: tr('Alamat Email', 'Email Address', 'Dirección de correo electrónico'),
                                           labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
                                           prefixIcon: const Icon(Icons.email, color: Color(0xFF1E293B), size: 22),
                                           filled: true, fillColor: Colors.grey[100],
@@ -300,7 +300,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         keyboardType: TextInputType.number,
                                         inputFormatters: [FilteringTextInputFormatter.digitsOnly, _BudgetThousandsFormatter()],
                                         decoration: InputDecoration(
-                                          labelText: tr('Target Anggaran Per Bulan', 'Monthly Budget Target'),
+                                          labelText: tr('Target Anggaran Per Bulan', 'Monthly Budget Target', 'Objetivo de presupuesto mensual'),
                                           labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
                                           prefixIcon: const Icon(Icons.savings_rounded, color: Color(0xFF1E293B), size: 22),
                                           prefixText: '${CurrencyUtils.getFormat(_selectedCurrency).currencySymbol} ',
@@ -317,7 +317,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         value: _selectedCurrency,
                                         style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold),
                                         decoration: InputDecoration(
-                                          labelText: tr('Mata Uang Default', 'Default Currency'),
+                                          labelText: tr('Mata Uang Default', 'Default Currency', 'Moneda predeterminada'),
                                           labelStyle: const TextStyle(color: Colors.black54, fontSize: 14),
                                           prefixIcon: const Icon(Icons.language_rounded, color: Color(0xFF1E293B), size: 22),
                                           filled: true, fillColor: Colors.grey[100],
@@ -346,16 +346,16 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
                                   child: Column(
                                     children: [
-                                      Text(tr('Mulai Perjalanan', 'Start Your Journey'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
+                                      Text(tr('Mulai Perjalanan', 'Start Your Journey', 'Comience su viaje'), style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Color(0xFF1E293B))),
                                       const SizedBox(height: 8),
-                                      Text(tr('Pilih bagaimana Anda ingin memulai', 'Choose how you want to start'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontSize: 14)),
+                                      Text(tr('Pilih bagaimana Anda ingin memulai', 'Choose how you want to start', 'Elige cómo quieres empezar'), textAlign: TextAlign.center, style: const TextStyle(color: Colors.black54, fontSize: 14)),
                                       const SizedBox(height: 48),
                                       
                                       SizedBox(
                                         width: double.infinity,
                                         child: ElevatedButton.icon(
                                           icon: const Icon(Icons.person_add_rounded, size: 24),
-                                          label: Text(tr('PENGGUNA BARU', 'NEW USER'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                                          label: Text(tr('PENGGUNA BARU', 'NEW USER', 'NUEVO USUARIO'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: const Color(0xFF2563EB),
                                             foregroundColor: Colors.white,
@@ -374,7 +374,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                         width: double.infinity,
                                         child: ElevatedButton.icon(
                                           icon: const Icon(Icons.restore_rounded, size: 24),
-                                          label: Text(tr('PULIHKAN DATA', 'RESTORE DATA'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
+                                          label: Text(tr('PULIHKAN DATA', 'RESTORE DATA', 'RESTAURAR DATOS'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.white,
                                             foregroundColor: const Color(0xFF1E293B),
@@ -414,21 +414,21 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                     },
                                     children: [
                                       _buildOnboardingSlide(
-                                        imagePath: tr('assets/gambar1_id.png', 'assets/gambar1_en.png'), 
-                                        title: tr('Catat Semua Layanan', 'Record All Services'),
-                                        desc: tr('Kumpulkan semua tagihan di satu tempat agar lebih rapi.', 'Keep all your subscriptions in one neat place.'),
+                                        imagePath: tr('assets/gambar1_id.png', 'assets/gambar1_en.png', 'activos/gambar1_es.png'), 
+                                        title: tr('Catat Semua Layanan', 'Record All Services', 'Registrar todos los servicios'),
+                                        desc: tr('Kumpulkan semua tagihan di satu tempat agar lebih rapi.', 'Keep all your subscriptions in one neat place.', 'Mantenga todas sus suscripciones en un lugar ordenado.'),
                                         alignment: const Alignment(0.15, -1.0),
                                       ),
                                       _buildOnboardingSlide(
-                                        imagePath: tr('assets/gambar2_id.png', 'assets/gambar2_en.png'), 
-                                        title: tr('Pengingat Otomatis', 'Automatic Reminders'),
-                                        desc: tr('Tidak ada lagi denda telat bayar karena lupa waktu.', 'No more late payment fines because you forgot the date.'),
+                                        imagePath: tr('assets/gambar2_id.png', 'assets/gambar2_en.png', 'activos/gambar2_en.png'), 
+                                        title: tr('Pengingat Otomatis', 'Automatic Reminders', 'Recordatorios automáticos'),
+                                        desc: tr('Tidak ada lagi denda telat bayar karena lupa waktu.', 'No more late payment fines because you forgot the date.', 'No más multas por pagos atrasados ​​porque olvidaste la fecha.'),
                                         alignment: const Alignment(0.0, -1.0),
                                       ),
                                       _buildOnboardingSlide(
-                                        imagePath: tr('assets/gambar3_id.png', 'assets/gambar3_en.png'), 
-                                        title: tr('Pantau Pengeluaran', 'Track Expenses'),
-                                        desc: tr('Analisis cerdas kemana uangmu habis setiap bulannya.', 'Smart analysis of where your money goes every month.'),
+                                        imagePath: tr('assets/gambar3_id.png', 'assets/gambar3_en.png', 'activos/gambar3_es.png'), 
+                                        title: tr('Pantau Pengeluaran', 'Track Expenses', 'Seguimiento de gastos'),
+                                        desc: tr('Analisis cerdas kemana uangmu habis setiap bulannya.', 'Smart analysis of where your money goes every month.', 'Análisis inteligente de adónde va tu dinero cada mes.'),
                                         alignment: const Alignment(0.0, -1.0),
                                       ),
                                     ],
@@ -464,7 +464,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                                           onPressed: () {
                                             _pageController.previousPage(duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
                                           },
-                                          child: Text(tr('KEMBALI', 'BACK'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
+                                          child: Text(tr('KEMBALI', 'BACK', 'ATRÁS'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black54)),
                                         ),
                                         ElevatedButton(
                                           style: ElevatedButton.styleFrom(
@@ -737,9 +737,9 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(tr('Halo,', 'Hello,'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
-                              Text(tr('Selamat', 'Welcome'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
-                              Text(tr('Datang Kembali', 'Back'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Halo,', 'Hello,', 'Hola,'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Selamat', 'Welcome', 'Bienvenido'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
+                              Text(tr('Datang Kembali', 'Back', 'Atrás'), style: TextStyle(fontSize: 44, fontWeight: FontWeight.w900, color: textColor, height: 1.1, letterSpacing: -1.0)),
                             ],
                           ),
                         ),
@@ -753,7 +753,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(tr('Masuk sebagai', 'Sign in as'), style: TextStyle(fontSize: 14, color: subTextColor, fontWeight: FontWeight.w600)),
+                              Text(tr('Masuk sebagai', 'Sign in as', 'Iniciar sesión como'), style: TextStyle(fontSize: 14, color: subTextColor, fontWeight: FontWeight.w600)),
                               const SizedBox(height: 8),
                               GestureDetector(
                                 onTap: _showUserSelector,
@@ -773,7 +773,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                       const SizedBox(width: 16),
                                       Expanded(
                                         child: Text(
-                                          _activeUserName.isEmpty ? tr('Pengguna SubTrack IQ', 'SubTrack IQ User') : _activeUserName,
+                                          _activeUserName.isEmpty ? tr('Pengguna SubTrack IQ', 'SubTrack IQ User', 'Usuario de SubTrack IQ') : _activeUserName,
                                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
                                           maxLines: 1, overflow: TextOverflow.ellipsis,
                                         ),
@@ -810,7 +810,7 @@ class _WelcomeReturningViewState extends State<WelcomeReturningView> with Ticker
                                     },
                               child: _isLoading
                                   ? const Padding(padding: EdgeInsets.only(top: 4.0), child: WavyDotsProgressIndicator(color: Colors.white, dotSize: 5.0))
-                                  : Text(tr('Masuk', 'Enter'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                                  : Text(tr('Masuk', 'Enter', 'Ingresar'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                             ),
                           ),
                         ),

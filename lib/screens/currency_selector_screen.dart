@@ -36,7 +36,7 @@ class _CurrencySelectorScreenState extends State<CurrencySelectorScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(tr('Pilih Mata Uang', 'Select Currency'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
+        title: Text(tr('Pilih Mata Uang', 'Select Currency', 'Seleccionar moneda'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
         centerTitle: true,
       ),
       body: ValueListenableBuilder<String>(

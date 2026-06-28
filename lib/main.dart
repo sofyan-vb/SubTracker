@@ -50,9 +50,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeModeNotifier,
-      builder: (context, currentMode, _) {
+    return ValueListenableBuilder<String>(
+      valueListenable: languageNotifier,
+      builder: (context, currentLang, _) {
+        return ValueListenableBuilder<ThemeMode>(
+          valueListenable: themeModeNotifier,
+          builder: (context, currentMode, _) {
         return MaterialApp(
           title: 'SubTrack IQ',
           debugShowCheckedModeBanner: false,
@@ -118,6 +121,8 @@ class MyApp extends StatelessWidget {
           },
           home: const GateKeeper(), 
         );
+      }
+    );
       }
     );
   }
@@ -299,7 +304,7 @@ class _HandwritingWelcomeTextState extends State<HandwritingWelcomeText> with Si
   void initState() {
     super.initState();
     
-    _typingPart = tr('Selamat datang di', 'Welcome to');
+    _typingPart = tr('Selamat datang di', 'Welcome to', 'Bienvenido a');
     _staticPart = 'SubTrack IQ';
     _paintController = AnimationController(vsync: this, duration: const Duration(milliseconds: 2500));
     _paintAnimation = Tween<double>(begin: -0.2, end: 1.2).animate(CurvedAnimation(parent: _paintController, curve: Curves.easeInOutCubic));
