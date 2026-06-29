@@ -30,7 +30,7 @@ class CategoryUtils {
     'Kebutuhan sehari-hari', 'Kesehatan', 'Kecantikan & Perawatan', 'Asuransi', 'Properti & Sewa', 
     'Donasi & Amal', 'Hosting & Domain', 'Meditasi', 'Musik', 'Berita & Membaca', 
     'Password manager', 'Hewan peliharaan', 'Podcast', 'Produktivitas', 'Membership retail', 'Keamanan & VPN', 
-    'Belanja', 'Langganan', 'Travel', 'Lainnya'
+    'Belanja', 'Langganan', 'Travel', 'Transportasi Publik & E-Toll', 'Sosial Media Premium', 'Lainnya'
   ];
 
   static const List<String> categoriesEN = [
@@ -40,7 +40,7 @@ class CategoryUtils {
     'Groceries', 'Health', 'Beauty & Grooming', 'Insurance', 'Housing & Rent', 
     'Charity & Donations', 'Hosting & Domains', 'Meditation', 'Music', 'News & Reading', 
     'Password manager', 'Pets', 'Podcasts', 'Productivity', 'Retail memberships', 'Security & VPN', 
-    'Shopping', 'Subscriptions', 'Travel', 'Others'
+    'Shopping', 'Subscriptions', 'Travel', 'Public Transport & E-Toll', 'Social Media Premium', 'Others'
   ];
 
   static List<CustomCategory> customCategories = [];
@@ -113,6 +113,8 @@ class CategoryUtils {
       case 'Belanja': case 'Shopping': return const Color(0xFFF97316);
       case 'Langganan': case 'Subscriptions': return const Color(0xFF4F46E5);
       case 'Travel': return const Color(0xFF0D9488);
+      case 'Transportasi Publik & E-Toll': case 'Public Transport & E-Toll': return const Color(0xFF3B82F6);
+      case 'Sosial Media Premium': case 'Social Media Premium': return const Color(0xFFEC4899);
       case 'Lainnya': case 'Others': return const Color(0xFF64748B);
       default: return const Color(0xFF0D9488);
     }
@@ -161,6 +163,8 @@ class CategoryUtils {
       case 'Belanja': case 'Shopping': return Icons.shopping_cart_rounded;
       case 'Langganan': case 'Subscriptions': return Icons.subscriptions_rounded;
       case 'Travel': return Icons.flight_rounded;
+      case 'Transportasi Publik & E-Toll': case 'Public Transport & E-Toll': return Icons.directions_transit_rounded;
+      case 'Sosial Media Premium': case 'Social Media Premium': return Icons.verified_rounded;
       case 'Lainnya': case 'Others': return Icons.dashboard_customize_rounded;
       default: return Icons.category_rounded;
     }

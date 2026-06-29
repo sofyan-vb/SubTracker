@@ -276,14 +276,12 @@ class _DetailScreenState extends State<DetailScreen> {
                   if (currentSub.isFinished) return const SizedBox.shrink();
                   
                   final now = DateTime.now();
-                  final dueDay = DateTime(currentSub.dueDate.year, currentSub.dueDate.month, currentSub.dueDate.day);
-                  final difference = dueDay.difference(DateTime(now.year, now.month, now.day)).inDays;
-                  final isDueSoon = difference <= 3;
+                  final notifDate = currentSub.dueDate.subtract(const Duration(days: 3));
+                  final isNotifArrived = now.isAfter(notifDate) || now.isAtSameMomentAs(notifDate);
                   
-                  if (isDueSoon) {
+                  if (isNotifArrived) {
                     return const SizedBox.shrink();
                   } else {
-                    final notifDate = dueDay.subtract(const Duration(days: 3));
                     final diffToNotif = notifDate.difference(now);
                     final d = diffToNotif.inDays;
                     final h = diffToNotif.inHours % 24;
@@ -441,11 +439,12 @@ class _DetailScreenState extends State<DetailScreen> {
                           Builder(
                             builder: (context) {
                               final now = DateTime.now();
-                              final diff = currentSub.dueDate.difference(DateTime(now.year, now.month, now.day)).inDays;
-                              final isDueSoon = diff <= 3 && !currentSub.isFinished;
+                              final notifDate = currentSub.dueDate.subtract(const Duration(days: 3));
+                              final isNotifArrived = now.isAfter(notifDate) || now.isAtSameMomentAs(notifDate);
+                              final showActionButtons = isNotifArrived && !currentSub.isFinished;
                               
-                              if (isDueSoon) {
-                                // Saat jatuh tempo: tampilkan 2 tombol
+                              if (showActionButtons) {
+                                // Saat notifikasi udah muncul: tampilkan 2 tombol (Tandai Selesai, Perpanjang)
                                 return Column(
                                   children: [
                                     SizedBox(
@@ -482,7 +481,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                   ],
                                 );
                               } else {
-                                // Belum jatuh tempo: tombol hapus biasa
+                                // Waktu mundur belum sampai / notifikasi belum muncul: tombol hapus biasa
                                 return SizedBox(
                                   width: double.infinity,
                                   child: OutlinedButton.icon(

@@ -186,6 +186,93 @@ class LogoWidget extends StatelessWidget {
       'airbnb': 'airbnb.com',
       'ebay': 'ebay.com',
       'alibaba': 'alibaba.com',
+      
+      // Newly added missing services
+      'zapclinic': 'zapclinic.com',
+      'msglow': 'msglowid.com',
+      'thebodyshop': 'thebodyshop.co.id',
+      'jobstreet': 'jobstreet.co.id',
+      'kalibrr': 'kalibrr.com',
+      'glints': 'glints.com',
+      'alibabacloud': 'alibabacloud.com',
+      'heroku': 'heroku.com',
+      'hinge': 'hinge.co',
+      'tantan': 'tantanapp.com',
+      'badoo': 'badoo.com',
+      'sketch': 'sketch.com',
+      'invision': 'invisionapp.com',
+      'freepikpremium': 'freepik.com',
+      'firebase': 'firebase.google.com',
+      'docker': 'docker.com',
+      'postman': 'postman.com',
+      'applefitness+': 'apple.com',
+      'freeletics': 'freeletics.com',
+      'niketrainingclub': 'nike.com',
+      'kfc': 'kfc.co.id',
+      'domino\'s': 'dominos.co.id',
+      'pizzahut': 'pizzahut.co.id',
+      'starbucksrewards': 'starbucks.co.id',
+      'applearcade': 'apple.com',
+      'lottemart': 'lottemart.co.id',
+      'klikdokter': 'klikdokter.com',
+      'gooddoctor': 'gooddoctor.co.id',
+      'flo': 'flo.health',
+      'f45': 'f45training.com',
+      'gold\'sgym': 'goldsgym.com',
+      'fithub': 'fithub.id',
+      'mamikos': 'mamikos.com',
+      'travelio': 'travelio.com',
+      'rukita': 'rukita.co',
+      'axamandiri': 'axa-mandiri.co.id',
+      'aia': 'aia-financial.co.id',
+      'fwd': 'fwd.co.id',
+      'wakingup': 'wakingup.com',
+      'riliv': 'riliv.co',
+      'tempo': 'tempo.co',
+      'wattpad': 'wattpad.com',
+      'webtoon': 'webtoons.com',
+      'bloomberg': 'bloomberg.com',
+      'scribd': 'scribd.com',
+      'nordpass': 'nordpass.com',
+      'keeper': 'keepersecurity.com',
+      'enpass': 'enpass.io',
+      'roboform': 'roboform.com',
+      'chewy': 'chewy.com',
+      'royalcaninclub': 'royalcanin.com',
+      'petloverscentre': 'petloverscentre.com',
+      'applepodcasts': 'apple.com',
+      'audible': 'audible.com',
+      'storytel': 'storytel.com',
+      'kakaopage': 'kakaopage.co.id',
+      'trello': 'trello.com',
+      'asana': 'asana.com',
+      'monday.com': 'monday.com',
+      'clickup': 'clickup.com',
+      'obsidian': 'obsidian.md',
+      'ikeafamily': 'ikea.co.id',
+      'costco': 'costco.com',
+      'mysuperindo': 'superindo.co.id',
+      'cyberghost': 'cyberghostvpn.com',
+      'protonvpn': 'protonvpn.com',
+      'piavpn': 'privateinternetaccess.com',
+      'kaspersky': 'kaspersky.com',
+      'bitdefender': 'bitdefender.com',
+      'microsoft365family': 'microsoft.com',
+      'halo+': 'telkomsel.com',
+      'booking.com': 'booking.com',
+      'expedia': 'expedia.co.id',
+      'reddoorz': 'reddoorz.com',
+      'oyo': 'oyorooms.com',
+      'flazzbca': 'bca.co.id',
+      'emoneymandiri': 'bankmandiri.co.id',
+      'brizzi': 'bri.co.id',
+      'tapcashbni': 'bni.co.id',
+      'kmtcommuterline': 'krl.co.id',
+      'jaklingko': 'jaklingkoindonesia.co.id',
+      'xpremium': 'x.com',
+      'telegrampremium': 'telegram.org',
+      'metaverified': 'meta.com',
+      'snapchat+': 'snapchat.com',
     };
     
     // Explicit overrides for logos that fail or user uploaded
@@ -209,12 +296,13 @@ class LogoWidget extends StatelessWidget {
     if (explicitUrls.containsKey(lowerName)) {
       return explicitUrls[lowerName];
     }
-    
+
     if (domains.containsKey(lowerName)) {
-      return 'https://www.google.com/s2/favicons?domain=${domains[lowerName]}&sz=128';
+      final safeName = lowerName.replaceAll('\'', '').replaceAll('+', '');
+      return 'assets/logos/$safeName.png';
     }
     
-    // Guess domain
+    // Guess domain if it's not in our downloaded list
     return 'https://www.google.com/s2/favicons?domain=$lowerName.com&sz=128';
   }
 

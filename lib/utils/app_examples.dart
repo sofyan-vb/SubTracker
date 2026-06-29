@@ -37,6 +37,9 @@ class AppExamples {
       {'name': 'Telkom', 'color': const Color(0xFFED1C24), 'icon': Icons.phone},
     ],
     'Beauty & Grooming': [
+      {'name': 'Ipsy', 'color': const Color(0xFFEE3A7B), 'icon': Icons.spa},
+      {'name': 'Birchbox', 'color': const Color(0xFFF9A8A8), 'icon': Icons.spa},
+
       {'name': 'Sociolla Box', 'color': const Color(0xFFE84C88), 'icon': Icons.spa},
       {'name': 'Erha Clinic', 'color': const Color(0xFF00569D), 'icon': Icons.spa},
       {'name': 'Natasha', 'color': const Color(0xFF00963F), 'icon': Icons.spa},
@@ -47,6 +50,9 @@ class AppExamples {
       {'name': 'Indeed', 'color': const Color(0xFF2164F3), 'icon': Icons.work},
     ],
     'Charity & Donations': [
+      {'name': 'Patreon Donation', 'color': const Color(0xFFFF424D), 'icon': Icons.volunteer_activism},
+      {'name': 'WWF', 'color': const Color(0xFF000000), 'icon': Icons.volunteer_activism},
+
       {'name': 'Kitabisa', 'color': const Color(0xFF00A5CF), 'icon': Icons.volunteer_activism},
       {'name': 'Dompet Dhuafa', 'color': const Color(0xFF00963F), 'icon': Icons.volunteer_activism},
       {'name': 'UNICEF', 'color': const Color(0xFF00AEFF), 'icon': Icons.volunteer_activism},
@@ -72,12 +78,20 @@ class AppExamples {
       {'name': 'TeraBox', 'color': const Color(0xFF0A65FF), 'icon': Icons.cloud},
     ],
     'Communication': [
+      {'name': 'Google Workspace', 'color': const Color(0xFF4285F4), 'icon': Icons.business},
+      {'name': 'Skype', 'color': const Color(0xFF00AFF0), 'icon': Icons.chat},
+      {'name': 'Webex', 'color': const Color(0xFF005073), 'icon': Icons.video_call},
+
       {'name': 'Zoom', 'color': const Color(0xFF2D8CFF), 'icon': Icons.video_call},
       {'name': 'Slack', 'color': const Color(0xFF4A154B), 'icon': Icons.chat},
       {'name': 'Discord Nitro', 'color': const Color(0xFF5865F2), 'icon': Icons.chat},
       {'name': 'Microsoft Teams', 'color': const Color(0xFF6264A7), 'icon': Icons.chat},
     ],
     'Creator memberships': [
+      {'name': 'Substack', 'color': const Color(0xFFFF6719), 'icon': Icons.article},
+      {'name': 'Ko-fi', 'color': const Color(0xFF29ABE0), 'icon': Icons.local_cafe},
+      {'name': 'Buy Me a Coffee', 'color': const Color(0xFFFFDD00), 'icon': Icons.local_cafe},
+
       {'name': 'Patreon', 'color': const Color(0xFFFF424D), 'icon': Icons.favorite},
       {'name': 'KaryaKarsa', 'color': const Color(0xFF6B48FF), 'icon': Icons.favorite},
       {'name': 'YouTube Channel', 'color': const Color(0xFFFF0000), 'icon': Icons.play_arrow},
@@ -154,6 +168,9 @@ class AppExamples {
       {'name': 'LinkAja', 'color': const Color(0xFFE3000F), 'icon': Icons.account_balance_wallet},
     ],
     'Fitness': [
+      {'name': 'Peloton', 'color': const Color(0xFFDF1C2F), 'icon': Icons.directions_bike},
+      {'name': 'Zwift', 'color': const Color(0xFFFC6719), 'icon': Icons.directions_bike},
+
       {'name': 'Strava', 'color': const Color(0xFFFC4C02), 'icon': Icons.fitness_center},
       {'name': 'Fitbit Premium', 'color': const Color(0xFF00B0B9), 'icon': Icons.fitness_center},
       {'name': 'MyFitnessPal', 'color': const Color(0xFF0066EE), 'icon': Icons.fitness_center},
@@ -189,6 +206,10 @@ class AppExamples {
       {'name': 'Apple Health', 'color': const Color(0xFFFF2D55), 'icon': Icons.favorite},
     ],
     'Hosting & Domains': [
+      {'name': 'Bluehost', 'color': const Color(0xFF2B558C), 'icon': Icons.dns},
+      {'name': 'HostGator', 'color': const Color(0xFFFFC220), 'icon': Icons.dns},
+      {'name': 'SiteGround', 'color': const Color(0xFF4369DF), 'icon': Icons.dns},
+
       {'name': 'Niagahoster', 'color': const Color(0xFF0056D2), 'icon': Icons.dns},
       {'name': 'Hostinger', 'color': const Color(0xFF673AB7), 'icon': Icons.dns},
       {'name': 'Namecheap', 'color': const Color(0xFFDE3B00), 'icon': Icons.dns},
@@ -200,6 +221,9 @@ class AppExamples {
       {'name': 'Fitness First', 'color': const Color(0xFFD41F26), 'icon': Icons.sports_gymnastics},
     ],
     'Housing & Rent': [
+      {'name': 'Zillow', 'color': const Color(0xFF006AFF), 'icon': Icons.house},
+      {'name': 'Redfin', 'color': const Color(0xFFC82021), 'icon': Icons.house},
+
       {'name': 'Kos Bulanan', 'color': const Color(0xFF009688), 'icon': Icons.house},
       {'name': 'IPL Apartemen', 'color': const Color(0xFF3F51B5), 'icon': Icons.apartment},
       {'name': 'Sewa Rumah', 'color': const Color(0xFF795548), 'icon': Icons.home},
@@ -211,6 +235,10 @@ class AppExamples {
       {'name': 'BPJS Ketenagakerjaan', 'color': const Color(0xFF00A859), 'icon': Icons.shield},
     ],
     'Meditation': [
+      {'name': 'Ten Percent Happier', 'color': const Color(0xFF000000), 'icon': Icons.self_improvement},
+      {'name': 'Breethe', 'color': const Color(0xFF3893C4), 'icon': Icons.self_improvement},
+      {'name': 'Simple Habit', 'color': const Color(0xFF4A90E2), 'icon': Icons.self_improvement},
+
       {'name': 'Headspace', 'color': const Color(0xFFF47C5D), 'icon': Icons.self_improvement},
       {'name': 'Calm', 'color': const Color(0xFF8BB7D6), 'icon': Icons.self_improvement},
       {'name': 'Insight Timer', 'color': const Color(0xFFD6A461), 'icon': Icons.self_improvement},
@@ -241,6 +269,10 @@ class AppExamples {
       {'name': 'Dashlane', 'color': const Color(0xFF0A2540), 'icon': Icons.lock},
     ],
     'Pets': [
+      {'name': 'Petco', 'color': const Color(0xFF002244), 'icon': Icons.pets},
+      {'name': 'Rover', 'color': const Color(0xFF009C3E), 'icon': Icons.pets},
+      {'name': 'Wag!', 'color': const Color(0xFF00B293), 'icon': Icons.pets},
+
       {'name': 'BarkBox', 'color': const Color(0xFF333333), 'icon': Icons.pets},
       {'name': 'PetDesk', 'color': const Color(0xFF00A2D9), 'icon': Icons.pets},
     ],
@@ -277,6 +309,9 @@ class AppExamples {
       {'name': 'MAPCLUB', 'color': const Color(0xFF000000), 'icon': Icons.shopping_cart},
     ],
     'Subscriptions': [
+      {'name': 'JetBrains All Products', 'color': const Color(0xFF000000), 'icon': Icons.code},
+      {'name': 'AutoCAD', 'color': const Color(0xFFE52924), 'icon': Icons.architecture},
+
       {'name': 'Apple One', 'color': const Color(0xFF000000), 'icon': Icons.subscriptions},
       {'name': 'Google Play Pass', 'color': const Color(0xFF00C782), 'icon': Icons.subscriptions},
     ],
