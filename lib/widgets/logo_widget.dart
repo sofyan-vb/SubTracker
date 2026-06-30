@@ -273,9 +273,22 @@ class LogoWidget extends StatelessWidget {
       'telegrampremium': 'telegram.org',
       'metaverified': 'meta.com',
       'snapchat+': 'snapchat.com',
+      
+      // New AI Tools & Flights
+      'garudaindonesia': 'garuda-indonesia.com',
+      'citilink': 'citilink.co.id',
+      'lionair': 'lionair.co.id',
+      'batikair': 'batikair.com',
+      'airasia': 'airasia.com',
+      'singaporeairlines': 'singaporeair.com',
+      'notionai': 'notion.so',
+      'jasper': 'jasper.ai',
+      'copy.ai': 'copy.ai',
+      'synthesia': 'synthesia.io',
+      'runway': 'runwayml.com',
+      'huggingface': 'huggingface.co',
     };
     
-    // Explicit overrides for logos that fail or user uploaded
     Map<String, String> explicitUrls = {
       'pln': 'assets/logos/pln.png',
       'pdam': 'assets/logos/pdam.png',
@@ -291,6 +304,8 @@ class LogoWidget extends StatelessWidget {
       'pgn': 'assets/logos/pgn.png',
       'duolingoplus': 'assets/logos/duolingoplus.png',
       'kost': 'assets/logos/kost.png',
+      'geminiadvanced': 'assets/logos/gemini.png',
+      'kaiaccess': 'assets/logos/kaiaccess.png',
     };
 
     if (explicitUrls.containsKey(lowerName)) {
@@ -329,7 +344,7 @@ class LogoWidget extends StatelessWidget {
           File(customLogoPath!),
           width: size,
           height: size,
-          fit: BoxFit.cover,
+          fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) => fallback,
         ),
       );
@@ -343,7 +358,7 @@ class LogoWidget extends StatelessWidget {
             url,
             width: size,
             height: size,
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => fallback,
           ),
         );

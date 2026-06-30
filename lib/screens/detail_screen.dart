@@ -166,6 +166,41 @@ class _DetailScreenState extends State<DetailScreen> {
     ToastUtils.show(context, tr('Layanan berhasil diperpanjang', 'Service successfully renewed', 'Servicio renovado exitosamente'));
   }
 
+  Future<void> _selectNewDueDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: currentSub.dueDate.isBefore(DateTime.now()) ? DateTime.now() : currentSub.dueDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+      helpText: tr('Pilih Tanggal Perpanjangan', 'Select Renewal Date', 'Seleccionar fecha de renovación'),
+    );
+
+    if (pickedDate != null && mounted) {
+      final newDate = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        currentSub.dueDate.hour,
+        currentSub.dueDate.minute,
+      );
+
+      final provider = context.read<SubProvider>();
+      final newHistory = List<DateTime>.from(currentSub.paymentHistory);
+      newHistory.add(DateTime.now());
+
+      final updatedSub = currentSub.copyWith(
+        dueDate: newDate,
+        isFinished: false,
+        paymentHistory: newHistory,
+      );
+      
+      provider.removeSub(currentSub.id);
+      provider.addSub(updatedSub);
+      setState(() { currentSub = updatedSub; });
+      ToastUtils.show(context, tr('Layanan berhasil diperpanjang', 'Service successfully renewed', 'Servicio renovado exitosamente'));
+    }
+  }
+
   void _cancelSubscription() {
     final provider = context.read<SubProvider>();
     final updatedSub = currentSub.copyWith(isFinished: true);
@@ -439,9 +474,8 @@ class _DetailScreenState extends State<DetailScreen> {
                           Builder(
                             builder: (context) {
                               final now = DateTime.now();
-                              final notifDate = currentSub.dueDate.subtract(const Duration(days: 3));
-                              final isNotifArrived = now.isAfter(notifDate) || now.isAtSameMomentAs(notifDate);
-                              final showActionButtons = isNotifArrived && !currentSub.isFinished;
+                              final isTimeArrived = now.isAfter(currentSub.dueDate) || now.isAtSameMomentAs(currentSub.dueDate);
+                              final showActionButtons = isTimeArrived && !currentSub.isFinished;
                               
                               if (showActionButtons) {
                                 // Saat notifikasi udah muncul: tampilkan 2 tombol (Tandai Selesai, Perpanjang)
@@ -475,7 +509,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                         ),
                                         icon: const Icon(Icons.autorenew_rounded, size: 18),
                                         label: Text(tr('Perpanjang Layanan', 'Renew Service', 'Renovar Servicio'), style: const TextStyle(fontWeight: FontWeight.bold)),
-                                        onPressed: _processAutoRenewal,
+                                        onPressed: _selectNewDueDate,
                                       ),
                                     ),
                                   ],

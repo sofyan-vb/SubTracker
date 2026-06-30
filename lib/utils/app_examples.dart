@@ -10,6 +10,12 @@ class AppExamples {
       {'name': 'Midjourney', 'color': const Color(0xFF000000), 'icon': Icons.brush},
       {'name': 'GitHub Copilot', 'color': const Color(0xFF000000), 'icon': Icons.code},
       {'name': 'Grammarly', 'color': const Color(0xFF15C39A), 'icon': Icons.edit},
+      {'name': 'Notion AI', 'color': const Color(0xFF000000), 'icon': Icons.edit_note},
+      {'name': 'Jasper', 'color': const Color(0xFF4A154B), 'icon': Icons.edit},
+      {'name': 'Copy.ai', 'color': const Color(0xFF141414), 'icon': Icons.edit},
+      {'name': 'Synthesia', 'color': const Color(0xFF2355F4), 'icon': Icons.video_call},
+      {'name': 'Runway', 'color': const Color(0xFF000000), 'icon': Icons.video_call},
+      {'name': 'Hugging Face', 'color': const Color(0xFFFFD21E), 'icon': Icons.smart_toy},
     ],
     'Automotive': [
       {'name': 'Tesla Premium', 'color': const Color(0xFFE82127), 'icon': Icons.directions_car},
@@ -322,6 +328,12 @@ class AppExamples {
       {'name': 'Airbnb', 'color': const Color(0xFFFF5A5F), 'icon': Icons.hotel},
       {'name': 'Pegipegi', 'color': const Color(0xFFFF7A00), 'icon': Icons.flight},
       {'name': 'KAI Access', 'color': const Color(0xFF003399), 'icon': Icons.train},
+      {'name': 'Garuda Indonesia', 'color': const Color(0xFF00539B), 'icon': Icons.flight},
+      {'name': 'Citilink', 'color': const Color(0xFF008930), 'icon': Icons.flight},
+      {'name': 'Lion Air', 'color': const Color(0xFFE4002B), 'icon': Icons.flight},
+      {'name': 'Batik Air', 'color': const Color(0xFFE4002B), 'icon': Icons.flight},
+      {'name': 'AirAsia', 'color': const Color(0xFFFF0000), 'icon': Icons.flight},
+      {'name': 'Singapore Airlines', 'color': const Color(0xFF002244), 'icon': Icons.flight},
     ],
   };
 
