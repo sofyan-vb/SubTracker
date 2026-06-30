@@ -122,7 +122,17 @@ class CategoryUtils {
 
   static IconData getIcon(String category) {
     for (var cat in customCategories) {
-      if (cat.name == category) return IconData(cat.iconCodePoint, fontFamily: 'MaterialIcons');
+      if (cat.name == category) {
+        if (cat.iconCodePoint == Icons.star_rounded.codePoint) return Icons.star_rounded;
+        if (cat.iconCodePoint == Icons.favorite_rounded.codePoint) return Icons.favorite_rounded;
+        if (cat.iconCodePoint == Icons.work_rounded.codePoint) return Icons.work_rounded;
+        if (cat.iconCodePoint == Icons.home_rounded.codePoint) return Icons.home_rounded;
+        if (cat.iconCodePoint == Icons.sports_esports_rounded.codePoint) return Icons.sports_esports_rounded;
+        if (cat.iconCodePoint == Icons.fitness_center_rounded.codePoint) return Icons.fitness_center_rounded;
+        if (cat.iconCodePoint == Icons.pets_rounded.codePoint) return Icons.pets_rounded;
+        if (cat.iconCodePoint == Icons.local_dining_rounded.codePoint) return Icons.local_dining_rounded;
+        return Icons.star_rounded;
+      }
     }
 
     switch (category) {
