@@ -1,4 +1,4 @@
-package com.sofyan.subtrackiq
+package com.sofyan.subtracker
 
 import android.appwidget.AppWidgetManager
 import android.content.Context
